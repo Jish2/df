@@ -7,3 +7,4 @@ brew 'yadm'
 # apps
 
 cask 'visual-studio-code'
+cask 'alfred'
