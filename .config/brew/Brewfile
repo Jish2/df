@@ -6,6 +6,7 @@ brew 'zsh-autosuggestions'
 brew 'zsh-syntax-highlighting'
 brew 'zoxide'
 brew 'nvm'
+brew 'yarn'
 
 
 # apps
