@@ -10,3 +10,6 @@ source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 # aliases
 source $HOME/.aliases
 
+# zoxide
+eval "$(zoxide init zsh --cmd cd)"
+

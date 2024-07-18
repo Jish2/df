@@ -4,6 +4,7 @@ brew 'yadm'
 brew 'neovim'
 brew 'zsh-autosuggestions'
 brew 'zsh-syntax-highlighting'
+brew 'zoxide'
 
 
 # apps
