@@ -7,3 +7,5 @@ alias config="open ~/.zshrc"
 # nodet (node typescript)
 alias nodet="npx ts-node"
 
+# brewfile
+alias brewfile="nvim ~/.config/brew/Brewfile"
