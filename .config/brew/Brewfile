@@ -5,6 +5,7 @@ brew 'neovim'
 brew 'zsh-autosuggestions'
 brew 'zsh-syntax-highlighting'
 brew 'zoxide'
+brew 'nvm'
 
 
 # apps
