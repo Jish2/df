@@ -1,0 +1,9 @@
+# reload
+alias r="source ~/.zshrc"
+
+# open config
+alias config="open ~/.zshrc"
+
+# nodet (node typescript)
+alias nodet="npx ts-node"
+
