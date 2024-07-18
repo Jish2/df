@@ -13,4 +13,4 @@ cask 'visual-studio-code'
 cask 'alfred'
 cask 'karabiner-elements'
 cask 'obsidian'
-
+cask 'aldente'
