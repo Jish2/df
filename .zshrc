@@ -27,3 +27,5 @@ fpath+=("$(brew --prefix)/share/zsh/site-functions")
 autoload -U promptinit; promptinit
 prompt pure
 
+prompt_newline=$(echo -n "\u200B") # remove default newline
+
