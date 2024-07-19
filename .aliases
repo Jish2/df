@@ -2,7 +2,7 @@
 alias r="source ~/.zshrc"
 
 # open config
-alias config="open ~/.zshrc"
+alias config="nvim ~/.zshrc"
 
 # nodet (node typescript)
 alias nodet="npx ts-node"
