@@ -11,6 +11,7 @@ brew 'pure' # zsh prompt
 brew 'spotify'
 brew 'spotfiy-d' # daemon for spotify
 brew 'pyenv'
+brew 'go'
 
 
 # apps
