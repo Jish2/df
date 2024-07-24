@@ -18,6 +18,32 @@
                 },
                 "rules": [
                     {
+                        "description": "MS Remote Desktop - Left cmd to Left ctrl",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "bundle_identifiers": [
+                                            "com.microsoft.rdc.macos"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "left_gui"
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "left_control",
+                                        "repeat": true
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ],
+                        "title": "MS Remote Desktop"
+                    },
+                    {
                         "description": "CAPS > ESC, CAPS+H/J/K/L > ←↓↑→, CAPS+D/U > PG↓↑",
                         "manipulators": [
                             {
