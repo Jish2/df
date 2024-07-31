@@ -13,6 +13,7 @@ brew 'spotfiy-d' # daemon for spotify
 brew 'pyenv'
 brew 'go'
 brew 'php'
+brew 'postgresql'
 
 
 # apps
