@@ -26,10 +26,15 @@ fpath+=("$(brew --prefix)/share/zsh/site-functions")
 
 autoload -U promptinit; promptinit
 prompt pure
-
 prompt_newline=$(echo -n "\u200B") # remove default newline
 
 # pyenv
 export PYENV_ROOT="$HOME/.pyenv"
 [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init -)"
+
+# go
+PATH=${PATH}:`go env GOPATH`/bin
+
+# ruby
+export PATH="/usr/local/opt/ruby/bin:$PATH"
