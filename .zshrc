@@ -36,5 +36,5 @@ eval "$(pyenv init -)"
 # go
 PATH=${PATH}:`go env GOPATH`/bin
 
-# ruby
-export PATH="/usr/local/opt/ruby/bin:$PATH"
+# ruby gems
+export PATH="/opt/homebrew/lib/ruby/gems/3.3.0/bin:$PATH"
