@@ -9,3 +9,6 @@ alias nodet="npx ts-node"
 
 # brewfile
 alias brewfile="nvim ~/.config/brew/Brewfile"
+
+# gh release pr
+alias ghrl="gh pr create --base prod --head main --title release --body \"\""
