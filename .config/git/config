@@ -1,0 +1,10 @@
+[user]
+	email = jgoon@tesla.com
+	name = Joshua Goon
+[core]
+	editor = vim
+  patch = delta
+  excludesfile = ~/.gitignore
+[push]
+	autoSetupRemote = true
+  

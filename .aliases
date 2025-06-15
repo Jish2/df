@@ -12,3 +12,42 @@ alias brewfile="nvim ~/.config/brew/Brewfile"
 
 # gh release pr
 alias ghrl="gh pr create --base prod --head main --title release --body \"\""
+
+# apply flake.nix changes
+alias flake="(cd ~/.config/nix && make apply)"
+
+# github clone (clones and opens vscode)
+alias gc='clone() { (cd ~/github && git clone "git@github.tesla.com:$1.git" && code "$(basename "$1" .git)"); }; clone'
+
+# genji worktree
+create_genji_worktree() {
+  if [ -z "$1" ]; then
+    echo "Error: no branch name provided"
+    return 1
+  fi
+
+  local branch_name="${1:10}"
+  local worktree_path="../$branch_name"
+
+  echo "Creating worktree for branch $1 at $worktree_path"
+
+  # if the branch already exists, just open it
+  # git worktree add "$worktree_path" -b "$1" 2>/dev/null || git worktree add "$worktree_path" "$1"
+
+  if git show-ref --verify --quiet refs/heads/"$1"; then
+    git worktree add "$worktree_path" "$1"
+    (cd "$worktree_path" && git reset --hard origin/$1 && git branch --set-upstream-to=origin/$1 $1)
+  else
+    git worktree add "$worktree_path" -b "$1"
+  fi
+
+  (cd "$worktree_path" && cp ~/github/genjis/main/.env.development.local .env.development.local)
+  (cd "$worktree_path" && yarn > /dev/null 2>&1 &)
+
+  code "$worktree_path"
+}
+
+alias gwtc='create_genji_worktree'
+
+alias gwt='git worktree'
+

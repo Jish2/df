@@ -1,949 +1,859 @@
 {
-    "global": { "show_in_menu_bar": false },
-    "profiles": [
-        {
-            "complex_modifications": {
-                "rules": [
-                    {
-                        "description": "MS Remote Desktop - Left cmd to Left ctrl",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "bundle_identifiers": [
-                                            "com.microsoft.rdc.macos"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    }
-                                ],
-                                "from": { "key_code": "left_gui" },
-                                "to": [
-                                    {
-                                        "key_code": "left_control",
-                                        "repeat": true
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ],
-                        "title": "MS Remote Desktop"
-                    },
-                    {
-                        "description": "CAPS > ESC, CAPS+H/J/K/L > ←↓↑→, CAPS+D/U > PG↓↑",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "caps_lock pressed",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "description": "caps + left_control + h for moving to right tab",
-                                "from": {
-                                    "key_code": "h",
-                                    "modifiers": { "mandatory": ["left_control"] }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "left_arrow",
-                                        "modifiers": ["left_command", "left_option"]
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "caps_lock pressed",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "description": "caps + left_control + l for moving to left tab",
-                                "from": {
-                                    "key_code": "l",
-                                    "modifiers": { "mandatory": ["left_control"] }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "right_arrow",
-                                        "modifiers": ["left_command", "left_option"]
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "caps_lock pressed",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "description": "caps + left_control + k for closing tabs",
-                                "from": {
-                                    "key_code": "k",
-                                    "modifiers": { "mandatory": ["left_control"] }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "w",
-                                        "modifiers": ["left_command"]
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "caps_lock pressed",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "j",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [{ "key_code": "down_arrow" }],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "caps_lock pressed",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "k",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [{ "key_code": "up_arrow" }],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "caps_lock pressed",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "h",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [{ "key_code": "left_arrow" }],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "caps_lock pressed",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "l",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [{ "key_code": "right_arrow" }],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "caps_lock pressed",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "d",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [{ "key_code": "page_down" }],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "caps_lock pressed",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "u",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [{ "key_code": "page_up" }],
-                                "type": "basic"
-                            },
-                            {
-                                "from": {
-                                    "key_code": "caps_lock",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [
-                                    {
-                                        "set_variable": {
-                                            "name": "caps_lock pressed",
-                                            "value": 1
-                                        }
-                                    }
-                                ],
-                                "to_after_key_up": [
-                                    {
-                                        "set_variable": {
-                                            "name": "caps_lock pressed",
-                                            "value": 0
-                                        }
-                                    }
-                                ],
-                                "to_if_alone": [{ "key_code": "escape" }],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "caps_lock pressed",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "description": "caps + f -> cmd+opt+ctrl+shift+f",
-                                "from": {
-                                    "key_code": "f",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "f",
-                                        "modifiers": ["left_command", "left_option", "left_control", "left_shift"]
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "caps_lock pressed",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "description": "caps + g -> cmd+opt+ctrl+shift+g",
-                                "from": {
-                                    "key_code": "g",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "g",
-                                        "modifiers": ["left_command", "left_option", "left_control", "left_shift"]
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "(Vim 8/11) h,j,k,l (+ control/option/command/shift),e,b,0,^,$,gg,G,{,}",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "bundle_identifiers": [
-                                            "com.googlecode.iterm2",
-                                            "com.github.atom",
-                                            "com.jetbrains.pycharm"
-                                        ],
-                                        "type": "frontmost_application_unless"
-                                    },
-                                    {
-                                        "name": "vim_mode",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "h",
-                                    "modifiers": { "optional": ["control", "option", "command", "shift"] }
-                                },
-                                "to": [{ "key_code": "left_arrow" }],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "bundle_identifiers": [
-                                            "com.googlecode.iterm2",
-                                            "com.github.atom",
-                                            "com.jetbrains.pycharm"
-                                        ],
-                                        "type": "frontmost_application_unless"
-                                    },
-                                    {
-                                        "name": "vim_mode",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "j",
-                                    "modifiers": { "optional": ["control", "option", "command", "shift"] }
-                                },
-                                "to": [{ "key_code": "down_arrow" }],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "bundle_identifiers": [
-                                            "com.googlecode.iterm2",
-                                            "com.github.atom",
-                                            "com.jetbrains.pycharm"
-                                        ],
-                                        "type": "frontmost_application_unless"
-                                    },
-                                    {
-                                        "name": "vim_mode",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "k",
-                                    "modifiers": { "optional": ["control", "option", "command", "shift"] }
-                                },
-                                "to": [{ "key_code": "up_arrow" }],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "bundle_identifiers": [
-                                            "com.googlecode.iterm2",
-                                            "com.github.atom",
-                                            "com.jetbrains.pycharm"
-                                        ],
-                                        "type": "frontmost_application_unless"
-                                    },
-                                    {
-                                        "name": "vim_mode",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "l",
-                                    "modifiers": { "optional": ["control", "option", "command", "shift"] }
-                                },
-                                "to": [{ "key_code": "right_arrow" }],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "bundle_identifiers": [
-                                            "com.googlecode.iterm2",
-                                            "com.github.atom",
-                                            "com.jetbrains.pycharm"
-                                        ],
-                                        "type": "frontmost_application_unless"
-                                    },
-                                    {
-                                        "name": "vim_mode",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "u",
-                                    "modifiers": { "optional": ["control", "option", "command", "shift"] }
-                                },
-                                "to": [{ "key_code": "page_up" }],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "bundle_identifiers": [
-                                            "com.googlecode.iterm2",
-                                            "com.github.atom",
-                                            "com.jetbrains.pycharm"
-                                        ],
-                                        "type": "frontmost_application_unless"
-                                    },
-                                    {
-                                        "name": "vim_mode",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "d",
-                                    "modifiers": { "optional": ["control", "option", "command", "shift"] }
-                                },
-                                "to": [{ "key_code": "page_down" }],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "bundle_identifiers": [
-                                            "com.googlecode.iterm2",
-                                            "com.github.atom",
-                                            "com.jetbrains.pycharm"
-                                        ],
-                                        "type": "frontmost_application_unless"
-                                    },
-                                    {
-                                        "name": "vim_mode",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": { "key_code": "e" },
-                                "to": [
-                                    {
-                                        "key_code": "right_arrow",
-                                        "modifiers": ["left_alt"]
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "bundle_identifiers": [
-                                            "com.googlecode.iterm2",
-                                            "com.github.atom",
-                                            "com.jetbrains.pycharm"
-                                        ],
-                                        "type": "frontmost_application_unless"
-                                    },
-                                    {
-                                        "name": "vim_mode",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": { "key_code": "b" },
-                                "to": [
-                                    {
-                                        "key_code": "left_arrow",
-                                        "modifiers": ["left_alt"]
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "bundle_identifiers": [
-                                            "com.googlecode.iterm2",
-                                            "com.github.atom",
-                                            "com.jetbrains.pycharm"
-                                        ],
-                                        "type": "frontmost_application_unless"
-                                    },
-                                    {
-                                        "name": "vim_mode",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": { "key_code": "w" },
-                                "to": [
-                                    {
-                                        "key_code": "right_arrow",
-                                        "modifiers": ["left_alt"]
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "bundle_identifiers": [
-                                            "com.googlecode.iterm2",
-                                            "com.github.atom",
-                                            "com.jetbrains.pycharm"
-                                        ],
-                                        "type": "frontmost_application_unless"
-                                    },
-                                    {
-                                        "name": "vim_mode",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": { "key_code": "0" },
-                                "to": [
-                                    {
-                                        "key_code": "left_arrow",
-                                        "modifiers": ["left_command"]
-                                    },
-                                    {
-                                        "key_code": "left_arrow",
-                                        "modifiers": ["left_command"]
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "bundle_identifiers": [
-                                            "com.googlecode.iterm2",
-                                            "com.github.atom",
-                                            "com.jetbrains.pycharm"
-                                        ],
-                                        "type": "frontmost_application_unless"
-                                    },
-                                    {
-                                        "name": "vim_mode",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "6",
-                                    "modifiers": { "mandatory": ["shift"] }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "left_arrow",
-                                        "modifiers": ["left_command"]
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "bundle_identifiers": [
-                                            "com.googlecode.iterm2",
-                                            "com.github.atom",
-                                            "com.jetbrains.pycharm"
-                                        ],
-                                        "type": "frontmost_application_unless"
-                                    },
-                                    {
-                                        "name": "vim_mode",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "4",
-                                    "modifiers": { "mandatory": ["shift"] }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "right_arrow",
-                                        "modifiers": ["left_command"]
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "bundle_identifiers": [
-                                            "com.googlecode.iterm2",
-                                            "com.github.atom",
-                                            "com.jetbrains.pycharm"
-                                        ],
-                                        "type": "frontmost_application_unless"
-                                    },
-                                    {
-                                        "name": "vim_mode",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    },
-                                    {
-                                        "name": "g_pressed",
-                                        "type": "variable_unless",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": { "key_code": "g" },
-                                "parameters": { "basic.to_delayed_action_delay_milliseconds": 500 },
-                                "to": [
-                                    {
-                                        "set_variable": {
-                                            "name": "g_pressed",
-                                            "value": 1
-                                        }
-                                    }
-                                ],
-                                "to_delayed_action": {
-                                    "to_if_invoked": [
-                                        {
-                                            "set_variable": {
-                                                "name": "g_pressed",
-                                                "value": 0
-                                            }
-                                        }
-                                    ]
-                                },
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "bundle_identifiers": [
-                                            "com.googlecode.iterm2",
-                                            "com.github.atom",
-                                            "com.jetbrains.pycharm"
-                                        ],
-                                        "type": "frontmost_application_unless"
-                                    },
-                                    {
-                                        "name": "vim_mode",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    },
-                                    {
-                                        "name": "g_pressed",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": { "key_code": "g" },
-                                "to": [
-                                    {
-                                        "key_code": "up_arrow",
-                                        "modifiers": ["left_command"]
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "g_pressed",
-                                            "value": 0
-                                        }
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "bundle_identifiers": [
-                                            "com.googlecode.iterm2",
-                                            "com.github.atom",
-                                            "com.jetbrains.pycharm"
-                                        ],
-                                        "type": "frontmost_application_unless"
-                                    },
-                                    {
-                                        "name": "vim_mode",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "g",
-                                    "modifiers": { "mandatory": ["shift"] }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "down_arrow",
-                                        "modifiers": ["left_command"]
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "bundle_identifiers": [
-                                            "com.googlecode.iterm2",
-                                            "com.github.atom",
-                                            "com.jetbrains.pycharm"
-                                        ],
-                                        "type": "frontmost_application_unless"
-                                    },
-                                    {
-                                        "name": "vim_mode",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "open_bracket",
-                                    "modifiers": { "mandatory": ["shift"] }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "a",
-                                        "modifiers": ["left_control"]
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "bundle_identifiers": [
-                                            "com.googlecode.iterm2",
-                                            "com.github.atom",
-                                            "com.jetbrains.pycharm"
-                                        ],
-                                        "type": "frontmost_application_unless"
-                                    },
-                                    {
-                                        "name": "vim_mode",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "close_bracket",
-                                    "modifiers": { "mandatory": ["shift"] }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "e",
-                                        "modifiers": ["left_control"]
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "(Vim 1/11) caps_lock -> on, caps_lock, esc, control+[ or any pointing_button -> off",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "bundle_identifiers": [
-                                            "com.googlecode.iterm2",
-                                            "com.github.atom",
-                                            "com.jetbrains.pycharm"
-                                        ],
-                                        "type": "frontmost_application_unless"
-                                    },
-                                    {
-                                        "name": "vim_mode",
-                                        "type": "variable_unless",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": { "key_code": "caps_lock" },
-                                "parameters": {
-                                    "basic.to_if_alone_threshold_milliseconds": 0,
-                                    "basic.to_if_held_down_threshold_milliseconds": 100
-                                },
-                                "to_after_key_up": [
-                                    {
-                                        "set_variable": {
-                                            "name": "vim_mode",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_notification_message": {
-                                            "id": "vim_mode_plus_enabled",
-                                            "text": ""
-                                        }
-                                    }
-                                ],
-                                "to_if_alone": [
-                                    {
-                                        "set_variable": {
-                                            "name": "vim_mode",
-                                            "value": 1
-                                        }
-                                    }
-                                ],
-                                "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "vim_mode",
-                                            "value": 1
-                                        }
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "bundle_identifiers": [
-                                            "com.googlecode.iterm2",
-                                            "com.github.atom",
-                                            "com.jetbrains.pycharm"
-                                        ],
-                                        "type": "frontmost_application_unless"
-                                    },
-                                    {
-                                        "name": "vim_mode",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": { "key_code": "caps_lock" },
-                                "to": [
-                                    {
-                                        "set_variable": {
-                                            "name": "vim_mode",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_notification_message": {
-                                            "id": "vim_mode_plus_enabled",
-                                            "text": ""
-                                        }
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "bundle_identifiers": [
-                                            "com.googlecode.iterm2",
-                                            "com.github.atom",
-                                            "com.jetbrains.pycharm"
-                                        ],
-                                        "type": "frontmost_application_unless"
-                                    },
-                                    {
-                                        "name": "vim_mode",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": { "key_code": "escape" },
-                                "to": [
-                                    {
-                                        "set_variable": {
-                                            "name": "vim_mode",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_notification_message": {
-                                            "id": "vim_mode_plus_enabled",
-                                            "text": ""
-                                        }
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "bundle_identifiers": [
-                                            "com.googlecode.iterm2",
-                                            "com.github.atom",
-                                            "com.jetbrains.pycharm"
-                                        ],
-                                        "type": "frontmost_application_unless"
-                                    },
-                                    {
-                                        "name": "vim_mode",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "open_bracket",
-                                    "modifiers": { "mandatory": ["control"] }
-                                },
-                                "to": [
-                                    {
-                                        "set_variable": {
-                                            "name": "vim_mode",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_notification_message": {
-                                            "id": "vim_mode_plus_enabled",
-                                            "text": ""
-                                        }
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "bundle_identifiers": [
-                                            "com.googlecode.iterm2",
-                                            "com.github.atom",
-                                            "com.jetbrains.pycharm"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "vim_mode",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": { "any": "key_code" },
-                                "to": [
-                                    {
-                                        "set_variable": {
-                                            "name": "vim_mode",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_notification_message": {
-                                            "id": "vim_mode_plus_enabled",
-                                            "text": ""
-                                        }
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "vim_mode",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": { "any": "pointing_button" },
-                                "to": [
-                                    {
-                                        "set_variable": {
-                                            "name": "vim_mode",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_notification_message": {
-                                            "id": "vim_mode_plus_enabled",
-                                            "text": ""
-                                        }
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    }
-                ]
-            },
-            "name": "Default profile",
-            "selected": true,
-            "virtual_hid_keyboard": {
-                "country_code": 0,
-                "keyboard_type_v2": "ansi"
-            }
-        }
-    ]
+	"global": { "show_in_menu_bar": false },
+	"profiles": [
+		{
+			"complex_modifications": {
+				"rules": [
+					{
+						"description": "MS Remote Desktop - Left cmd to Left ctrl",
+						"manipulators": [
+							{
+								"conditions": [
+									{
+										"bundle_identifiers": ["com.microsoft.rdc.macos"],
+										"type": "frontmost_application_if"
+									}
+								],
+								"from": { "key_code": "left_gui" },
+								"to": [
+									{
+										"key_code": "left_control",
+										"repeat": true
+									}
+								],
+								"type": "basic"
+							}
+						],
+						"title": "MS Remote Desktop"
+					},
+					{
+						"description": "CAPS > ESC, CAPS+H/J/K/L > ←↓↑→, CAPS+D/U > PG↓↑",
+						"manipulators": [
+							{
+								"conditions": [
+									{
+										"name": "caps_lock pressed",
+										"type": "variable_if",
+										"value": 1
+									}
+								],
+								"description": "caps + left_control + h for moving to right tab",
+								"from": {
+									"key_code": "h",
+									"modifiers": { "mandatory": ["left_control"] }
+								},
+								"to": [
+									{
+										"key_code": "left_arrow",
+										"modifiers": ["left_command", "left_option"]
+									}
+								],
+								"type": "basic"
+							},
+							{
+								"conditions": [
+									{
+										"name": "caps_lock pressed",
+										"type": "variable_if",
+										"value": 1
+									}
+								],
+								"description": "caps + left_control + l for moving to left tab",
+								"from": {
+									"key_code": "l",
+									"modifiers": { "mandatory": ["left_control"] }
+								},
+								"to": [
+									{
+										"key_code": "right_arrow",
+										"modifiers": ["left_command", "left_option"]
+									}
+								],
+								"type": "basic"
+							},
+							{
+								"conditions": [
+									{
+										"name": "caps_lock pressed",
+										"type": "variable_if",
+										"value": 1
+									}
+								],
+								"description": "caps + left_control + k for closing tabs",
+								"from": {
+									"key_code": "k",
+									"modifiers": { "mandatory": ["left_control"] }
+								},
+								"to": [
+									{
+										"key_code": "w",
+										"modifiers": ["left_command"]
+									}
+								],
+								"type": "basic"
+							},
+							{
+								"conditions": [
+									{
+										"name": "caps_lock pressed",
+										"type": "variable_if",
+										"value": 1
+									}
+								],
+								"from": {
+									"key_code": "j",
+									"modifiers": { "optional": ["any"] }
+								},
+								"to": [{ "key_code": "down_arrow" }],
+								"type": "basic"
+							},
+							{
+								"conditions": [
+									{
+										"name": "caps_lock pressed",
+										"type": "variable_if",
+										"value": 1
+									}
+								],
+								"from": {
+									"key_code": "k",
+									"modifiers": { "optional": ["any"] }
+								},
+								"to": [{ "key_code": "up_arrow" }],
+								"type": "basic"
+							},
+							{
+								"conditions": [
+									{
+										"name": "caps_lock pressed",
+										"type": "variable_if",
+										"value": 1
+									}
+								],
+								"from": {
+									"key_code": "h",
+									"modifiers": { "optional": ["any"] }
+								},
+								"to": [{ "key_code": "left_arrow" }],
+								"type": "basic"
+							},
+							{
+								"conditions": [
+									{
+										"name": "caps_lock pressed",
+										"type": "variable_if",
+										"value": 1
+									}
+								],
+								"from": {
+									"key_code": "l",
+									"modifiers": { "optional": ["any"] }
+								},
+								"to": [{ "key_code": "right_arrow" }],
+								"type": "basic"
+							},
+							{
+								"conditions": [
+									{
+										"name": "caps_lock pressed",
+										"type": "variable_if",
+										"value": 1
+									}
+								],
+								"from": {
+									"key_code": "d",
+									"modifiers": { "optional": ["any"] }
+								},
+								"to": [{ "key_code": "page_down" }],
+								"type": "basic"
+							},
+							{
+								"conditions": [
+									{
+										"name": "caps_lock pressed",
+										"type": "variable_if",
+										"value": 1
+									}
+								],
+								"from": {
+									"key_code": "u",
+									"modifiers": { "optional": ["any"] }
+								},
+								"to": [{ "key_code": "page_up" }],
+								"type": "basic"
+							},
+							{
+								"from": {
+									"key_code": "caps_lock",
+									"modifiers": { "optional": ["any"] }
+								},
+								"to": [
+									{
+										"set_variable": {
+											"name": "caps_lock pressed",
+											"value": 1
+										}
+									}
+								],
+								"to_after_key_up": [
+									{
+										"set_variable": {
+											"name": "caps_lock pressed",
+											"value": 0
+										}
+									}
+								],
+								"to_if_alone": [{ "key_code": "escape" }],
+								"type": "basic"
+							},
+							{
+								"conditions": [
+									{
+										"name": "caps_lock pressed",
+										"type": "variable_if",
+										"value": 1
+									}
+								],
+								"description": "caps + f -> cmd+opt+ctrl+shift+f",
+								"from": {
+									"key_code": "f",
+									"modifiers": { "optional": ["any"] }
+								},
+								"to": [
+									{
+										"key_code": "f",
+										"modifiers": ["left_command", "left_option", "left_control", "left_shift"]
+									}
+								],
+								"type": "basic"
+							},
+							{
+								"conditions": [
+									{
+										"name": "caps_lock pressed",
+										"type": "variable_if",
+										"value": 1
+									}
+								],
+								"description": "caps + g -> cmd+opt+ctrl+shift+g",
+								"from": {
+									"key_code": "g",
+									"modifiers": { "optional": ["any"] }
+								},
+								"to": [
+									{
+										"key_code": "g",
+										"modifiers": ["left_command", "left_option", "left_control", "left_shift"]
+									}
+								],
+								"type": "basic"
+							}
+						]
+					},
+					{
+						"description": "(Vim 8/11) h,j,k,l (+ control/option/command/shift),e,b,0,^,$,gg,G,{,}",
+						"manipulators": [
+							{
+								"conditions": [
+									{
+										"bundle_identifiers": ["com.googlecode.iterm2", "com.github.atom", "com.jetbrains.pycharm"],
+										"type": "frontmost_application_unless"
+									},
+									{
+										"name": "vim_mode",
+										"type": "variable_if",
+										"value": 1
+									}
+								],
+								"from": {
+									"key_code": "h",
+									"modifiers": { "optional": ["control", "option", "command", "shift"] }
+								},
+								"to": [{ "key_code": "left_arrow" }],
+								"type": "basic"
+							},
+							{
+								"conditions": [
+									{
+										"bundle_identifiers": ["com.googlecode.iterm2", "com.github.atom", "com.jetbrains.pycharm"],
+										"type": "frontmost_application_unless"
+									},
+									{
+										"name": "vim_mode",
+										"type": "variable_if",
+										"value": 1
+									}
+								],
+								"from": {
+									"key_code": "j",
+									"modifiers": { "optional": ["control", "option", "command", "shift"] }
+								},
+								"to": [{ "key_code": "down_arrow" }],
+								"type": "basic"
+							},
+							{
+								"conditions": [
+									{
+										"bundle_identifiers": ["com.googlecode.iterm2", "com.github.atom", "com.jetbrains.pycharm"],
+										"type": "frontmost_application_unless"
+									},
+									{
+										"name": "vim_mode",
+										"type": "variable_if",
+										"value": 1
+									}
+								],
+								"from": {
+									"key_code": "k",
+									"modifiers": { "optional": ["control", "option", "command", "shift"] }
+								},
+								"to": [{ "key_code": "up_arrow" }],
+								"type": "basic"
+							},
+							{
+								"conditions": [
+									{
+										"bundle_identifiers": ["com.googlecode.iterm2", "com.github.atom", "com.jetbrains.pycharm"],
+										"type": "frontmost_application_unless"
+									},
+									{
+										"name": "vim_mode",
+										"type": "variable_if",
+										"value": 1
+									}
+								],
+								"from": {
+									"key_code": "l",
+									"modifiers": { "optional": ["control", "option", "command", "shift"] }
+								},
+								"to": [{ "key_code": "right_arrow" }],
+								"type": "basic"
+							},
+							{
+								"conditions": [
+									{
+										"bundle_identifiers": ["com.googlecode.iterm2", "com.github.atom", "com.jetbrains.pycharm"],
+										"type": "frontmost_application_unless"
+									},
+									{
+										"name": "vim_mode",
+										"type": "variable_if",
+										"value": 1
+									}
+								],
+								"from": {
+									"key_code": "u",
+									"modifiers": { "optional": ["control", "option", "command", "shift"] }
+								},
+								"to": [{ "key_code": "page_up" }],
+								"type": "basic"
+							},
+							{
+								"conditions": [
+									{
+										"bundle_identifiers": ["com.googlecode.iterm2", "com.github.atom", "com.jetbrains.pycharm"],
+										"type": "frontmost_application_unless"
+									},
+									{
+										"name": "vim_mode",
+										"type": "variable_if",
+										"value": 1
+									}
+								],
+								"from": {
+									"key_code": "d",
+									"modifiers": { "optional": ["control", "option", "command", "shift"] }
+								},
+								"to": [{ "key_code": "page_down" }],
+								"type": "basic"
+							},
+							{
+								"conditions": [
+									{
+										"bundle_identifiers": ["com.googlecode.iterm2", "com.github.atom", "com.jetbrains.pycharm"],
+										"type": "frontmost_application_unless"
+									},
+									{
+										"name": "vim_mode",
+										"type": "variable_if",
+										"value": 1
+									}
+								],
+								"from": { "key_code": "e" },
+								"to": [
+									{
+										"key_code": "right_arrow",
+										"modifiers": ["left_alt"]
+									}
+								],
+								"type": "basic"
+							},
+							{
+								"conditions": [
+									{
+										"bundle_identifiers": ["com.googlecode.iterm2", "com.github.atom", "com.jetbrains.pycharm"],
+										"type": "frontmost_application_unless"
+									},
+									{
+										"name": "vim_mode",
+										"type": "variable_if",
+										"value": 1
+									}
+								],
+								"from": { "key_code": "b" },
+								"to": [
+									{
+										"key_code": "left_arrow",
+										"modifiers": ["left_alt"]
+									}
+								],
+								"type": "basic"
+							},
+							{
+								"conditions": [
+									{
+										"bundle_identifiers": ["com.googlecode.iterm2", "com.github.atom", "com.jetbrains.pycharm"],
+										"type": "frontmost_application_unless"
+									},
+									{
+										"name": "vim_mode",
+										"type": "variable_if",
+										"value": 1
+									}
+								],
+								"from": { "key_code": "w" },
+								"to": [
+									{
+										"key_code": "right_arrow",
+										"modifiers": ["left_alt"]
+									}
+								],
+								"type": "basic"
+							},
+							{
+								"conditions": [
+									{
+										"bundle_identifiers": ["com.googlecode.iterm2", "com.github.atom", "com.jetbrains.pycharm"],
+										"type": "frontmost_application_unless"
+									},
+									{
+										"name": "vim_mode",
+										"type": "variable_if",
+										"value": 1
+									}
+								],
+								"from": { "key_code": "0" },
+								"to": [
+									{
+										"key_code": "left_arrow",
+										"modifiers": ["left_command"]
+									},
+									{
+										"key_code": "left_arrow",
+										"modifiers": ["left_command"]
+									}
+								],
+								"type": "basic"
+							},
+							{
+								"conditions": [
+									{
+										"bundle_identifiers": ["com.googlecode.iterm2", "com.github.atom", "com.jetbrains.pycharm"],
+										"type": "frontmost_application_unless"
+									},
+									{
+										"name": "vim_mode",
+										"type": "variable_if",
+										"value": 1
+									}
+								],
+								"from": {
+									"key_code": "6",
+									"modifiers": { "mandatory": ["shift"] }
+								},
+								"to": [
+									{
+										"key_code": "left_arrow",
+										"modifiers": ["left_command"]
+									}
+								],
+								"type": "basic"
+							},
+							{
+								"conditions": [
+									{
+										"bundle_identifiers": ["com.googlecode.iterm2", "com.github.atom", "com.jetbrains.pycharm"],
+										"type": "frontmost_application_unless"
+									},
+									{
+										"name": "vim_mode",
+										"type": "variable_if",
+										"value": 1
+									}
+								],
+								"from": {
+									"key_code": "4",
+									"modifiers": { "mandatory": ["shift"] }
+								},
+								"to": [
+									{
+										"key_code": "right_arrow",
+										"modifiers": ["left_command"]
+									}
+								],
+								"type": "basic"
+							},
+							{
+								"conditions": [
+									{
+										"bundle_identifiers": ["com.googlecode.iterm2", "com.github.atom", "com.jetbrains.pycharm"],
+										"type": "frontmost_application_unless"
+									},
+									{
+										"name": "vim_mode",
+										"type": "variable_if",
+										"value": 1
+									},
+									{
+										"name": "g_pressed",
+										"type": "variable_unless",
+										"value": 1
+									}
+								],
+								"from": { "key_code": "g" },
+								"parameters": { "basic.to_delayed_action_delay_milliseconds": 500 },
+								"to": [
+									{
+										"set_variable": {
+											"name": "g_pressed",
+											"value": 1
+										}
+									}
+								],
+								"to_delayed_action": {
+									"to_if_invoked": [
+										{
+											"set_variable": {
+												"name": "g_pressed",
+												"value": 0
+											}
+										}
+									]
+								},
+								"type": "basic"
+							},
+							{
+								"conditions": [
+									{
+										"bundle_identifiers": ["com.googlecode.iterm2", "com.github.atom", "com.jetbrains.pycharm"],
+										"type": "frontmost_application_unless"
+									},
+									{
+										"name": "vim_mode",
+										"type": "variable_if",
+										"value": 1
+									},
+									{
+										"name": "g_pressed",
+										"type": "variable_if",
+										"value": 1
+									}
+								],
+								"from": { "key_code": "g" },
+								"to": [
+									{
+										"key_code": "up_arrow",
+										"modifiers": ["left_command"]
+									},
+									{
+										"set_variable": {
+											"name": "g_pressed",
+											"value": 0
+										}
+									}
+								],
+								"type": "basic"
+							},
+							{
+								"conditions": [
+									{
+										"bundle_identifiers": ["com.googlecode.iterm2", "com.github.atom", "com.jetbrains.pycharm"],
+										"type": "frontmost_application_unless"
+									},
+									{
+										"name": "vim_mode",
+										"type": "variable_if",
+										"value": 1
+									}
+								],
+								"from": {
+									"key_code": "g",
+									"modifiers": { "mandatory": ["shift"] }
+								},
+								"to": [
+									{
+										"key_code": "down_arrow",
+										"modifiers": ["left_command"]
+									}
+								],
+								"type": "basic"
+							},
+							{
+								"conditions": [
+									{
+										"bundle_identifiers": ["com.googlecode.iterm2", "com.github.atom", "com.jetbrains.pycharm"],
+										"type": "frontmost_application_unless"
+									},
+									{
+										"name": "vim_mode",
+										"type": "variable_if",
+										"value": 1
+									}
+								],
+								"from": {
+									"key_code": "open_bracket",
+									"modifiers": { "mandatory": ["shift"] }
+								},
+								"to": [
+									{
+										"key_code": "a",
+										"modifiers": ["left_control"]
+									}
+								],
+								"type": "basic"
+							},
+							{
+								"conditions": [
+									{
+										"bundle_identifiers": ["com.googlecode.iterm2", "com.github.atom", "com.jetbrains.pycharm"],
+										"type": "frontmost_application_unless"
+									},
+									{
+										"name": "vim_mode",
+										"type": "variable_if",
+										"value": 1
+									}
+								],
+								"from": {
+									"key_code": "close_bracket",
+									"modifiers": { "mandatory": ["shift"] }
+								},
+								"to": [
+									{
+										"key_code": "e",
+										"modifiers": ["left_control"]
+									}
+								],
+								"type": "basic"
+							}
+						]
+					},
+					{
+						"description": "(Vim 1/11) caps_lock -> on, caps_lock, esc, control+[ or any pointing_button -> off",
+						"manipulators": [
+							{
+								"conditions": [
+									{
+										"bundle_identifiers": ["com.googlecode.iterm2", "com.github.atom", "com.jetbrains.pycharm"],
+										"type": "frontmost_application_unless"
+									},
+									{
+										"name": "vim_mode",
+										"type": "variable_unless",
+										"value": 1
+									}
+								],
+								"from": { "key_code": "caps_lock" },
+								"parameters": {
+									"basic.to_if_alone_threshold_milliseconds": 0,
+									"basic.to_if_held_down_threshold_milliseconds": 100
+								},
+								"to_after_key_up": [
+									{
+										"set_variable": {
+											"name": "vim_mode",
+											"value": 0
+										}
+									},
+									{
+										"set_notification_message": {
+											"id": "vim_mode_plus_enabled",
+											"text": ""
+										}
+									}
+								],
+								"to_if_alone": [
+									{
+										"set_variable": {
+											"name": "vim_mode",
+											"value": 1
+										}
+									}
+								],
+								"to_if_held_down": [
+									{
+										"set_variable": {
+											"name": "vim_mode",
+											"value": 1
+										}
+									}
+								],
+								"type": "basic"
+							},
+							{
+								"conditions": [
+									{
+										"bundle_identifiers": ["com.googlecode.iterm2", "com.github.atom", "com.jetbrains.pycharm"],
+										"type": "frontmost_application_unless"
+									},
+									{
+										"name": "vim_mode",
+										"type": "variable_if",
+										"value": 1
+									}
+								],
+								"from": { "key_code": "caps_lock" },
+								"to": [
+									{
+										"set_variable": {
+											"name": "vim_mode",
+											"value": 0
+										}
+									},
+									{
+										"set_notification_message": {
+											"id": "vim_mode_plus_enabled",
+											"text": ""
+										}
+									}
+								],
+								"type": "basic"
+							},
+							{
+								"conditions": [
+									{
+										"bundle_identifiers": ["com.googlecode.iterm2", "com.github.atom", "com.jetbrains.pycharm"],
+										"type": "frontmost_application_unless"
+									},
+									{
+										"name": "vim_mode",
+										"type": "variable_if",
+										"value": 1
+									}
+								],
+								"from": { "key_code": "escape" },
+								"to": [
+									{
+										"set_variable": {
+											"name": "vim_mode",
+											"value": 0
+										}
+									},
+									{
+										"set_notification_message": {
+											"id": "vim_mode_plus_enabled",
+											"text": ""
+										}
+									}
+								],
+								"type": "basic"
+							},
+							{
+								"conditions": [
+									{
+										"bundle_identifiers": ["com.googlecode.iterm2", "com.github.atom", "com.jetbrains.pycharm"],
+										"type": "frontmost_application_unless"
+									},
+									{
+										"name": "vim_mode",
+										"type": "variable_if",
+										"value": 1
+									}
+								],
+								"from": {
+									"key_code": "open_bracket",
+									"modifiers": { "mandatory": ["control"] }
+								},
+								"to": [
+									{
+										"set_variable": {
+											"name": "vim_mode",
+											"value": 0
+										}
+									},
+									{
+										"set_notification_message": {
+											"id": "vim_mode_plus_enabled",
+											"text": ""
+										}
+									}
+								],
+								"type": "basic"
+							},
+							{
+								"conditions": [
+									{
+										"bundle_identifiers": ["com.googlecode.iterm2", "com.github.atom", "com.jetbrains.pycharm"],
+										"type": "frontmost_application_if"
+									},
+									{
+										"name": "vim_mode",
+										"type": "variable_if",
+										"value": 1
+									}
+								],
+								"from": { "any": "key_code" },
+								"to": [
+									{
+										"set_variable": {
+											"name": "vim_mode",
+											"value": 0
+										}
+									},
+									{
+										"set_notification_message": {
+											"id": "vim_mode_plus_enabled",
+											"text": ""
+										}
+									}
+								],
+								"type": "basic"
+							},
+							{
+								"conditions": [
+									{
+										"name": "vim_mode",
+										"type": "variable_if",
+										"value": 1
+									}
+								],
+								"from": { "any": "pointing_button" },
+								"to": [
+									{
+										"set_variable": {
+											"name": "vim_mode",
+											"value": 0
+										}
+									},
+									{
+										"set_notification_message": {
+											"id": "vim_mode_plus_enabled",
+											"text": ""
+										}
+									}
+								],
+								"type": "basic"
+							}
+						]
+					}
+				]
+			},
+			"name": "Default profile",
+			"selected": true,
+			"virtual_hid_keyboard": {
+				"country_code": 0,
+				"keyboard_type_v2": "ansi"
+			}
+		}
+	]
 }
