@@ -1,139 +1,108 @@
-// Place your key bindings in this file to override the defaultsauto[]
+// Place your key bindings in this file to override the defaults
 [
-	// {
-	//   "key": "alt+enter",
-	//   "command": "colonize.endline",
-	//   "when": "editorTextFocus"
-	// },
-	// {
-	//   "key": "shift+enter",
-	//   "command": "-colonize.endline",
-	//   "when": "editorTextFocus"
-	// },
-	// {
-	//   "key": "shift+enter",
-	//   "command": "colonize.newline",
-	//   "when": "editorTextFocus"
-	// },
-	// {
-	//   "key": "alt+enter",
-	//   "command": "-colonize.newline",
-	//   "when": "editorTextFocus"
-	// },
-	{
-		"key": "shift+cmd+d",
-		"command": "-workbench.view.debug",
-		"when": "viewContainer.workbench.view.debug.enabled"
-	},
-	{
-		"key": "shift+alt+down",
-		"command": "editor.action.copyLinesDownAction",
-		"when": "editorTextFocus && !editorReadonly"
-	},
-	{
-		"key": "shift+alt+down",
-		"command": "-editor.action.copyLinesDownAction",
-		"when": "editorTextFocus && !editorReadonly"
-	},
-	{
-		"key": "shift+cmd+m",
-		"command": "editor.toggleFold",
-		"when": "editorTextFocus && foldingEnabled"
-	},
-	{
-		"key": "cmd+k cmd+l",
-		"command": "-editor.toggleFold",
-		"when": "editorTextFocus && foldingEnabled"
-	},
-	{
-		"key": "shift+cmd+m",
-		"command": "-workbench.actions.view.problems",
-		"when": "workbench.panel.markers.view.active"
-	},
-	{
-		"key": "ctrl+shift+cmd+i",
-		"command": "workbench.action.quickchat.toggle",
-		"when": "hasChatProvider"
-	},
-	{
-		"key": "shift+cmd+i",
-		"command": "-workbench.action.quickchat.toggle",
-		"when": "hasChatProvider"
-	},
-	{
-		"key": "shift+cmd+i",
-		"command": "inlineChat.start",
-		"when": "inlineChatHasProvider && !editorReadonly"
-	},
-	{
-		"key": "cmd+i",
-		"command": "-inlineChat.start",
-		"when": "inlineChatHasProvider && !editorReadonly"
-	},
-	{
-		"key": "shift+cmd+b",
-		"command": "-workbench.action.tasks.build",
-		"when": "taskCommandsRegistered"
-	},
-	{
-		"key": "shift+cmd+b",
-		"command": "workbench.action.toggleSidebarVisibility"
-	},
-	{
-		"key": "cmd+b",
-		"command": "-workbench.action.toggleSidebarVisibility"
-	},
-	{
-		"key": "cmd+f",
-		"command": "actions.find",
-		"when": "(editorFocus || editorIsOpen || sideBarFocus) && !terminalFocus"
-	},
-	{
-		"key": "cmd+f",
-		"command": "-actions.find",
-		"when": "editorFocus || editorIsOpen"
-	},
-	{
-		"key": "shift+cmd+i",
-		"command": "inlineChat.start",
-		"when": "editorFocus && inlineChatHasProvider && !editorReadonly"
-	},
-
-	{
-		"key": "shift+cmd+r",
-		"command": "references-view.findReferences",
-		"when": "editorHasReferenceProvider"
-	},
-	{
-		"key": "shift+alt+f12",
-		"command": "-references-view.findReferences",
-		"when": "editorHasReferenceProvider"
-	},
-	{
-		"key": "shift+cmd+g",
-		"command": "-editor.action.previousMatchFindAction",
-		"when": "editorFocus"
-	},
-	{
-		"key": "shift+cmd+g",
-		"command": "editor.action.revealDefinition",
-		"when": "editorHasDefinitionProvider && editorTextFocus && !isInEmbeddedEditor"
-	},
-	{
-		"key": "f12",
-		"command": "-editor.action.revealDefinition",
-		"when": "editorHasDefinitionProvider && editorTextFocus && !isInEmbeddedEditor"
-	},
-
-	{
-		"key": "shift+cmd+d",
-		"command": "editor.action.copyLinesDownAction",
-		"when": "editorTextFocus && !editorReadonly"
-	},
-
-	{
-		"key": "cmd+i",
-		"command": "-inlineChat.start",
-		"when": "editorFocus && inlineChatHasEditsAgent && inlineChatPossible && !editorReadonly && !editorSimpleInput || editorFocus && inlineChatHasProvider && inlineChatPossible && !editorReadonly && !editorSimpleInput"
-	}
+  {
+    "key": "shift+cmd+d",
+    "command": "editor.action.copyLinesDownAction",
+    "when": "editorTextFocus && !editorReadonly"
+    // copy line down
+  },
+  {
+    "key": "alt+cmd+q",
+    "command": "workbench.action.quit"
+    // make quitting by accident harder
+  },
+  {
+    "key": "cmd+q",
+    "command": "-workbench.action.quit"
+    // remove default quit keybind
+  },
+  {
+    "key": "shift+cmd+r",
+    "command": "references-view.findReferences",
+    "when": "editorHasReferenceProvider"
+    // find all references on current symbol
+  },
+  {
+    "key": "shift+cmd+b",
+    "command": "-workbench.action.tasks.build",
+    "when": "taskCommandsRegistered"
+  },
+  {
+    "key": "shift+cmd+g",
+    "command": "editor.action.revealDefinition",
+    "when": "editorHasDefinitionProvider && editorTextFocus && !isInEmbeddedEditor"
+  },
+  {
+    "key": "f12",
+    "command": "-editor.action.revealDefinition",
+    "when": "editorHasDefinitionProvider && editorTextFocus && !isInEmbeddedEditor"
+  },
+  {
+    "key": "alt+cmd+[",
+    "command": "-editor.fold",
+    "when": "editorTextFocus && foldingEnabled"
+  },
+  {
+    "key": "shift+cmd+m",
+    "command": "editor.toggleFold",
+    "when": "editorTextFocus && foldingEnabled"
+  },
+  {
+    "key": "cmd+k cmd+l",
+    "command": "-editor.toggleFold",
+    "when": "editorTextFocus && foldingEnabled"
+  },
+  {
+    "key": "cmd+'",
+    "command": "leetcode.testSolution"
+  },
+  {
+    "key": "shift+cmd+b",
+    "command": "workbench.action.toggleSidebarVisibility"
+  },
+  {
+    "key": "alt+cmd+down",
+    "command": "-extension.vim_cmd+alt+down",
+    "when": "editorTextFocus && vim.active && !inDebugRepl"
+  },
+  {
+    "key": "alt+cmd+up",
+    "command": "-extension.vim_cmd+alt+up",
+    "when": "editorTextFocus && vim.active && !inDebugRepl"
+  },
+  {
+    "key": "shift+cmd+j",
+    "command": "workbench.action.toggleMaximizedPanel",
+    "when": "panelAlignment == 'center' || panelPosition != 'bottom' && panelPosition != 'top'"
+  },
+  {
+    "key": "cmd+i",
+    "command": "-inlineChat.startWithCurrentLine",
+    "when": "editorFocus && github.copilot.chat.editor.enableLineTrigger && inlineChatHasProvider && !editorReadonly && !inlineChatVisible"
+  },
+  {
+    "key": "cmd+i",
+    "command": "-inlineChat.startWithCurrentLine",
+    "when": "inlineChatHasProvider && inlineChatShowingHint && !editorReadonly && !inlineChatVisible"
+  },
+  {
+    "key": "cmd+i",
+    "command": "-workbench.action.chat.holdToVoiceChatInChatView",
+    "when": "chatIsEnabled && hasSpeechProvider && !chatSessionRequestInProgress && !editorFocus && !inChatInput && !inlineChatFocused && !notebookEditorFocused"
+  },
+  {
+    "key": "cmd+i",
+    "command": "-inlineChat.start",
+    "when": "editorFocus && inlineChatHasProvider && inlineChatPossible && !editorReadonly && !editorSimpleInput"
+  },
+  {
+    "key": "cmd+i",
+    "command": "-inlineChat2.reveal",
+    "when": "inlineChatHasEditsAgent && !chatEdits.isGlobalEditingSession && chatEdits.requestCount >= 1"
+  },
+  {
+    "key": "cmd+i",
+    "command": "-inlineChat.start",
+    "when": "editorFocus && inlineChatHasEditsAgent && inlineChatPossible && !editorReadonly && !editorSimpleInput || editorFocus && inlineChatHasProvider && inlineChatPossible && !editorReadonly && !editorSimpleInput"
+  }
 ]
