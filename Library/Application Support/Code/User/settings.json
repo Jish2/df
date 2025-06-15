@@ -1,0 +1,295 @@
+{
+	// "editor.fontFamily": "'Cascadia Code','Consolas'",
+	"editor.fontLigatures": true,
+	"workbench.iconTheme": "vscode-icons",
+	"sync.autoUpload": true,
+	"sync.autoDownload": true,
+	"sync.forceDownload": true,
+	"sync.forceUpload": true,
+	"sync.quietSync": true,
+	"oneDarkPro.vivid": true,
+	"sync.gist": "2b712920754121c69b077c423abe6da9",
+	"oneDarkPro.italic": false,
+	"bracket-pair-colorizer-2.depreciation-notice": false,
+	"bracketPairColorizer.depreciation-notice": false,
+	"code-runner.saveFileBeforeRun": true,
+	"explorer.confirmDragAndDrop": false,
+	"liveServer.settings.donotShowInfoMsg": true,
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"prettier.useTabs": true,
+	"[javascript]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"cSpell.userWords": [
+		"backlink",
+		"Backlinks",
+		"Chakra",
+		"checkmark",
+		"curr",
+		"dropbtn",
+		"excludesfile",
+		"frontmatter",
+		"hono",
+		"hottake",
+		"ibrahimeatspie",
+		"indut",
+		"jgoon",
+		"leetcode",
+		"leetpals",
+		"lucide",
+		"mycloset",
+		"nativewind",
+		"nextval",
+		"openauth",
+		"openauthjs",
+		"openweathermap",
+		"preact",
+		"protobuf",
+		"pyker",
+		"quicktime",
+		"Roadmap",
+		"smiski",
+		"spenta",
+		"systempreferences",
+		"tailwindcss",
+		"UIUC",
+		"uuidv",
+		"valibot"
+	],
+	"editor.formatOnSave": true,
+	"tabnine.experimentalAutoImports": true,
+	"git.autofetch": true,
+	"git.enableSmartCommit": true,
+	"security.workspace.trust.untrustedFiles": "open",
+	"vsicons.dontShowNewVersionMessage": true,
+	"reactSnippets.settings.prettierEnabled": true,
+	"git.confirmSync": false,
+	"css.remoteStyleSheets": [
+		"https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css",
+		"https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css",
+		"/style.css",
+		"style.css",
+		"${fileBasenameNoExtension}.css"
+	],
+	"cSpell.ignoreWords": ["Multiselect"],
+	// "[xml]": {
+	//     "editor.defaultFormatter": "fabianlauer.vs-code-xml-format"
+	// },
+	"kotlin.languageServer.enabled": false,
+	"kotlin.debugAdapter.enabled": false,
+	"[cpp]": {
+		"editor.defaultFormatter": "xaver.clang-format"
+	},
+	"C_Cpp.clang_format_fallbackStyle": "Google, IndentWidth: 4, TabWidth: 4",
+	"code-runner.runInTerminal": true,
+	"terminal.integrated.defaultProfile.osx": "zsh",
+	"code-runner.executorMap": {
+		"javascript": "node",
+		"java": "cd $dir && javac $fileName && java $fileNameWithoutExt",
+		"c": "cd $dir && gcc $fileName -o $fileNameWithoutExt && $dir$fileNameWithoutExt",
+		"cpp": "cd $dir && g++ $fileName -o $fileNameWithoutExt.o && $dir$fileNameWithoutExt.o",
+		"objective-c": "cd $dir && gcc -framework Cocoa $fileName -o $fileNameWithoutExt && $dir$fileNameWithoutExt",
+		"php": "php",
+		"python": "python -u",
+		"perl": "perl",
+		"perl6": "perl6",
+		"ruby": "ruby",
+		"go": "go run",
+		"lua": "lua",
+		"groovy": "groovy",
+		"powershell": "powershell -ExecutionPolicy ByPass -File",
+		"bat": "cmd /c",
+		"shellscript": "bash",
+		"fsharp": "fsi",
+		"csharp": "scriptcs",
+		"vbscript": "cscript //Nologo",
+		"typescript": "ts-node",
+		"coffeescript": "coffee",
+		"scala": "scala",
+		"swift": "swift",
+		"julia": "julia",
+		"crystal": "crystal",
+		"ocaml": "ocaml",
+		"r": "Rscript",
+		"applescript": "osascript",
+		"clojure": "lein exec",
+		"haxe": "haxe --cwd $dirWithoutTrailingSlash --run $fileNameWithoutExt",
+		"rust": "cd $dir && rustc $fileName && $dir$fileNameWithoutExt",
+		"racket": "racket",
+		"scheme": "csi -script",
+		"ahk": "autohotkey",
+		"autoit": "autoit3",
+		"dart": "dart",
+		"pascal": "cd $dir && fpc $fileName && $dir$fileNameWithoutExt",
+		"d": "cd $dir && dmd $fileName && $dir$fileNameWithoutExt",
+		"haskell": "runhaskell",
+		"nim": "nim compile --verbosity:0 --hints:off --run",
+		"lisp": "sbcl --script",
+		"kit": "kitc --run",
+		"v": "v run",
+		"sass": "sass --style expanded",
+		"scss": "scss --style expanded",
+		"less": "cd $dir && lessc $fileName $fileNameWithoutExt.css",
+		"FortranFreeForm": "cd $dir && gfortran $fileName -o $fileNameWithoutExt && $dir$fileNameWithoutExt",
+		"fortran-modern": "cd $dir && gfortran $fileName -o $fileNameWithoutExt && $dir$fileNameWithoutExt",
+		"fortran_fixed-form": "cd $dir && gfortran $fileName -o $fileNameWithoutExt && $dir$fileNameWithoutExt",
+		"fortran": "cd $dir && gfortran $fileName -o $fileNameWithoutExt && $dir$fileNameWithoutExt",
+		"sml": "cd $dir && sml $fileName"
+	},
+	"latex-workshop.latex.tools": [
+		{
+			"name": "latexmk",
+			"command": "latexmk",
+			"args": ["-synctex=1", "-interaction=nonstopmode", "-file-line-error", "-pdf", "-outdir=%OUTDIR%", "%DOC%"],
+			"env": {}
+		},
+		{
+			"name": "xelatex",
+			"command": "xelatex",
+			"args": ["-synctex=1", "-interaction=nonstopmode", "-file-line-error", "%DOC%"],
+			"env": {}
+		},
+		{
+			"name": "pdflatex",
+			"command": "pdflatex",
+			"args": ["-synctex=1", "-interaction=nonstopmode", "-file-line-error", "%DOC%"],
+			"env": {}
+		},
+		{
+			"name": "bibtex",
+			"command": "bibtex",
+			"args": ["%DOCFILE%"],
+			"env": {}
+		}
+	],
+	"latex-workshop.latex.recipes": [
+		{
+			"name": "pdfLaTeX",
+			"tools": ["pdflatex"]
+		},
+		{
+			"name": "latexmk 🔃",
+			"tools": ["latexmk"]
+		},
+		{
+			"name": "xelatex",
+			"tools": ["xelatex"]
+		},
+		{
+			"name": "pdflatex ➞ bibtex ➞ pdflatex`×2",
+			"tools": ["pdflatex", "bibtex", "pdflatex", "pdflatex"]
+		},
+		{
+			"name": "xelatex ➞ bibtex ➞ xelatex`×2",
+			"tools": ["xelatex", "bibtex", "xelatex", "xelatex"]
+		}
+	],
+	"prettier.printWidth": 140,
+	"npm.keybindingsChangedWarningShown": true,
+	"emeraldwalk.runonsave": {},
+	"vscord.status.details.text.notInFile": "procastinating 😑",
+	"vscord.status.buttons.button1.active.url": "https://github.com/Jish2/",
+	"vscord.status.buttons.button1.active.enabled": true,
+	"vscord.status.buttons.button1.active.label": "github",
+	"vscord.app.name": "Visual Studio Code",
+	"vscord.status.buttons.button1.git.active.label": "repo",
+	"vscord.status.buttons.button1.idle.label": "github",
+	"vscord.status.buttons.button1.idle.url": "https://github.com/Jish2/",
+	"vscord.status.problems.text": "{problems_count} problems 🙄",
+	"vscord.status.image.large.editing.text": "editing {lang} ✍️",
+	"vscord.status.image.large.idle.text": "snoozin 🥱",
+	"vscord.status.details.text.idle": "snoozin 🥱",
+	"vscord.status.details.text.editing": "{workspace}",
+	"vscord.status.state.text.editing": "editing {file_name}{file_extension} ✍️",
+	"[json]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"files.associations": {
+		".clang-tidy": "cpp"
+	},
+	"C_Cpp.codeAnalysis.clangTidy.codeAction.showDisable": false,
+	"[jsonc]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"editor.detectIndentation": false,
+	"ppm-pgm-viewer-for-vscode.imagepreview.uiPosition": "right",
+	"terminal.integrated.env.windows": {},
+	"terminal.integrated.env.osx": {},
+	"window.title": "${rootName}${separator}${activeEditorShort}",
+	"css.lint.unknownAtRules": "ignore",
+	"svg.preview.mode": "svg",
+	"editor.foldingImportsByDefault": true,
+	"editor.indentSize": "tabSize",
+	"editor.tabSize": 2,
+	"terminal.integrated.profiles.windows": {
+		"PowerShell": {
+			"source": "PowerShell",
+			"icon": "terminal-powershell",
+			"args": ["-ExecutionPolicy", "Bypass"]
+		}
+	},
+	"terminal.integrated.defaultProfile.windows": "PowerShell",
+	"codesandbox.currentWorkspace": "b99d4db7-4572-4dbb-b786-cc94c6a50aee",
+	"remote.SSH.remotePlatform": {
+		"sandbox.fmtl5z.csb": "linux"
+	},
+	"[c]": {
+		"editor.defaultFormatter": "xaver.clang-format"
+	},
+	"[python]": {
+		"editor.detectIndentation": false,
+		"editor.insertSpaces": true,
+		"editor.tabSize": 4,
+		"editor.defaultFormatter": "ms-python.black-formatter"
+	},
+	"npm.packageManager": "auto",
+	"console-ninja.featureSet": "Community",
+	"terminal.integrated.inheritEnv": false,
+	"workbench.activityBar.location": "top",
+	"workbench.colorTheme": "One Monokai",
+	"typescript.preferences.importModuleSpecifier": "non-relative",
+	"[java]": {
+		"editor.defaultFormatter": "redhat.java"
+	},
+	"python.defaultInterpreterPath": "/Users/admin/.pyenv/versions/3.10.13/bin/python",
+	"editor.accessibilitySupport": "off",
+	"github.copilot.editor.enableAutoCompletions": true,
+	"diffEditor.ignoreTrimWhitespace": true,
+	"workbench.editorAssociations": {
+		"*.pdf": "latex-workshop-pdf-hook"
+	},
+	"[go]": {
+		"editor.defaultFormatter": "golang.go"
+	},
+	"leetcode.defaultLanguage": "python3",
+	"leetcode.workspaceFolder": "/Users/jgoon/github/leetcode",
+	"go.toolsManagement.autoUpdate": true,
+	"eslint.workingDirectories": [
+		{
+			"mode": "auto"
+		}
+	],
+	"cmake.pinnedCommands": ["workbench.action.tasks.configureTaskRunner", "workbench.action.tasks.runTask"],
+	"github.copilot.enable": {
+		"*": true,
+		"plaintext": false,
+		"markdown": false,
+		"scminput": false,
+		"scss": true,
+		"typescriptreact": true,
+		"javascript": true
+	},
+	"vim.smartRelativeLine": true,
+	"sqlfluff.dialect": "postgres",
+	"[sql]": {
+		"editor.defaultFormatter": "dorzey.vscode-sqlfluff"
+	},
+	"latex-workshop.formatting.latex": "latexindent",
+	"[latex]": {
+		"editor.defaultFormatter": "James-Yu.latex-workshop"
+	},
+	"[swift]": {
+		"editor.defaultFormatter": "vknabel.vscode-apple-swift-format"
+	},
+	"swiftformat.options": ["--trimwhitespace", "always", "--indentstrings", "true", "--disable", "trailingSpace"]
+}
