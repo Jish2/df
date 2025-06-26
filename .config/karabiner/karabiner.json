@@ -740,7 +740,7 @@
                                 "from": { "key_code": "caps_lock" },
                                 "parameters": {
                                     "basic.to_if_alone_threshold_milliseconds": 0,
-                                    "basic.to_if_held_down_threshold_milliseconds": 100
+                                    "basic.to_if_held_down_threshold_milliseconds": 150
                                 },
                                 "to_after_key_up": [
                                     {
@@ -945,8 +945,8 @@
                                     "modifiers": { "optional": ["any"] }
                                 },
                                 "parameters": {
-                                    "basic.to_delayed_action_delay_milliseconds": 180,
-                                    "basic.to_if_held_down_threshold_milliseconds": 180
+                                    "basic.to_delayed_action_delay_milliseconds": 150,
+                                    "basic.to_if_held_down_threshold_milliseconds": 150
                                 },
                                 "to_delayed_action": { "to_if_canceled": [{ "key_code": "a" }] },
                                 "to_if_alone": [
@@ -964,8 +964,8 @@
                                     "modifiers": { "optional": ["any"] }
                                 },
                                 "parameters": {
-                                    "basic.to_delayed_action_delay_milliseconds": 180,
-                                    "basic.to_if_held_down_threshold_milliseconds": 180
+                                    "basic.to_delayed_action_delay_milliseconds": 150,
+                                    "basic.to_if_held_down_threshold_milliseconds": 150
                                 },
                                 "to_delayed_action": { "to_if_canceled": [{ "key_code": "s" }] },
                                 "to_if_alone": [
@@ -983,8 +983,8 @@
                                     "modifiers": { "optional": ["any"] }
                                 },
                                 "parameters": {
-                                    "basic.to_delayed_action_delay_milliseconds": 180,
-                                    "basic.to_if_held_down_threshold_milliseconds": 180
+                                    "basic.to_delayed_action_delay_milliseconds": 150,
+                                    "basic.to_if_held_down_threshold_milliseconds": 150
                                 },
                                 "to_delayed_action": { "to_if_canceled": [{ "key_code": "d" }] },
                                 "to_if_alone": [
@@ -1002,8 +1002,8 @@
                                     "modifiers": { "optional": ["any"] }
                                 },
                                 "parameters": {
-                                    "basic.to_delayed_action_delay_milliseconds": 180,
-                                    "basic.to_if_held_down_threshold_milliseconds": 180
+                                    "basic.to_delayed_action_delay_milliseconds": 150,
+                                    "basic.to_if_held_down_threshold_milliseconds": 150
                                 },
                                 "to_delayed_action": { "to_if_canceled": [{ "key_code": "f" }] },
                                 "to_if_alone": [
@@ -1021,8 +1021,8 @@
                                     "modifiers": { "optional": ["any"] }
                                 },
                                 "parameters": {
-                                    "basic.to_delayed_action_delay_milliseconds": 180,
-                                    "basic.to_if_held_down_threshold_milliseconds": 180
+                                    "basic.to_delayed_action_delay_milliseconds": 150,
+                                    "basic.to_if_held_down_threshold_milliseconds": 150
                                 },
                                 "to_delayed_action": { "to_if_canceled": [{ "key_code": "j" }] },
                                 "to_if_alone": [
@@ -1040,8 +1040,8 @@
                                     "modifiers": { "optional": ["any"] }
                                 },
                                 "parameters": {
-                                    "basic.to_delayed_action_delay_milliseconds": 180,
-                                    "basic.to_if_held_down_threshold_milliseconds": 180
+                                    "basic.to_delayed_action_delay_milliseconds": 150,
+                                    "basic.to_if_held_down_threshold_milliseconds": 150
                                 },
                                 "to_delayed_action": { "to_if_canceled": [{ "key_code": "k" }] },
                                 "to_if_alone": [
@@ -1059,8 +1059,8 @@
                                     "modifiers": { "optional": ["any"] }
                                 },
                                 "parameters": {
-                                    "basic.to_delayed_action_delay_milliseconds": 180,
-                                    "basic.to_if_held_down_threshold_milliseconds": 180
+                                    "basic.to_delayed_action_delay_milliseconds": 150,
+                                    "basic.to_if_held_down_threshold_milliseconds": 150
                                 },
                                 "to_delayed_action": { "to_if_canceled": [{ "key_code": "l" }] },
                                 "to_if_alone": [
@@ -1078,8 +1078,8 @@
                                     "modifiers": { "optional": ["any"] }
                                 },
                                 "parameters": {
-                                    "basic.to_delayed_action_delay_milliseconds": 180,
-                                    "basic.to_if_held_down_threshold_milliseconds": 180
+                                    "basic.to_delayed_action_delay_milliseconds": 150,
+                                    "basic.to_if_held_down_threshold_milliseconds": 150
                                 },
                                 "to_delayed_action": { "to_if_canceled": [{ "key_code": "semicolon" }] },
                                 "to_if_alone": [
