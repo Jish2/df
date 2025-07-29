@@ -34,7 +34,7 @@
   "leetcode.hint.configWebviewMarkdown": false,
   "leetcode.hint.commentDescription": false,
   "[markdown]": {
-    "editor.defaultFormatter": "DavidAnson.vscode-markdownlint",
+    "editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
   },
   "cSpell.userWords": [
     "allstatus",
@@ -115,5 +115,6 @@
   "workbench.colorTheme": "GitHub Dark Default",
   "zenMode.showTabs": "single",
   "window.customTitleBarVisibility": "windowed",
-  "window.titleBarStyle": "custom"
+  "window.titleBarStyle": "custom",
+  "github.copilot.nextEditSuggestions.enabled": true
 }
