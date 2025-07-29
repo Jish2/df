@@ -209,6 +209,11 @@ automatically-unhide-macos-hidden-apps = false
     up = 'volume up'
     shift-down = ['volume set 0', 'mode main']
 
+# set apps to floating
 [[on-window-detected]]
     if.app-id = 'com.spotify.client'
+    run = ['layout floating']
+
+[[on-window-detected]]
+    if.app-id = 'com.apple.MobileSMS'
     run = ['layout floating']
