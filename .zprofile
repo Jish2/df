@@ -19,3 +19,14 @@ export PATH="/opt/homebrew/lib/ruby/gems/3.3.0/bin:$PATH"
 
 # console ninja
 PATH=~/.console-ninja/.bin:$PATH
+
+# fc command
+FCEDIT=nvim
+
+# pnpm
+export PNPM_HOME="/Users/jgoon/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end

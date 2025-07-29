@@ -21,14 +21,6 @@ autoload -U promptinit; promptinit
 prompt pure
 prompt_newline=$(echo -n "\u00A0")
 
-
-# pnpm
-export PNPM_HOME="/Users/jgoon/Library/pnpm"
-case ":$PATH:" in
-  *":$PNPM_HOME:"*) ;;
-  *) export PATH="$PNPM_HOME:$PATH" ;;
-esac
-# pnpm end
-
+# terraform
 autoload -U +X bashcompinit && bashcompinit
 complete -o nospace -C /opt/homebrew/bin/terraform terraform
