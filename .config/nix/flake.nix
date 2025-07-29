@@ -35,7 +35,7 @@
             defaultbrowser
             yarn
             gh
-            pyenv
+            # pyenv
             iterm2
             yadm
             zsh-syntax-highlighting
@@ -168,6 +168,7 @@
               "nvm"
               "openssl@3"
               "pango" # for dimensional team
+              "pyenv"
             ];
             casks = [
               "docker"
