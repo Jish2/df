@@ -182,6 +182,7 @@
               "visual-studio-code"
               "alt-tab"
               "mactex"
+              "nikitabobko/tap/aerospace"
             ];
             onActivation.cleanup = "zap";
           };
