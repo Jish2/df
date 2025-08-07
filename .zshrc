@@ -26,3 +26,7 @@ prompt_newline=$(echo -n "\u00A0")
 # terraform
 autoload -U +X bashcompinit && bashcompinit
 complete -o nospace -C /opt/homebrew/bin/terraform terraform
+
+# volta
+export PATH="/Users/jgoon/.volta/bin:$PATH"
+
