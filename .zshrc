@@ -1,3 +1,5 @@
+autoload -Uz compinit
+compinit
 # some configs are replicated in ~/.config/nix/flake.nix
 
 # zsh-syntax-highlighting
