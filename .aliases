@@ -52,3 +52,5 @@ alias gwtc='create_genji_worktree'
 alias gwt='git worktree'
 
 alias sqlite='/opt/homebrew/Cellar/sqlite/3.50.1/bin/sqlite3'
+
+alias k='kubectl'
