@@ -53,4 +53,7 @@ alias gwt='git worktree'
 
 alias sqlite='/opt/homebrew/Cellar/sqlite/3.50.1/bin/sqlite3'
 
+alias kubectl='kubecolor'
+
 alias k='kubectl'
+
