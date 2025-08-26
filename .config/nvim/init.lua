@@ -610,6 +610,39 @@ require('lazy').setup({
           end,
         },
       }
+
+      -- Explicitly configure JSON language server
+      require('lspconfig').jsonls.setup({
+        capabilities = capabilities,
+        settings = {
+          json = {
+            schemas = {
+              {
+                fileMatch = { 'package.json' },
+                url = 'https://json.schemastore.org/package.json',
+              },
+              {
+                fileMatch = { 'tsconfig.json', 'tsconfig.*.json' },
+                url = 'https://json.schemastore.org/tsconfig.json',
+              },
+              {
+                fileMatch = { '.eslintrc.json', '.eslintrc.*.json' },
+                url = 'https://json.schemastore.org/eslintrc.json',
+              },
+              {
+                fileMatch = { 'composer.json' },
+                url = 'https://json.schemastore.org/composer.json',
+              },
+              {
+                fileMatch = { '*.code-workspace' },
+                url = 'https://json.schemastore.org/workspace-configuration.json',
+              },
+            },
+            validate = { enable = true },
+            format = { enable = true },
+          },
+        },
+      })
     end,
   },
   {
