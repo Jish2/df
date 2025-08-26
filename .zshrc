@@ -30,3 +30,10 @@ complete -o nospace -C /opt/homebrew/bin/terraform terraform
 # volta
 export PATH="/Users/jgoon/.volta/bin:$PATH"
 
+# kubectl krew
+export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+
+# kubectl autocomplete
+source <(kubectl completion zsh)
+compdef kubecolor=kubectl
+
