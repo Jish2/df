@@ -1,0 +1,14 @@
+k9s:
+  cluster: arn:aws:eks:us-east-1:304707545954:cluster/eks-20241120-stg
+  namespace:
+    active: all
+    lockFavorites: false
+    favorites:
+      - snap
+      - all
+      - default
+  view:
+    active: jobs all
+  featureGates:
+    nodeShell: false
+  proxy: null
