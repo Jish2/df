@@ -40,3 +40,7 @@ compdef kubecolor=kubectl
 # fzf config
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
+# setup go + rbx
+export GOPROXY=https://artifactory.rbx.com/api/go/go-all
+export GONOSUMDB=github.rbx.com
+
