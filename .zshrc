@@ -48,3 +48,7 @@ setopt INC_APPEND_HISTORY    # write each command to $HISTFILE immediately
 setopt HIST_IGNORE_DUPS      # drop exact duplicates
 setopt HIST_IGNORE_SPACE     # ignore commands starting with a space
 
+# setup go + rbx
+export GOPROXY=https://artifactory.rbx.com/api/go/go-all
+export GONOSUMDB=github.rbx.com
+
