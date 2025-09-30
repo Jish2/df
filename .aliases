@@ -7,9 +7,6 @@ alias config="nvim ~/.zshrc"
 # nodet (node typescript)
 alias nodet="npx ts-node"
 
-# brewfile
-alias brewfile="nvim ~/.config/brew/Brewfile"
-
 # gh release pr
 alias ghrl="gh pr create --base prod --head main --title release --body \"\""
 
@@ -57,3 +54,7 @@ alias kubectl='kubecolor'
 
 alias k='kubectl'
 
+# brewfile
+alias brewfile="nvim ~/Brewfile"
+alias brewdump='brew bundle dump --file=Brewfile --force'
+alias brewinstall='brew bundle --file=Brewfile --force' # add cleanup flag to remove undeclared apps
