@@ -1,0 +1,10 @@
+# k9s runtime/cache artifacts
+clusters/
+screen-dumps/
+k9s.log
+cache/
+tmp/
+
+# Local overrides
+*.bak
+*.local.yaml
