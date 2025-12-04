@@ -7,6 +7,30 @@
             "complex_modifications": {
                 "rules": [
                     {
+                        "description": "Control+Tab -> immediate Cmd+Tab on keydown",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "tab",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "control"
+                                        ],
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "shell_command": "osascript -e 'tell application \"System Events\" to key code 48 using {command down}'"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
                         "description": "MS Remote Desktop - Left cmd to Left ctrl",
                         "manipulators": [
                             {
