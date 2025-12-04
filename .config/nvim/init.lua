@@ -531,6 +531,21 @@ require('lazy').setup({
         },
       }
 
+      -- Configure hover handler with border and background
+      vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(
+        vim.lsp.handlers.hover,
+        {
+          border = 'rounded',
+          focusable = false,
+        }
+      )
+      
+      -- Set up floating window background highlight for better visibility
+      -- This makes hover windows stand out from the code behind them
+      -- Colors compatible with rose-pine-moon theme
+      vim.api.nvim_set_hl(0, 'NormalFloat', { bg = '#393552', blend = 0 })
+      vim.api.nvim_set_hl(0, 'FloatBorder', { bg = '#393552', fg = '#9ccfd8' })
+
       -- LSP servers and clients are able to communicate to each other what features they support.
       --  By default, Neovim doesn't support everything that is in the LSP specification.
       --  When you add nvim-cmp, luasnip, etc. Neovim now has *more* capabilities.
