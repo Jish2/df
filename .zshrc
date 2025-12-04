@@ -52,3 +52,5 @@ setopt HIST_IGNORE_SPACE     # ignore commands starting with a space
 export GOPROXY=https://artifactory.rbx.com/api/go/go-all
 export GONOSUMDB=github.rbx.com
 
+export RBX_REGISTRY="--registry=https://artifactory.rbx.com/api/npm/npm-all/"
+
