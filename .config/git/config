@@ -25,6 +25,8 @@
 	ui = auto
 [diff]
 	tool = vimdiff
+[difftool]
+    prompt = false
 [merge]
 	tool = vimdiff
 
