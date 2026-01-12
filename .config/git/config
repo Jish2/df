@@ -24,11 +24,11 @@
 [color]
 	ui = auto
 [diff]
-	tool = vimdiff
+	tool = nvimdiff
 [difftool]
     prompt = false
 [merge]
-	tool = vimdiff
+	tool = nvimdiff
 
 # Include machine-specific config, yadm will symlink the config.local##...
 [include]
