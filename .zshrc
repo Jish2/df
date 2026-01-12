@@ -48,3 +48,5 @@ setopt INC_APPEND_HISTORY    # write each command to $HISTFILE immediately
 setopt HIST_IGNORE_DUPS      # drop exact duplicates
 setopt HIST_IGNORE_SPACE     # ignore commands starting with a space
 
+# machine-specific config, yadm will symlink the .zshrc.local##...
+[ -f ~/.zshrc.local ] && source ~/.zshrc.local
