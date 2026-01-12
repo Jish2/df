@@ -233,3 +233,8 @@ automatically-unhide-macos-hidden-apps = false
 [[on-window-detected]]
     if.app-id = 'com.openai.chat'
     run = ['layout floating']
+
+[[on-window-detected]]
+    if.app-id = 'com.openai.FaceTime'
+    run = ['layout floating']
+
