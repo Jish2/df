@@ -50,3 +50,11 @@ setopt HIST_IGNORE_SPACE     # ignore commands starting with a space
 
 # machine-specific config, yadm will symlink the .zshrc.local##...
 [ -f ~/.zshrc.local ] && source ~/.zshrc.local
+
+# bun completions
+[ -s "/Users/jgoon/.bun/_bun" ] && source "/Users/jgoon/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+
