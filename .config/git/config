@@ -11,3 +11,23 @@
 	diffFilter = delta --color-only
 [init]
 	defaultBranch = main
+[pull]
+	rebase = false
+[alias]
+	st = status
+	co = checkout
+	br = branch
+	ci = commit
+	unstage = restore --staged .
+	last = log -1 HEAD
+	lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+[color]
+	ui = auto
+[diff]
+	tool = vimdiff
+[merge]
+	tool = vimdiff
+
+# Include machine-specific config, yadm will symlink the config.local##...
+[include]
+	path = ~/.config/git/config.local
