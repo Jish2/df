@@ -40,3 +40,11 @@ compdef kubecolor=kubectl
 # fzf config
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
+# live, cross-tab shared history
+setopt APPEND_HISTORY        # append instead of overwrite on exit
+setopt INC_APPEND_HISTORY    # write each command to $HISTFILE immediately
+
+# (nice-to-have noise reduction)
+setopt HIST_IGNORE_DUPS      # drop exact duplicates
+setopt HIST_IGNORE_SPACE     # ignore commands starting with a space
+
