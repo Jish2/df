@@ -8,6 +8,7 @@
                 "rules": [
                     {
                         "description": "Control+Tab -> immediate Cmd+Tab on keydown",
+                        "enabled": false,
                         "manipulators": [
                             {
                                 "from": {
@@ -32,6 +33,7 @@
                     },
                     {
                         "description": "MS Remote Desktop - Left cmd to Left ctrl",
+                        "enabled": false,
                         "manipulators": [
                             {
                                 "conditions": [
