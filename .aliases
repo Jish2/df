@@ -1,5 +1,5 @@
 # reload
-alias r="source ~/.zshrc"
+alias r="source ~/.zshrc && tmux source-file ~/.tmux.conf"
 
 # open config
 alias config="nvim ~/.zshrc"
