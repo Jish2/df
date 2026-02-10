@@ -54,6 +54,10 @@ alias kubectl='kubecolor'
 
 alias k='kubectl'
 
+alias kd='kubectl --context ssodev'
+alias ks='kubectl --context ssostg'
+alias kp='kubectl --context ssoprod'
+
 # brewfile
 alias brewfile="nvim ~/Brewfile"
 alias brewdump='brew bundle dump --file=~/Brewfile --force'
