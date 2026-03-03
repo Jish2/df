@@ -21,6 +21,7 @@
 	unstage = restore --staged .
 	last = log -1 HEAD
 	lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+	wt = worktree
 [color]
 	ui = auto
 [diff]
