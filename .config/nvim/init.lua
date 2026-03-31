@@ -84,13 +84,18 @@ I hope you enjoy your Neovim journey,
 
 P.S. You can delete this when you're done too. It's your config now! :)
 --]]
+if vim.g.vscode then
+  require 'core.vscode'
+  return
+end
+
 require 'core.options'
-require 'core.colors'
 require 'core.keymaps'
+pcall(require, 'core.colors')
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
-
+--
 -- Highlight when yanking (copying) text
 --  Try it with `yap` in normal mode
 --  See `:help vim.highlight.on_yank()`
@@ -532,14 +537,11 @@ require('lazy').setup({
       }
 
       -- Configure hover handler with border and background
-      vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(
-        vim.lsp.handlers.hover,
-        {
-          border = 'rounded',
-          focusable = false,
-        }
-      )
-      
+      vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, {
+        border = 'rounded',
+        focusable = false,
+      })
+
       -- Set up floating window background highlight for better visibility
       -- This makes hover windows stand out from the code behind them
       -- Colors compatible with rose-pine-moon theme
@@ -625,14 +627,14 @@ require('lazy').setup({
           end,
         },
       }
-      
+
       -- Explicitly set up gopls to ensure it's registered
-      require('lspconfig').gopls.setup({
+      require('lspconfig').gopls.setup {
         capabilities = capabilities,
-      })
+      }
 
       -- Explicitly configure JSON language server
-      require('lspconfig').jsonls.setup({
+      require('lspconfig').jsonls.setup {
         capabilities = capabilities,
         settings = {
           json = {
@@ -662,7 +664,7 @@ require('lazy').setup({
             format = { enable = true },
           },
         },
-      })
+      }
     end,
   },
   {
@@ -1023,7 +1025,7 @@ require('lazy').setup({
     version = '*',
     dependencies = 'nvim-tree/nvim-web-devicons',
     config = function(_, opts)
-      require('bufferline').setup({
+      require('bufferline').setup {
         options = {
           -- Completely remove separators - no arrows or dividers
           separator_style = { left = '', right = '' },
@@ -1031,7 +1033,7 @@ require('lazy').setup({
           show_buffer_close_icons = false,
           show_close_icon = false,
         },
-      })
+      }
     end,
   },
   {

@@ -1,3 +1,5 @@
+local is_vscode = vim.g.vscode == true
+
 -- Set <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
@@ -62,7 +64,7 @@ vim.opt.list = true
 vim.opt.listchars = {
   tab = '  ',
   trail = '·',
-  nbsp = '␣'
+  nbsp = '␣',
 }
 
 -- Preview substitutions live, as you type!
@@ -85,60 +87,67 @@ vim.opt.relativenumber = true
 vim.opt.smartindent = true
 
 -- fold settings
-vim.opt.foldcolumn = '1'
-vim.opt.foldlevel = 99
-vim.opt.foldlevelstart = 99
-vim.opt.foldenable = true
-vim.opt.foldmethod = 'expr'
-vim.opt.foldexpr = 'nvim_treesitter#foldexpr()'
+if is_vscode then
+  -- VSCode handles folding UI/state; keep Neovim folding neutral here.
+  vim.opt.foldcolumn = '0'
+  vim.opt.foldmethod = 'manual'
+  vim.opt.foldenable = false
+else
+  vim.opt.foldcolumn = '1'
+  vim.opt.foldlevel = 99
+  vim.opt.foldlevelstart = 99
+  vim.opt.foldenable = true
+  vim.opt.foldmethod = 'expr'
+  vim.opt.foldexpr = 'nvim_treesitter#foldexpr()'
 
--- fix fold styling
-function HighlightedFoldtext()
-  local pos = vim.v.foldstart
-  local line = vim.api.nvim_buf_get_lines(0, pos - 1, pos, false)[1]
-  local lang = vim.treesitter.language.get_lang(vim.bo.filetype)
-  local parser = vim.treesitter.get_parser(0, lang)
-  local query = vim.treesitter.query.get(parser:lang(), 'highlights')
+  -- fix fold styling
+  function HighlightedFoldtext()
+    local pos = vim.v.foldstart
+    local line = vim.api.nvim_buf_get_lines(0, pos - 1, pos, false)[1]
+    local lang = vim.treesitter.language.get_lang(vim.bo.filetype)
+    local parser = vim.treesitter.get_parser(0, lang)
+    local query = vim.treesitter.query.get(parser:lang(), 'highlights')
 
-  if query == nil then
-    return vim.fn.foldtext()
-  end
-
-  local tree = parser:parse({ pos - 1, pos })[1]
-  local result = {}
-  local line_pos = 0
-  local prev_range = nil
-
-  for id, node, _ in query:iter_captures(tree:root(), 0, pos - 1, pos) do
-    local name = query.captures[id]
-    local start_row, start_col, end_row, end_col = node:range()
-    if start_row == pos - 1 and end_row == pos - 1 then
-      local range = { start_col, end_col }
-      if start_col > line_pos then
-        table.insert(result, { line:sub(line_pos + 1, start_col), 'Folded' })
-      end
-      line_pos = end_col
-      local text = vim.treesitter.get_node_text(node, 0)
-      if prev_range ~= nil and range[1] == prev_range[1] and range[2] == prev_range[2] then
-        result[#result] = { text, '@' .. name }
-      else
-        table.insert(result, { text, '@' .. name })
-      end
-      prev_range = range
+    if query == nil then
+      return vim.fn.foldtext()
     end
+
+    local tree = parser:parse({ pos - 1, pos })[1]
+    local result = {}
+    local line_pos = 0
+    local prev_range = nil
+
+    for id, node, _ in query:iter_captures(tree:root(), 0, pos - 1, pos) do
+      local name = query.captures[id]
+      local start_row, start_col, end_row, end_col = node:range()
+      if start_row == pos - 1 and end_row == pos - 1 then
+        local range = { start_col, end_col }
+        if start_col > line_pos then
+          table.insert(result, { line:sub(line_pos + 1, start_col), 'Folded' })
+        end
+        line_pos = end_col
+        local text = vim.treesitter.get_node_text(node, 0)
+        if prev_range ~= nil and range[1] == prev_range[1] and range[2] == prev_range[2] then
+          result[#result] = { text, '@' .. name }
+        else
+          table.insert(result, { text, '@' .. name })
+        end
+        prev_range = range
+      end
+    end
+
+    local end_char = vim.fn.getline(vim.v.foldend):gsub('^%s*', '')
+    local line_count = vim.v.foldend - vim.v.foldstart + 1
+
+    -- edit last element to include line num
+    result[#result][1] = result[#result][1] .. ' ... ' .. end_char .. ' (' .. line_count .. ')'
+
+    return result
   end
 
-  local end_char = vim.fn.getline(vim.v.foldend):gsub('^%s*', '')
-  local line_count = vim.v.foldend - vim.v.foldstart + 1
-
-  -- edit last element to include line num
-  result[#result][1] = result[#result][1] .. ' ... ' .. end_char .. ' (' .. line_count .. ')'
-
-  return result
+  vim.opt.foldtext = [[luaeval('HighlightedFoldtext')()]]
+  vim.opt.fillchars:append { fold = ' ' }
 end
-
-vim.opt.foldtext = [[luaeval('HighlightedFoldtext')()]]
-vim.opt.fillchars:append { fold = ' ' }
 
 vim.opt.pumblend = 0
 

@@ -4,6 +4,7 @@
 local function opts(desc)
   return { noremap = true, silent = true, desc = 'keymaps.lua: ' .. desc }
 end
+local is_vscode = vim.g.vscode == true
 
 -- Clear highlights on search when pressing <Esc> in normal mode
 --  See `:help hlsearch`
@@ -18,7 +19,9 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
 --
 -- NOTE: This won't work in all terminal emulators/tmux/etc. Try your own mapping
 -- or just use <C-\><C-n> to exit terminal mode
-vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
+if not is_vscode then
+  vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
+end
 
 -- TIP: Disable arrow keys in normal mode
 -- vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
@@ -53,4 +56,13 @@ vim.keymap.set('n', '<leader>DD', '"+D', opts 'cut text')
 vim.keymap.set('v', '<leader>d', '"+d', opts 'cut text')
 
 -- new tab
-vim.keymap.set('n', '<leader>t', ':tabnew<CR>', opts 'creates a new tab')
+if is_vscode then
+  local ok, vscode = pcall(require, 'vscode')
+  if ok then
+    vim.keymap.set('n', '<leader>t', function()
+      vscode.action 'workbench.action.files.newUntitledFile'
+    end, opts 'creates a new untitled editor')
+  end
+else
+  vim.keymap.set('n', '<leader>t', ':tabnew<CR>', opts 'creates a new tab')
+end
