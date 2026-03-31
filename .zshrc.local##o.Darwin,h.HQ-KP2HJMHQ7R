@@ -6,3 +6,6 @@ export GONOSUMDB=github.rbx.com
 
 export RBX_REGISTRY="--registry=https://artifactory.rbx.com/api/npm/npm-all/"
 
+# safe git
+export PATH=/opt/rbx/infosec/safe-git-push:$PATH
+
