@@ -27,6 +27,7 @@ local function setup_vscode_plugins()
       'echasnovski/mini.nvim',
       config = function()
         require('mini.ai').setup()
+        require('mini.surround').setup()
       end,
     },
   }
