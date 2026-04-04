@@ -43,10 +43,18 @@ compdef kubecolor=kubectl
 # live, cross-tab shared history
 setopt APPEND_HISTORY        # append instead of overwrite on exit
 setopt INC_APPEND_HISTORY    # write each command to $HISTFILE immediately
+setopt SHARE_HISTORY         # import commands from other sessions
+
+# retain much more shell history for Ctrl-R
+HISTFILE="$HOME/.zsh_history"  # on-disk file where history is persisted
+HISTSIZE=100000                # max commands kept in memory (searchable via Ctrl-R)
+SAVEHIST=100000                # max commands written to HISTFILE across sessions
 
 # (nice-to-have noise reduction)
 setopt HIST_IGNORE_DUPS      # drop exact duplicates
 setopt HIST_IGNORE_SPACE     # ignore commands starting with a space
+setopt HIST_EXPIRE_DUPS_FIRST  # when trimming history, drop duplicate entries first
+setopt HIST_FIND_NO_DUPS       # Ctrl-R skips repeating duplicate matches
 
 # machine-specific config, yadm will symlink the .zshrc.local##...
 [ -f ~/.zshrc.local ] && source ~/.zshrc.local
