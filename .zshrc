@@ -40,10 +40,11 @@ compdef kubecolor=kubectl
 # fzf config
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
-# live, cross-tab shared history
+# persist history to disk on every command, but keep arrow-key recall
+# scoped to the current session (see widget override below)
 setopt APPEND_HISTORY        # append instead of overwrite on exit
 setopt INC_APPEND_HISTORY    # write each command to $HISTFILE immediately
-setopt SHARE_HISTORY         # import commands from other sessions
+unsetopt SHARE_HISTORY       # don't pull in commands from other live sessions
 
 # retain much more shell history for Ctrl-R
 HISTFILE="$HOME/.zsh_history"  # on-disk file where history is persisted
@@ -55,6 +56,17 @@ setopt HIST_IGNORE_DUPS      # drop exact duplicates
 setopt HIST_IGNORE_SPACE     # ignore commands starting with a space
 setopt HIST_EXPIRE_DUPS_FIRST  # when trimming history, drop duplicate entries first
 setopt HIST_FIND_NO_DUPS       # Ctrl-R skips repeating duplicate matches
+
+# Up/Down arrows only walk this session's history (Ctrl-R still sees everything).
+typeset -g __session_hist_start=$HISTCMD
+_session-up-line-or-history() {
+  (( HISTNO > __session_hist_start )) && zle .up-line-or-history
+}
+_session-down-line-or-history() {
+  zle .down-line-or-history
+}
+zle -N up-line-or-history _session-up-line-or-history
+zle -N down-line-or-history _session-down-line-or-history
 
 # machine-specific config, yadm will symlink the .zshrc.local##...
 [ -f ~/.zshrc.local ] && source ~/.zshrc.local
