@@ -536,11 +536,18 @@ require('lazy').setup({
         },
       }
 
-      -- Configure hover handler with border and background
-      vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, {
-        border = 'rounded',
-        focusable = false,
-      })
+      -- Configure hover handler with border and background.
+      -- `vim.lsp.with` was deprecated in Neovim 0.11; wrap the buf.hover
+      -- function directly so opts always include our defaults.
+      local _orig_hover = vim.lsp.buf.hover
+      vim.lsp.buf.hover = function(opts)
+        opts = opts or {}
+        opts.border = opts.border or 'rounded'
+        if opts.focusable == nil then
+          opts.focusable = false
+        end
+        return _orig_hover(opts)
+      end
 
       -- Set up floating window background highlight for better visibility
       -- This makes hover windows stand out from the code behind them
@@ -577,6 +584,58 @@ require('lazy').setup({
         -- But for many setups, the LSP (`ts_ls`) will work just fine
         -- ts_ls = {},
         --
+        -- vtsls: a faster, VS Code-flavored wrapper around tsserver.
+        -- Provides JS/TS/JSX/TSX language features.
+        vtsls = {
+          filetypes = {
+            'javascript',
+            'javascriptreact',
+            'javascript.jsx',
+            'typescript',
+            'typescriptreact',
+            'typescript.tsx',
+          },
+          settings = {
+            complete_function_calls = true,
+            vtsls = {
+              enableMoveToFileCodeAction = true,
+              autoUseWorkspaceTsdk = true,
+              experimental = {
+                completion = {
+                  enableServerSideFuzzyMatch = true,
+                },
+              },
+            },
+            typescript = {
+              updateImportsOnFileMove = { enabled = 'always' },
+              suggest = {
+                completeFunctionCalls = true,
+              },
+              inlayHints = {
+                enumMemberValues = { enabled = true },
+                functionLikeReturnTypes = { enabled = true },
+                parameterNames = { enabled = 'literals' },
+                parameterTypes = { enabled = true },
+                propertyDeclarationTypes = { enabled = true },
+                variableTypes = { enabled = false },
+              },
+            },
+            javascript = {
+              updateImportsOnFileMove = { enabled = 'always' },
+              suggest = {
+                completeFunctionCalls = true,
+              },
+              inlayHints = {
+                enumMemberValues = { enabled = true },
+                functionLikeReturnTypes = { enabled = true },
+                parameterNames = { enabled = 'literals' },
+                parameterTypes = { enabled = true },
+                propertyDeclarationTypes = { enabled = true },
+                variableTypes = { enabled = false },
+              },
+            },
+          },
+        },
 
         lua_ls = {
           -- cmd = { ... },
@@ -589,6 +648,39 @@ require('lazy').setup({
               },
               -- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
               -- diagnostics = { disable = { 'missing-fields' } },
+            },
+          },
+        },
+
+        marksman = {},
+
+        jsonls = {
+          settings = {
+            json = {
+              schemas = {
+                {
+                  fileMatch = { 'package.json' },
+                  url = 'https://json.schemastore.org/package.json',
+                },
+                {
+                  fileMatch = { 'tsconfig.json', 'tsconfig.*.json' },
+                  url = 'https://json.schemastore.org/tsconfig.json',
+                },
+                {
+                  fileMatch = { '.eslintrc.json', '.eslintrc.*.json' },
+                  url = 'https://json.schemastore.org/eslintrc.json',
+                },
+                {
+                  fileMatch = { 'composer.json' },
+                  url = 'https://json.schemastore.org/composer.json',
+                },
+                {
+                  fileMatch = { '*.code-workspace' },
+                  url = 'https://json.schemastore.org/workspace-configuration.json',
+                },
+              },
+              validate = { enable = true },
+              format = { enable = true },
             },
           },
         },
@@ -609,61 +701,28 @@ require('lazy').setup({
       -- for you, so that they are available from within Neovim.
       local ensure_installed_tools = {
         'stylua', -- Used to format Lua code
+        'prettierd', -- JS/TS/JSON/Markdown/etc. formatter (used by conform)
       }
       require('mason-tool-installer').setup { ensure_installed = ensure_installed_tools }
 
+      -- Register every server config via the Neovim 0.11+ vim.lsp.config API.
+      -- mason-lspconfig v2 no longer accepts the old `handlers = {...}` option
+      -- and just calls `vim.lsp.enable()` for installed servers, so we must
+      -- register configs ourselves before enabling.
+      local server_names = vim.tbl_keys(servers)
+      for _, name in ipairs(server_names) do
+        local cfg = servers[name] or {}
+        cfg.capabilities = vim.tbl_deep_extend('force', {}, capabilities, cfg.capabilities or {})
+        vim.lsp.config(name, cfg)
+      end
+
       require('mason-lspconfig').setup {
-        ensure_installed = vim.tbl_keys(servers or {}), -- Install LSP servers
+        ensure_installed = server_names,
         automatic_installation = true,
-        handlers = {
-          -- Default handler for all servers
-          function(server_name)
-            local server = servers[server_name] or {}
-            -- This handles overriding only values explicitly passed
-            -- by the server configuration above. Useful when disabling
-            -- certain features of an LSP (for example, turning off formatting for ts_ls)
-            server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
-            require('lspconfig')[server_name].setup(server)
-          end,
-        },
-      }
-
-      -- Explicitly set up gopls to ensure it's registered
-      require('lspconfig').gopls.setup {
-        capabilities = capabilities,
-      }
-
-      -- Explicitly configure JSON language server
-      require('lspconfig').jsonls.setup {
-        capabilities = capabilities,
-        settings = {
-          json = {
-            schemas = {
-              {
-                fileMatch = { 'package.json' },
-                url = 'https://json.schemastore.org/package.json',
-              },
-              {
-                fileMatch = { 'tsconfig.json', 'tsconfig.*.json' },
-                url = 'https://json.schemastore.org/tsconfig.json',
-              },
-              {
-                fileMatch = { '.eslintrc.json', '.eslintrc.*.json' },
-                url = 'https://json.schemastore.org/eslintrc.json',
-              },
-              {
-                fileMatch = { 'composer.json' },
-                url = 'https://json.schemastore.org/composer.json',
-              },
-              {
-                fileMatch = { '*.code-workspace' },
-                url = 'https://json.schemastore.org/workspace-configuration.json',
-              },
-            },
-            validate = { enable = true },
-            format = { enable = true },
-          },
-        },
+        -- Only auto-enable the LSPs we explicitly configured above.
+        -- This prevents stray installed packages from being enabled
+        -- without a registered config (which produces warnings).
+        automatic_enable = server_names,
       }
     end,
   },
@@ -705,6 +764,17 @@ require('lazy').setup({
         --
         -- You can use 'stop_after_first' to run the first available formatter from the list
         javascript = { 'prettierd', 'prettier', stop_after_first = true },
+        javascriptreact = { 'prettierd', 'prettier', stop_after_first = true },
+        typescript = { 'prettierd', 'prettier', stop_after_first = true },
+        typescriptreact = { 'prettierd', 'prettier', stop_after_first = true },
+        json = { 'prettierd', 'prettier', stop_after_first = true },
+        jsonc = { 'prettierd', 'prettier', stop_after_first = true },
+        yaml = { 'prettierd', 'prettier', stop_after_first = true },
+        markdown = { 'prettierd', 'prettier', stop_after_first = true },
+        html = { 'prettierd', 'prettier', stop_after_first = true },
+        css = { 'prettierd', 'prettier', stop_after_first = true },
+        scss = { 'prettierd', 'prettier', stop_after_first = true },
+        graphql = { 'prettierd', 'prettier', stop_after_first = true },
         nix = { 'nixfmt' },
       },
     },
