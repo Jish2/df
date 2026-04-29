@@ -27,6 +27,9 @@ prompt_newline=$(echo -n "\u00A0")
 autoload -U +X bashcompinit && bashcompinit
 complete -o nospace -C /opt/homebrew/bin/terraform terraform
 
+# pyenv (interactive shell function setup; PATH is set in .zprofile)
+command -v pyenv >/dev/null && eval "$(pyenv init -)"
+
 # volta
 export PATH="/Users/jgoon/.volta/bin:$PATH"
 
@@ -82,3 +85,4 @@ export PATH="$HOME/.local/bin:$PATH"
 
 # load secrets
 [[ -f ~/.zshrc.secrets ]] && source ~/.zshrc.secrets
+alias gpt='~/github/scripts/query-chat-gpt-through-codex.sh'

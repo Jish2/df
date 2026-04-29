@@ -9,7 +9,12 @@ export NVM_DIR="$HOME/.nvm"
 # pyenv
 export PYENV_ROOT="$HOME/.pyenv"
 [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"
+# Clear stale rehash temp file that can block startup for ~60s if a previous
+# `pyenv rehash` was killed mid-write.
+[ -e "$PYENV_ROOT/shims/.pyenv-shim" ] && rm -f "$PYENV_ROOT/shims/.pyenv-shim"
+# `--path` only sets PATH (fast, login-shell only). The interactive shell
+# function setup is done in .zshrc with `pyenv init -`.
+eval "$(pyenv init --path)"
 
 # go
 PATH=${PATH}:`go env GOPATH`/bin
@@ -30,3 +35,5 @@ case ":$PATH:" in
   *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
 # pnpm end
+
+export PATH=/opt/rbx/infosec/safe-git-push:$PATH
