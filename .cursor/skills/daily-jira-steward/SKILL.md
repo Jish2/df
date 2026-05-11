@@ -19,6 +19,22 @@ Use this skill as a morning routine to turn recent work into a saved daily repor
 - Never close or transition a ticket from local commits alone. Require merged PR evidence, explicit user instruction, or a clearly completed Jira workflow signal.
 - Report repo writes are operational artifacts and do not need separate approval.
 
+## Status Reconciliation
+
+Every run should compare Jira status against the strongest available evidence and draft transitions when they are out of date.
+
+Use these defaults unless a team workflow or user instruction says otherwise:
+
+- Concrete work found but no PR yet: move the tracking ticket to `In Progress`.
+- PR is open for the ticket: move the ticket to `In Review`.
+- PR is merged and the ticket still needs rollout, observation, or follow-up validation: move the ticket to `In Testing`.
+- PR is merged and the ticket's acceptance criteria are complete with no known follow-up: move the ticket to `Closed`.
+- Parent workstream with any active child tickets: keep the parent at `In Progress`.
+- Parent workstream with only review-state child tickets: use `In Review` if the parent is mainly waiting on review.
+- Parent workstream with all child tickets closed or verified: draft closing the parent.
+
+Draft status transitions with the evidence that supports them. Jira transitions are still approval-gated unless the user explicitly asks to apply them.
+
 ## Sources
 
 Use whatever relevant sources are available to reconstruct the review window: Cursor chat transcripts, current chat context, git branches, commits, GitHub PRs, Jira, Slack, Gmail, calendar, docs, Confluence, Google Drive, production signals, or other systems that identify work, blockers, decisions, or completion evidence.
