@@ -1,6 +1,6 @@
 ---
 name: daily-jira-steward
-description: Maintains Jira tracking from recent work, PRs, branches, and user-provided ideas. Use when the user asks to run the daily Jira steward, update Jira from recent work, create tracking tickets, reconcile Jira with PRs, or close tickets after merges.
+description: Maintains Jira tracking from recent work, PRs, branches, user-provided ideas, and stale tickets. Use when the user asks to run the daily Jira steward, update Jira from recent work, create tracking tickets, reconcile Jira with PRs, call out neglected Jira issues, or close tickets after merges.
 disable-model-invocation: true
 ---
 
@@ -34,6 +34,27 @@ Use these defaults unless a team workflow or user instruction says otherwise:
 - Parent workstream with all child tickets closed or verified: draft closing the parent.
 
 Draft status transitions with the evidence that supports them. Jira transitions are still approval-gated unless the user explicitly asks to apply them.
+
+## Stale Ticket Callouts
+
+Every run should include a small stale-ticket review so old work does not disappear. Treat staleness as a reminder signal, not proof that Jira needs a write.
+
+Default searches:
+
+```text
+project in (ROS, ROSHELP) AND assignee = currentUser() AND statusCategory != Done AND updated <= -14d ORDER BY updated ASC
+project in (ROS, ROSHELP) AND reporter = currentUser() AND statusCategory != Done AND updated <= -30d ORDER BY updated ASC
+```
+
+Use these thresholds unless the ticket, team workflow, or user instruction suggests a better bar:
+
+- In Review with no update for 7+ days: call out as likely waiting on review, merge, or a status correction.
+- In Testing with no update for 14+ days: call out as likely needing validation, rollout notes, or closure.
+- In Progress with no update for 21+ days: call out as possibly blocked, forgotten, or missing a progress comment.
+- To Do, Backlog, or unstarted work with no update for 30+ days: call out as stale if it still appears relevant; otherwise suggest closing, deprioritizing, or leaving alone with a reason.
+- Any active assigned ticket with no update for 60+ days: always include it as long-stale, even if no action is obvious.
+
+For each stale callout, include the age, current status, owner/relationship to the user, why it might matter, and the lightest useful next step. Prefer `needs a quick look`, `candidate to close`, `waiting on external signal`, `probably still fine`, or `needs user judgment` over inventing urgency. Do not draft Jira comments solely because a ticket is old; draft a comment, transition, or close action only when there is supporting evidence or the user asks to clean it up.
 
 ## Sources
 
@@ -83,11 +104,12 @@ git -C /Users/jgoon/github/daily-reports push
 2. Read any pending draft first and show it as Pending Approval.
 3. Inspect relevant sources, including Cursor chats updated during the window.
 4. Triage the user's current Jira tickets and compare them against recent evidence.
-5. List GitHub activity in the report, including PRs created, merged, or materially updated during the window. Include `[n/a]` PRs explicitly.
-6. Draft exact Jira and GitHub PR updates: creates, comments, transitions, PR link updates, and skips. For related work, draft one parent ticket and only useful immediate child tickets.
-7. Save the pending draft, write the daily report, commit and push the report repo.
-8. Present the report and stop for approval.
-9. If the user approves all or part of the draft, apply only that portion. Keep unapproved items pending. Do not show rejected items again unless new evidence appears or the user asks to revisit them.
+5. Run the stale-ticket review and call out long-stale tickets separately from evidence-backed proposed updates.
+6. List GitHub activity in the report, including PRs created, merged, or materially updated during the window. Include `[n/a]` PRs explicitly.
+7. Draft exact Jira and GitHub PR updates: creates, comments, transitions, PR link updates, and skips. For related work, draft one parent ticket and only useful immediate child tickets.
+8. Save the pending draft, write the daily report, commit and push the report repo.
+9. Present the report and stop for approval.
+10. If the user approves all or part of the draft, apply only that portion. Keep unapproved items pending. Do not show rejected items again unless new evidence appears or the user asks to revisit them.
 
 ## Daily Report Format
 
@@ -114,6 +136,10 @@ Report saved at: [repo path]
 ## Current Jira Triage
 
 - [ticket key, observed state, proposed action or reason no action is needed]
+
+## Stale Ticket Callouts
+
+- [ticket key, age since last update, status, why it may need attention, lightest useful next step]
 
 ## Proposed Jira Updates
 
