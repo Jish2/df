@@ -1,0 +1,6 @@
+# Linux machine-specific .zshrc.local config
+#
+# Naming pattern mirrors Darwin host-specific files:
+#   .zshrc.local##o.<OS>,h.<hostname>
+#
+# Add per-machine overrides below.
