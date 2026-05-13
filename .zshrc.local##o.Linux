@@ -1,0 +1,4 @@
+# Linux-wide .zshrc.local config
+#
+# Keep Linux-only overrides here. Host-specific overrides can live in:
+#   .zshrc.local##o.Linux,h.<hostname>
