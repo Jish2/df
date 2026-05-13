@@ -11,6 +11,8 @@ Use this skill as a morning routine to turn recent work into a saved daily repor
 ## Rules
 
 - Jira and GitHub PR writes are approval-gated. Draft proposed ticket creation, comments, field changes, transitions, and PR body/title updates first. Apply only the specific changes the user approves.
+- Use the answers UI for approval when it is available. Convert each proposed write into a selectable option so the user can choose exactly which Jira or GitHub changes to apply.
+- Never refer to a PR, Jira ticket, or GR ticket by number or key alone. Always include the readable title or summary next to it, such as `PR #123: Add status reconciliation` or `ROS-456: Track stale Jira review`.
 - Do not create tickets for passing thoughts. Create tracking only when the user asks to track an idea or concrete evidence shows active work.
 - Prefer updating existing tickets over creating duplicates.
 - Triage the user's current Jira tickets every run. Look for stale status, missing progress comments, blockers, completed work, duplicate tracking, and tickets that should be linked to recent PRs or docs.
@@ -101,15 +103,36 @@ git -C /Users/jgoon/github/daily-reports push
 ## Workflow
 
 1. Establish the review window from checkpoint tracking unless the user specifies a window.
-2. Read any pending draft first and show it as Pending Approval.
+2. Read any pending draft first and show it as Pending Approval, preserving its proposed-changes table and change IDs.
 3. Inspect relevant sources, including Cursor chats updated during the window.
 4. Triage the user's current Jira tickets and compare them against recent evidence.
 5. Run the stale-ticket review and call out long-stale tickets separately from evidence-backed proposed updates.
 6. List GitHub activity in the report, including PRs created, merged, or materially updated during the window. Include `[n/a]` PRs explicitly.
 7. Draft exact Jira and GitHub PR updates: creates, comments, transitions, PR link updates, and skips. For related work, draft one parent ticket and only useful immediate child tickets.
 8. Save the pending draft, write the daily report, commit and push the report repo.
-9. Present the report and stop for approval.
-10. If the user approves all or part of the draft, apply only that portion. Keep unapproved items pending. Do not show rejected items again unless new evidence appears or the user asks to revisit them.
+9. Present the report and use the answers UI, when available, to ask which proposed changes to apply.
+10. If the user approves all or part of the draft, apply only the selected rows from the proposed-changes table. Keep unapproved items pending. Do not show rejected items again unless new evidence appears or the user asks to revisit them.
+
+## Approval Answers UI
+
+When there are proposed Jira or GitHub writes, use the answers UI before applying them. Offer one selectable option per proposed change, keyed by the table's change ID. Add `Apply all proposed changes` only when every row is low-risk and fully evidenced. Add `Skip all for now` when there are pending writes.
+
+Each option label must include the action, the target identifier, and the target title or summary. Do not use labels like `ROS-123` or `PR #456` by themselves.
+
+If the answers UI is not available, ask for approval in chat using the same change IDs. Apply only rows the user explicitly approves.
+
+## Pending Draft Format
+
+Every pending draft must include a proposed-changes table before any detailed notes. Keep one row per write action so it can be converted directly into answers UI options.
+
+```markdown
+| Change ID | System | Action | Target | Title or summary | Proposed change | Evidence | Approval status |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| JIRA-1 | Jira | Transition | ROS-123 | Add status reconciliation | Move from `In Progress` to `In Review` | PR #456: Add reconciliation is open | Pending |
+| GH-1 | GitHub | Update PR | PR #456 | Add reconciliation | Replace `[n/a]` with ROS-123: Add status reconciliation | PR implements tracked Jira work | Pending |
+```
+
+For new ticket creation, put `New ticket` in the Target column and the proposed ticket summary in `Title or summary`. For existing tickets and PRs, Target contains the key or number while `Title or summary` contains the readable title.
 
 ## Daily Report Format
 
@@ -127,30 +150,32 @@ Report saved at: [repo path]
 
 ## Pending Approval
 
-- [prior pending item if any]
+| Change ID | System | Action | Target | Title or summary | Proposed change | Evidence | Approval status |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [prior pending change ID] | [Jira or GitHub] | [Create, update, transition, comment, or PR update] | [ticket key, PR number, or New ticket] | [ticket or PR title] | [specific proposed write] | [supporting evidence] | [Pending, Approved, Applied, Skipped, or Rejected] |
 
 ## GitHub Activity
 
-- [PR created, merged, or materially updated]
+- [PR created, merged, or materially updated, always including PR number and title]
 
 ## Current Jira Triage
 
-- [ticket key, observed state, proposed action or reason no action is needed]
+- [ticket key and title, observed state, proposed action or reason no action is needed]
 
 ## Stale Ticket Callouts
 
-- [ticket key, age since last update, status, why it may need attention, lightest useful next step]
+- [ticket key and title, age since last update, status, why it may need attention, lightest useful next step]
 
 ## Proposed Jira Updates
 
-- Create: [summary and reason]
-- Update: [ticket key, comment or field change, reason]
-- Transition: [ticket key, from state to state, evidence]
+- Create: [ticket summary and reason]
+- Update: [ticket key and title, comment or field change, reason]
+- Transition: [ticket key and title, from state to state, evidence]
 - Skip: [work item, reason no Jira change is needed]
 
 ## Proposed GitHub PR Updates
 
-- Update: [PR number, body/title/comment change, reason]
+- Update: [PR number and title, body/title/comment change, reason]
 
 ## Questions
 
