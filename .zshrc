@@ -1,26 +1,49 @@
+# This file is zsh-specific; no-op when sourced from other shells (e.g. bash).
+[ -n "${ZSH_VERSION-}" ] || return 0 2>/dev/null || exit 0
+
 autoload -Uz compinit
 compinit
 # some configs are replicated in ~/.config/nix/flake.nix
 
-# zsh-syntax-highlighting
+# Lightweight helpers for loading optional config/plugins across platforms.
+source_if_exists() {
+  [ -f "$1" ] && source "$1"
+}
+
+source_first_existing() {
+  local _candidate
+  for _candidate in "$@"; do
+    [ -f "$_candidate" ] && source "$_candidate" && return 0
+  done
+  return 1
+}
+
+_brew_prefix=""
 if command -v brew >/dev/null 2>&1; then
-  _zsh_syntax="$(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
-  [ -f "$_zsh_syntax" ] && source "$_zsh_syntax"
-  unset _zsh_syntax
+  _brew_prefix="$(brew --prefix 2>/dev/null)"
 fi
+
+# zsh-syntax-highlighting
+source_first_existing \
+  "${_brew_prefix}/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" \
+  "/opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" \
+  "/home/linuxbrew/.linuxbrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" \
+  "/usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" \
+  "/usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 
 # syntax-highlighting-theme
-[ -f ~/.config/zsh/themes/catppuccin_mocha-zsh-syntax-highlighting.zsh ] && source ~/.config/zsh/themes/catppuccin_mocha-zsh-syntax-highlighting.zsh
+source_if_exists ~/.config/zsh/themes/catppuccin_mocha-zsh-syntax-highlighting.zsh
 
 # zsh-autosuggestions
-if command -v brew >/dev/null 2>&1; then
-  _zsh_autosuggest="$(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
-  [ -f "$_zsh_autosuggest" ] && source "$_zsh_autosuggest"
-  unset _zsh_autosuggest
-fi
+source_first_existing \
+  "${_brew_prefix}/share/zsh-autosuggestions/zsh-autosuggestions.zsh" \
+  "/opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh" \
+  "/home/linuxbrew/.linuxbrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh" \
+  "/usr/local/share/zsh-autosuggestions/zsh-autosuggestions.zsh" \
+  "/usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
 
 # aliases
-[ -f "$HOME/.aliases" ] && source "$HOME/.aliases"
+source_if_exists "$HOME/.aliases"
 
 # zoxide
 if command -v zoxide >/dev/null 2>&1; then
@@ -28,9 +51,8 @@ if command -v zoxide >/dev/null 2>&1; then
 fi
 
 # pure zsh prompt
-# fpath+=("$(brew --prefix)/share/zsh/site-functions")
 autoload -U promptinit; promptinit
-if prompt -l | grep -qx pure; then
+if (( ${${(f)"$(prompt -l)"}[(Ie)pure]} > 0 )); then
   prompt pure
   prompt_newline=$'\u00A0'
 fi
@@ -44,21 +66,18 @@ fi
 # pyenv (interactive shell function setup; PATH is set in .zprofile)
 command -v pyenv >/dev/null && eval "$(pyenv init -)"
 
-# volta
-export PATH="/Users/jgoon/.volta/bin:$PATH"
-
 # kubectl krew
 export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 
 # kubectl autocomplete
-if [ -n "$(whence -p kubectl)" ]; then
+if command -v kubectl >/dev/null 2>&1; then
   source <(command kubectl completion zsh)
   command -v kubecolor >/dev/null 2>&1 && compdef kubecolor=kubectl
 fi
 
 # fzf config
-if [ -f ~/.fzf.zsh ] && command -v fzf >/dev/null 2>&1 && fzf --zsh >/dev/null 2>&1; then
-  source ~/.fzf.zsh
+if command -v fzf >/dev/null 2>&1; then
+  eval "$(fzf --zsh 2>/dev/null)"
 fi
 
 # persist history to disk on every command, but keep arrow-key recall
@@ -89,19 +108,21 @@ _session-down-line-or-history() {
 zle -N up-line-or-history _session-up-line-or-history
 zle -N down-line-or-history _session-down-line-or-history
 
-# machine-specific config, yadm will symlink the .zshrc.local##...
+# machine/OS-specific config (yadm alternate files)
 if [ -f ~/.zshrc.local ]; then
   source ~/.zshrc.local
 else
   _zshrc_os="$(uname -s)"
   _zshrc_host="$(hostname -s 2>/dev/null || hostname)"
+  _zshrc_local_os="$HOME/.zshrc.local##o.${_zshrc_os}"
   _zshrc_local_variant="$HOME/.zshrc.local##o.${_zshrc_os},h.${_zshrc_host}"
-  [ -f "$_zshrc_local_variant" ] && source "$_zshrc_local_variant"
-  unset _zshrc_os _zshrc_host _zshrc_local_variant
+  if [ -f "$_zshrc_local_variant" ]; then
+    source "$_zshrc_local_variant"
+  elif [ -f "$_zshrc_local_os" ]; then
+    source "$_zshrc_local_os"
+  fi
+  unset _zshrc_os _zshrc_host _zshrc_local_os _zshrc_local_variant
 fi
-
-# bun completions
-[ -s "/Users/jgoon/.bun/_bun" ] && source "/Users/jgoon/.bun/_bun"
 
 # bun
 export BUN_INSTALL="$HOME/.bun"
@@ -112,3 +133,5 @@ export PATH="$HOME/.local/bin:$PATH"
 # load secrets
 [[ -f ~/.zshrc.secrets ]] && source ~/.zshrc.secrets
 alias gpt='~/github/scripts/query-chat-gpt-through-codex.sh'
+
+unset _brew_prefix
