@@ -21,6 +21,18 @@ Use this skill as a morning routine to turn recent work into a saved daily repor
 - Never close or transition a ticket from local commits alone. Require merged PR evidence, explicit user instruction, or a clearly completed Jira workflow signal.
 - Report repo writes are operational artifacts and do not need separate approval.
 
+## Access Gate
+
+The steward is only effective when it can inspect the required systems. Before doing the full evidence pass, verify access to:
+
+- Jira/Atlassian for current-ticket triage, stale-ticket searches, issue reads, and approved writes.
+- GitHub for PR activity, PR reads, and approved PR updates.
+- The daily reports repo for pull, report write, commit, and push.
+
+If any required source or tool fails because of authentication, missing credentials, unavailable CLI/tooling, or missing permissions, stop and ask the user to authenticate or repair access. Do not continue with a degraded steward run unless the user explicitly approves a limited run after seeing which source is unavailable.
+
+When stopping for access, report the exact source that failed, the command or tool category that failed, and the shortest next action for the user, such as refreshing `github.rbx.com` auth, completing Jira OAuth, running the host LCA helper, or reopening in the devcontainer. Do not write a clean daily report, advance `last_completed_at`, advance `last_reviewed_through_at`, or mark pending items reviewed until the required source is available or the user explicitly accepts a degraded run.
+
 ## Status Reconciliation
 
 Every run should compare Jira status against the strongest available evidence and draft transitions when they are out of date.
@@ -104,14 +116,15 @@ git -C /Users/jgoon/github/daily-reports push
 
 1. Establish the review window from checkpoint tracking unless the user specifies a window.
 2. Read any pending draft first and show it as Pending Approval, preserving its proposed-changes table and change IDs.
-3. Inspect relevant sources, including Cursor chats updated during the window.
-4. Triage the user's current Jira tickets and compare them against recent evidence.
-5. Run the stale-ticket review and call out long-stale tickets separately from evidence-backed proposed updates.
-6. List GitHub activity in the report, including PRs created, merged, or materially updated during the window. Include `[n/a]` PRs explicitly.
-7. Draft exact Jira and GitHub PR updates: creates, comments, transitions, PR link updates, and skips. For related work, draft one parent ticket and only useful immediate child tickets.
-8. Save the pending draft, write the daily report, commit and push the report repo.
-9. Present the report and use the answers UI, when available, to ask which proposed changes to apply.
-10. If the user approves all or part of the draft, apply only the selected rows from the proposed-changes table. Keep unapproved items pending. Do not show rejected items again unless new evidence appears or the user asks to revisit them.
+3. Run the access gate for Jira/Atlassian, GitHub, and the daily reports repo. Stop and ask for auth if any required source is unavailable.
+4. Inspect relevant sources, including Cursor chats updated during the window.
+5. Triage the user's current Jira tickets and compare them against recent evidence.
+6. Run the stale-ticket review and call out long-stale tickets separately from evidence-backed proposed updates.
+7. List GitHub activity in the report, including PRs created, merged, or materially updated during the window. Include `[n/a]` PRs explicitly.
+8. Draft exact Jira and GitHub PR updates: creates, comments, transitions, PR link updates, and skips. For related work, draft one parent ticket and only useful immediate child tickets.
+9. Save the pending draft, write the daily report, commit and push the report repo.
+10. Present the report and use the answers UI, when available, to ask which proposed changes to apply.
+11. If the user approves all or part of the draft, apply only the selected rows from the proposed-changes table. Keep unapproved items pending. Do not show rejected items again unless new evidence appears or the user asks to revisit them.
 
 ## Approval Answers UI
 
@@ -126,10 +139,10 @@ If the answers UI is not available, ask for approval in chat using the same chan
 Every pending draft must include a proposed-changes table before any detailed notes. Keep one row per write action so it can be converted directly into answers UI options.
 
 ```markdown
-| Change ID | System | Action | Target | Title or summary | Proposed change | Evidence | Approval status |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| JIRA-1 | Jira | Transition | ROS-123 | Add status reconciliation | Move from `In Progress` to `In Review` | PR #456: Add reconciliation is open | Pending |
-| GH-1 | GitHub | Update PR | PR #456 | Add reconciliation | Replace `[n/a]` with ROS-123: Add status reconciliation | PR implements tracked Jira work | Pending |
+| Change ID | System | Action     | Target  | Title or summary          | Proposed change                                         | Evidence                            | Approval status |
+| --------- | ------ | ---------- | ------- | ------------------------- | ------------------------------------------------------- | ----------------------------------- | --------------- |
+| JIRA-1    | Jira   | Transition | ROS-123 | Add status reconciliation | Move from `In Progress` to `In Review`                  | PR #456: Add reconciliation is open | Pending         |
+| GH-1      | GitHub | Update PR  | PR #456 | Add reconciliation        | Replace `[n/a]` with ROS-123: Add status reconciliation | PR implements tracked Jira work     | Pending         |
 ```
 
 For new ticket creation, put `New ticket` in the Target column and the proposed ticket summary in `Title or summary`. For existing tickets and PRs, Target contains the key or number while `Title or summary` contains the readable title.
@@ -150,8 +163,8 @@ Report saved at: [repo path]
 
 ## Pending Approval
 
-| Change ID | System | Action | Target | Title or summary | Proposed change | Evidence | Approval status |
-| --- | --- | --- | --- | --- | --- | --- | --- |
+| Change ID                 | System           | Action                                              | Target                                 | Title or summary     | Proposed change           | Evidence              | Approval status                                    |
+| ------------------------- | ---------------- | --------------------------------------------------- | -------------------------------------- | -------------------- | ------------------------- | --------------------- | -------------------------------------------------- |
 | [prior pending change ID] | [Jira or GitHub] | [Create, update, transition, comment, or PR update] | [ticket key, PR number, or New ticket] | [ticket or PR title] | [specific proposed write] | [supporting evidence] | [Pending, Approved, Applied, Skipped, or Rejected] |
 
 ## GitHub Activity
