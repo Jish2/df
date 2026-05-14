@@ -55,7 +55,7 @@ fi
 [ -d "$HOME/github/pure" ] && fpath=("$HOME/github/pure" $fpath)
 [ -d "$HOME/.zsh/pure" ] && fpath=("$HOME/.zsh/pure" $fpath)
 autoload -U promptinit; promptinit
-if (( ${${(f)"$(prompt -l)"}[(Ie)pure]} > 0 )); then
+if whence -w prompt_pure_setup >/dev/null 2>&1; then
   prompt pure
   prompt_newline=$'\u00A0'
 fi
