@@ -1,12 +1,12 @@
 ---
 name: daily-jira-steward
-description: Maintains Jira tracking from recent work, PRs, branches, user-provided ideas, and stale tickets. Use when the user asks to run the daily Jira steward, update Jira from recent work, create tracking tickets, reconcile Jira with PRs, call out neglected Jira issues, or close tickets after merges.
+description: Builds a comprehensive daily work report for performance-cycle recall and separately maintains Jira and PR tracking from recent work, branches, user-provided ideas, and stale tickets. Use when the user asks to run the daily Jira steward, write a daily work report, update Jira from recent work, create tracking tickets, reconcile Jira with PRs, call out neglected Jira issues, or close tickets after merges.
 disable-model-invocation: true
 ---
 
 # Daily Jira Steward
 
-Use this skill as a morning routine to turn recent work into a saved daily report and a draft set of Jira updates.
+Use this skill as a morning routine to turn recent work into a saved daily work report and a separate draft set of Jira and GitHub PR updates.
 
 ## Rules
 
@@ -20,6 +20,17 @@ Use this skill as a morning routine to turn recent work into a saved daily repor
 - For related `[n/a]` PRs in the same workstream, prefer a parent ticket with useful immediate child tickets instead of unrelated standalone tickets. Reuse existing Jira tickets when they clearly cover the work.
 - Never close or transition a ticket from local commits alone. Require merged PR evidence, explicit user instruction, or a clearly completed Jira workflow signal.
 - Report repo writes are operational artifacts and do not need separate approval.
+- The daily report and proposed Jira or PR updates have different jobs. The report is a comprehensive work log for later performance-cycle recall. Proposed updates are only the subset of work that needs Jira or GitHub tracking changes.
+
+## Daily Work Report Scope
+
+The saved daily report should reflect everything the user did during the review window that has evidence in the inspected sources. Do not limit the report to work that needs Jira updates.
+
+Capture concrete work signals such as implementation, debugging, CI or release work, code review, planning, design review, research, stakeholder coordination, support, incident or on-call work, docs, follow-ups, decisions made, and meaningful context gathering. Include small items when they help reconstruct the day later, but group tiny fragments under the same workstream instead of creating noisy one-off bullets.
+
+For each work item, include enough detail to be useful months later: the workstream or project, what changed or progressed, artifacts such as PRs, Jira tickets, docs, chats, or branches, relevant blockers or decisions, and the next step when one is visible. Prefer evidence-backed summaries over exhaustive transcript excerpts. Do not copy sensitive personal details or long private-message content into the report unless the user explicitly asks and it is necessary.
+
+Jira and PR tracking remains separate. A work item can appear in the daily report even when the right proposed update is `Skip`, no Jira change, or no PR change.
 
 ## Access Gate
 
@@ -72,9 +83,9 @@ For each stale callout, include the age, current status, owner/relationship to t
 
 ## Sources
 
-Use whatever relevant sources are available to reconstruct the review window: Cursor chat transcripts, current chat context, git branches, commits, GitHub PRs, Jira, Slack, Gmail, calendar, docs, Confluence, Google Drive, production signals, or other systems that identify work, blockers, decisions, or completion evidence.
+Use whatever relevant sources are available to reconstruct the review window: Cursor chat transcripts, current chat context, git branches, commits, GitHub PRs, Jira, Slack, Gmail, calendar, docs, Confluence, Google Drive, production signals, or other systems that identify work, blockers, decisions, completion evidence, or day-to-day effort.
 
-For Cursor chats, include transcripts updated during the review window, even if the chat was created earlier. Use transcript file modification time to select candidate chats. When message timestamps are available, summarize only messages or events inside the review window. If timestamps are unclear, include the transcript and summarize only concrete work signals that appear relevant.
+For Cursor chats, include transcripts updated during the review window, even if the chat was created earlier. Use transcript file modification time to select candidate chats. When message timestamps are available, summarize only messages or events inside the review window. If timestamps are unclear, include the transcript and summarize only concrete work signals that appear relevant. Include work even when it did not produce a PR, Jira change, or final shipped artifact.
 
 For Jira in the ROS workspace, first read `.cursor/skills/ros-atlassian/SKILL.md` and follow its routing. Outside ROS, use the available Jira or Atlassian skill. For GitHub, prefer the `gh` CLI when available.
 
@@ -97,7 +108,7 @@ Store skill state in `~/.cursor/skills/daily-jira-steward/state.json`:
 
 At run start, set `last_started_at` to the current time. If the user does not specify a window, choose the start time from `pending_since_at`, then `last_reviewed_through_at`, then the last 24 hours on weekdays or 72 hours after a weekend. Use `last_started_at` as the review-window end so work that happens during the run is picked up next time.
 
-Save the draft to `~/.cursor/skills/daily-jira-steward/pending-draft.md`. If proposed Jira changes are not applied, keep `pending_since_at` and `pending_draft_path` set so the next run includes them. Clear both only after updates are applied, the user says to mark them reviewed, or there are no proposed Jira changes.
+Save the draft to `~/.cursor/skills/daily-jira-steward/pending-draft.md`. If proposed Jira or GitHub changes are not applied, keep `pending_since_at` and `pending_draft_path` set so the next run includes them. Clear both only after updates are applied, the user says to mark them reviewed, or there are no proposed Jira or GitHub changes.
 
 After a clean run, set `last_completed_at`, set `last_reviewed_through_at` to the review-window end, and record `last_report_path`.
 
@@ -118,13 +129,14 @@ git -C /Users/jgoon/github/daily-reports push
 2. Read any pending draft first and show it as Pending Approval, preserving its proposed-changes table and change IDs.
 3. Run the access gate for Jira/Atlassian, GitHub, and the daily reports repo. Stop and ask for auth if any required source is unavailable.
 4. Inspect relevant sources, including Cursor chats updated during the window.
-5. Triage the user's current Jira tickets and compare them against recent evidence.
-6. Run the stale-ticket review and call out long-stale tickets separately from evidence-backed proposed updates.
-7. List GitHub activity in the report, including PRs created, merged, or materially updated during the window. Include `[n/a]` PRs explicitly.
-8. Draft exact Jira and GitHub PR updates: creates, comments, transitions, PR link updates, and skips. For related work, draft one parent ticket and only useful immediate child tickets.
-9. Save the pending draft, write the daily report, commit and push the report repo.
-10. Present the report and use the answers UI, when available, to ask which proposed changes to apply.
-11. If the user approves all or part of the draft, apply only the selected rows from the proposed-changes table. Keep unapproved items pending. Do not show rejected items again unless new evidence appears or the user asks to revisit them.
+5. Build a comprehensive work log from the evidence before deciding which items need Jira or PR updates.
+6. Triage the user's current Jira tickets and compare them against recent evidence.
+7. Run the stale-ticket review and call out long-stale tickets separately from evidence-backed proposed updates.
+8. List GitHub activity in the report, including PRs created, merged, reviewed, or materially updated during the window. Include `[n/a]` PRs explicitly.
+9. Draft exact Jira and GitHub PR updates: creates, comments, transitions, PR link updates, and skips. For related work, draft one parent ticket and only useful immediate child tickets.
+10. Save the pending draft, write the daily report, commit and push the report repo.
+11. Present the report and use the answers UI, when available, to ask which proposed changes to apply.
+12. If the user approves all or part of the draft, apply only the selected rows from the proposed-changes table. Keep unapproved items pending. Do not show rejected items again unless new evidence appears or the user asks to revisit them.
 
 ## Approval Answers UI
 
@@ -152,7 +164,7 @@ For new ticket creation, put `New ticket` in the Target column and the proposed 
 Use this structure when reporting back and when writing the daily report file:
 
 ```markdown
-## Daily Jira Steward Report
+## Daily Work Report
 
 Window: [start time] to [end time]
 Report saved at: [repo path]
@@ -160,6 +172,16 @@ Report saved at: [repo path]
 ## Sources Checked
 
 - [source and scope]
+
+## Work Log
+
+- [workstream or project]: [what the user did, evidence or artifacts, outcome or progress, blockers or next step if visible]
+
+## Artifact Summary
+
+- PR: [PR number and title, created/merged/reviewed/materially updated, why it mattered]
+- Jira: [ticket key and title, work performed or status observed]
+- Doc/Chat/Other: [artifact title or source, work performed or decision made]
 
 ## Pending Approval
 
@@ -169,7 +191,7 @@ Report saved at: [repo path]
 
 ## GitHub Activity
 
-- [PR created, merged, or materially updated, always including PR number and title]
+- [PR created, merged, reviewed, or materially updated, always including PR number and title]
 
 ## Current Jira Triage
 
@@ -195,4 +217,4 @@ Report saved at: [repo path]
 - [Only include blockers that require user judgment]
 ```
 
-If there is nothing to change, say Jira already appears aligned and list the evidence checked.
+If there is no Jira or PR tracking change to make, still write the full daily work report and say Jira and GitHub tracking already appear aligned.
