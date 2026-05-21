@@ -69,6 +69,13 @@ fi
 # pyenv (interactive shell function setup; PATH is set in .zprofile)
 command -v pyenv >/dev/null && eval "$(pyenv init -)"
 
+# nvm (interactive shell function setup; NVM_DIR is set in .zprofile)
+export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+if ! whence -w nvm >/dev/null 2>&1; then
+  [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+  [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
+fi
+
 # kubectl krew
 export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 
