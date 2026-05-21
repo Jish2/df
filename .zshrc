@@ -47,7 +47,8 @@ source_if_exists "$HOME/.aliases"
 
 # zoxide
 if command -v zoxide >/dev/null 2>&1; then
-  eval "$(zoxide init zsh --cmd cd)"
+  # apt zoxide 0.4.3: _z_cd calls cd instead of builtin cd → infinite recursion on zsh
+  eval "$(zoxide init zsh --cmd cd | sed 's/^    cd "\$@"/    builtin cd "$@"/')"
 fi
 
 # pure zsh prompt
