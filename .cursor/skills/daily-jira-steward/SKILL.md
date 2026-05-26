@@ -142,7 +142,7 @@ git -C /Users/jgoon/github/daily-reports push
 
 When there are proposed Jira or GitHub writes, use the answers UI before applying them. Offer one selectable option per proposed change, keyed by the table's change ID. Add `Apply all proposed changes` only when every row is low-risk and fully evidenced. Add `Skip all for now` when there are pending writes.
 
-Each option label must include the action, the target identifier, and the target title or summary. Do not use labels like `ROS-123` or `PR #456` by themselves.
+Each option label must include the action, the target identifier, and the target title or summary from the `Write` column. Do not use labels like `ROS-123` or `PR #456` by themselves.
 
 If the answers UI is not available, ask for approval in chat using the same change IDs. Apply only rows the user explicitly approves.
 
@@ -150,14 +150,21 @@ If the answers UI is not available, ask for approval in chat using the same chan
 
 Every pending draft must include a proposed-changes table before any detailed notes. Keep one row per write action so it can be converted directly into answers UI options.
 
+Keep the table readable in narrow editors. Use only these four columns:
+
+- `Change ID`: stable identifier such as `JIRA-1` or `GH-1`.
+- `Write`: combine system, action, target, and readable title or summary. Include the target key or PR number when one exists.
+- `Details`: combine the proposed change and the evidence. Keep it specific enough to apply the write without rereading the whole report.
+- `Status`: `Pending`, `Approved`, `Applied`, `Skipped`, or `Rejected`, with a short reason when helpful.
+
 ```markdown
-| Change ID | System | Action     | Target  | Title or summary          | Proposed change                                         | Evidence                            | Approval status |
-| --------- | ------ | ---------- | ------- | ------------------------- | ------------------------------------------------------- | ----------------------------------- | --------------- |
-| JIRA-1    | Jira   | Transition | ROS-123 | Add status reconciliation | Move from `In Progress` to `In Review`                  | PR #456: Add reconciliation is open | Pending         |
-| GH-1      | GitHub | Update PR  | PR #456 | Add reconciliation        | Replace `[n/a]` with ROS-123: Add status reconciliation | PR implements tracked Jira work     | Pending         |
+| Change ID | Write | Details | Status |
+| --------- | ----- | ------- | ------ |
+| JIRA-1 | Jira transition for `ROS-123: Add status reconciliation` | Move from `In Progress` to `In Review`. Evidence: `PR #456: Add reconciliation` is open. | Pending |
+| GH-1 | GitHub PR update for `PR #456: Add reconciliation` | Replace `[n/a]` with `ROS-123: Add status reconciliation`. Evidence: PR implements tracked Jira work. | Pending |
 ```
 
-For new ticket creation, put `New ticket` in the Target column and the proposed ticket summary in `Title or summary`. For existing tickets and PRs, Target contains the key or number while `Title or summary` contains the readable title.
+For new ticket creation, start the `Write` cell with `Jira create: [ticket summary]`. For existing tickets and PRs, include both the target identifier and readable title in the `Write` cell.
 
 ## Daily Report Format
 
@@ -185,9 +192,9 @@ Report saved at: [repo path]
 
 ## Pending Approval
 
-| Change ID                 | System           | Action                                              | Target                                 | Title or summary     | Proposed change           | Evidence              | Approval status                                    |
-| ------------------------- | ---------------- | --------------------------------------------------- | -------------------------------------- | -------------------- | ------------------------- | --------------------- | -------------------------------------------------- |
-| [prior pending change ID] | [Jira or GitHub] | [Create, update, transition, comment, or PR update] | [ticket key, PR number, or New ticket] | [ticket or PR title] | [specific proposed write] | [supporting evidence] | [Pending, Approved, Applied, Skipped, or Rejected] |
+| Change ID                 | Write                                            | Details                                          | Status                                             |
+| ------------------------- | ------------------------------------------------ | ------------------------------------------------ | -------------------------------------------------- |
+| [prior pending change ID] | [system, action, target, and readable title]     | [specific proposed write plus supporting evidence] | [Pending, Approved, Applied, Skipped, or Rejected] |
 
 ## GitHub Activity
 
