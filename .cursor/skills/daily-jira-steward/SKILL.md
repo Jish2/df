@@ -1,6 +1,6 @@
 ---
 name: daily-jira-steward
-description: Builds a comprehensive daily work report for performance-cycle recall and separately maintains Jira and PR tracking from recent work, branches, user-provided ideas, and stale tickets. Use when the user asks to run the daily Jira steward, write a daily work report, update Jira from recent work, create tracking tickets, reconcile Jira with PRs, call out neglected Jira issues, or close tickets after merges.
+description: Builds a comprehensive daily work report for performance-cycle recall, refreshes the work visibility doc (me.md) and synced Google Doc, and separately maintains Jira and PR tracking from recent work, branches, user-provided ideas, and stale tickets. Use when the user asks to run the daily Jira steward, write a daily work report, update Jira from recent work, create tracking tickets, reconcile Jira with PRs, call out neglected Jira issues, or close tickets after merges.
 disable-model-invocation: true
 ---
 
@@ -20,7 +20,9 @@ Use this skill as a morning routine to turn recent work into a saved daily work 
 - For related `[n/a]` PRs in the same workstream, prefer a parent ticket with useful immediate child tickets instead of unrelated standalone tickets. Reuse existing Jira tickets when they clearly cover the work.
 - Never close or transition a ticket from local commits alone. Require merged PR evidence, explicit user instruction, or a clearly completed Jira workflow signal.
 - Report repo writes are operational artifacts and do not need separate approval.
+- The `me.md` work visibility doc and Google Doc sync are operational artifacts and do not need separate approval.
 - The daily report and proposed Jira or PR updates have different jobs. The report is a comprehensive work log for later performance-cycle recall. Proposed updates are only the subset of work that needs Jira or GitHub tracking changes.
+- `me.md` is a short-lived dashboard, not a transcript. Refresh it from the evidence pass and triage; do not copy the full daily report into it.
 
 ## Daily Work Report Scope
 
@@ -38,11 +40,12 @@ The steward is only effective when it can inspect the required systems. Before d
 
 - Jira/Atlassian for current-ticket triage, stale-ticket searches, issue reads, and approved writes.
 - GitHub for PR activity, PR reads, and approved PR updates.
-- The daily reports repo for pull, report write, commit, and push.
+- The daily reports repo for pull, report write, `me.md` write, commit, and push.
+- Google Workspace (`gws`) for syncing `me.md` to the work visibility Google Doc.
 
 If any required source or tool fails because of authentication, missing credentials, unavailable CLI/tooling, or missing permissions, stop and ask the user to authenticate or repair access. Do not continue with a degraded steward run unless the user explicitly approves a limited run after seeing which source is unavailable.
 
-When stopping for access, report the exact source that failed, the command or tool category that failed, and the shortest next action for the user, such as refreshing `github.rbx.com` auth, completing Jira OAuth, running the host LCA helper, or reopening in the devcontainer. Do not write a clean daily report, advance `last_completed_at`, advance `last_reviewed_through_at`, or mark pending items reviewed until the required source is available or the user explicitly accepts a degraded run.
+When stopping for access, report the exact source that failed, the command or tool category that failed, and the shortest next action for the user, such as refreshing `github.rbx.com` auth, completing Jira OAuth, running the host LCA helper, authenticating `gws`, or reopening in the devcontainer. Do not write a clean daily report, refresh `me.md`, sync the Google Doc, advance `last_completed_at`, advance `last_reviewed_through_at`, or mark pending items reviewed until the required source is available or the user explicitly accepts a degraded run.
 
 ## Status Reconciliation
 
@@ -114,28 +117,86 @@ After a clean run, set `last_completed_at`, set `last_reviewed_through_at` to th
 
 Persist daily reports in `github.rbx.com/jgoon/daily-reports` using the local checkout at `/Users/jgoon/github/daily-reports`. If missing, clone `https://github.rbx.com/jgoon/daily-reports.git`. Pull with `--ff-only` before writing.
 
-Write reports to `reports/YYYY-MM-DD.md` using the review-window end date in local time. Append a new run section if the file already exists. Commit and push after writing:
+Write reports to `reports/YYYY-MM-DD.md` using the review-window end date in local time. Append a new run section if the file already exists.
+
+## Work Visibility Doc (`me.md`)
+
+Maintain `/Users/jgoon/github/daily-reports/me.md` as the stable index for active work. Google Doc mirror: `https://docs.google.com/document/d/1YB1z9XYfCdxXiVbDSy_Fl8DorysXuZzqtbVn8nHx1vA/edit`
+
+After the evidence pass and before presenting approvals, refresh `me.md` from the same sources used for the daily report. Set `Last updated: YYYY-MM-DD` to the review-window end date in local time.
+
+Keep this structure:
+
+```markdown
+# Josh Goon Work Visibility
+
+Last updated: YYYY-MM-DD
+
+## Now
+- **Focus:** ...
+- **Goal:** ...
+- **Status:** ...
+- **Needs attention:** ...
+- **Links:** [latest daily report](reports/YYYY-MM-DD.md), ...
+
+## Next
+- [concrete next actions with PR/Jira links]
+
+## Backlog
+- [lower-priority or stale follow-ups with links]
+
+## Done Recently
+- [3-6 bullets for work completed or materially advanced in the last ~2 weeks; drop items older than that]
+
+## Useful Links
+- Daily reports: [YYYY-MM-DD](reports/YYYY-MM-DD.md), ...
+- Jira: [active ROS work](...)
+- GitHub: [ROS PRs by Josh](...), [ros-infra PRs by Josh](...)
+- Docs: ...
+```
+
+Guidelines:
+
+- **Now** reflects current focus, goal, status, blockers, and 3-5 high-signal links (latest report, top active Jira, top open PRs).
+- **Next** is ordered, actionable, and uses the readable `PR #N: title` / `ROS-N: title` style.
+- **Backlog** holds tickets or themes not actively being worked this week.
+- **Done Recently** rotates forward; remove bullets that are no longer useful for standups or manager visibility.
+- Prefer markdown links over bare URLs. Use relative paths for in-repo daily reports.
+- Do not include approval-gated Jira or GitHub writes that are still `Pending` unless they are already part of the user's committed plan.
+
+Sync to Google Docs after saving `me.md` (uses Drive native Markdown import, then a date chip on `Last updated`):
+
+```bash
+python3 /Users/jgoon/github/daily-reports/scripts/sync-me-to-gdoc.py
+```
+
+If `gws` or the sync script fails, still commit `me.md` when the report is committed, and tell the user the Google Doc is stale until sync succeeds.
+
+Commit and push report-repo changes after writing the report and refreshing `me.md`:
 
 ```bash
 git -C /Users/jgoon/github/daily-reports pull --ff-only
-git -C /Users/jgoon/github/daily-reports add reports/YYYY-MM-DD.md
+git -C /Users/jgoon/github/daily-reports add reports/YYYY-MM-DD.md me.md
 git -C /Users/jgoon/github/daily-reports commit -m "docs: add daily report for YYYY-MM-DD"
 git -C /Users/jgoon/github/daily-reports push
+python3 /Users/jgoon/github/daily-reports/scripts/sync-me-to-gdoc.py
 ```
+
+When only `me.md` changes on a run (no new report file), commit with `docs: refresh work visibility for YYYY-MM-DD` and run the sync script.
 
 ## Workflow
 
 1. Establish the review window from checkpoint tracking unless the user specifies a window.
 2. Read any pending draft first and show it as Pending Approval, preserving its proposed-changes table and change IDs.
-3. Run the access gate for Jira/Atlassian, GitHub, and the daily reports repo. Stop and ask for auth if any required source is unavailable.
+3. Run the access gate for Jira/Atlassian, GitHub, the daily reports repo, and `gws`. Stop and ask for auth if any required source is unavailable.
 4. Inspect relevant sources, including Cursor chats updated during the window.
 5. Build a comprehensive work log from the evidence before deciding which items need Jira or PR updates.
 6. Triage the user's current Jira tickets and compare them against recent evidence.
 7. Run the stale-ticket review and call out long-stale tickets separately from evidence-backed proposed updates.
 8. List GitHub activity in the report, including PRs created, merged, reviewed, or materially updated during the window. Include `[n/a]` PRs explicitly.
 9. Draft exact Jira and GitHub PR updates: creates, comments, transitions, PR link updates, and skips. For related work, draft one parent ticket and only useful immediate child tickets.
-10. Save the pending draft, write the daily report, commit and push the report repo.
-11. Present the report and use the answers UI, when available, to ask which proposed changes to apply.
+10. Save the pending draft, write the daily report, refresh `me.md`, commit and push the report repo, then run `scripts/sync-me-to-gdoc.py`.
+11. Present the report, note the `me.md` and Google Doc refresh, and use the answers UI, when available, to ask which proposed changes to apply.
 12. If the user approves all or part of the draft, apply only the selected rows from the proposed-changes table. Keep unapproved items pending. Do not show rejected items again unless new evidence appears or the user asks to revisit them.
 
 ## Approval Answers UI
