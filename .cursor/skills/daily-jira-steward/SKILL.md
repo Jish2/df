@@ -1,6 +1,6 @@
 ---
 name: daily-jira-steward
-description: Builds a comprehensive daily work report for performance-cycle recall, refreshes the work visibility doc (me.md) and synced Google Doc, and separately maintains Jira and PR tracking from recent work, branches, user-provided ideas, and stale tickets. Use when the user asks to run the daily Jira steward, write a daily work report, update Jira from recent work, create tracking tickets, reconcile Jira with PRs, call out neglected Jira issues, or close tickets after merges.
+description: Builds a comprehensive daily work report for performance-cycle recall, refreshes the work visibility doc (me.md) and synced Google Doc, and separately maintains Jira and PR tracking from recent work, branches, Slack context, user-provided ideas, and stale tickets. Use when the user asks to run the daily Jira steward, write a daily work report, update Jira from recent work, create tracking tickets, reconcile Jira with PRs, call out neglected Jira issues, or close tickets after merges.
 disable-model-invocation: true
 ---
 
@@ -13,6 +13,7 @@ Use this skill as a morning routine to turn recent work into a saved daily work 
 - Jira and GitHub PR writes are approval-gated. Draft proposed ticket creation, comments, field changes, transitions, and PR body/title updates first. Apply only the specific changes the user approves.
 - Use the answers UI for approval when it is available. Convert each proposed write into a selectable option so the user can choose exactly which Jira or GitHub changes to apply.
 - Never refer to a PR, Jira ticket, or GR ticket by number or key alone. Always include the readable title or summary next to it, such as `PR #123: Add status reconciliation` or `ROS-456: Track stale Jira review`.
+- Slack is required context for every run. Search it during the evidence pass and include Slack-specific work signals, decisions, coordination, blockers, support requests, and follow-ups in the daily report and `me.md` when relevant.
 - Do not create tickets for passing thoughts. Create tracking only when the user asks to track an idea or concrete evidence shows active work.
 - Prefer updating existing tickets over creating duplicates.
 - Triage the user's current Jira tickets every run. Look for stale status, missing progress comments, blockers, completed work, duplicate tracking, and tickets that should be linked to recent PRs or docs.
@@ -40,6 +41,7 @@ The steward is only effective when it can inspect the required systems. Before d
 
 - Jira/Atlassian for current-ticket triage, stale-ticket searches, issue reads, and approved writes.
 - GitHub for PR activity, PR reads, and approved PR updates.
+- Slack for search, channel history, and thread reads during the review window.
 - The daily reports repo for pull, report write, `me.md` write, commit, and push.
 - Google Workspace (`gws`) for syncing `me.md` to the work visibility Google Doc.
 
@@ -91,6 +93,8 @@ Use whatever relevant sources are available to reconstruct the review window: Cu
 For Cursor chats, include transcripts updated during the review window, even if the chat was created earlier. Use transcript file modification time to select candidate chats. When message timestamps are available, summarize only messages or events inside the review window. If timestamps are unclear, include the transcript and summarize only concrete work signals that appear relevant. Include work even when it did not produce a PR, Jira change, or final shipped artifact.
 
 For Jira in the ROS workspace, first read `.cursor/skills/ros-atlassian/SKILL.md` and follow its routing. Outside ROS, use the available Jira or Atlassian skill. For GitHub, prefer the `gh` CLI when available.
+
+For Slack, first read `/Users/jgoon/.agents/skills/slack/SKILL.md` and follow its read-only workflow. Always run a Slack pass for the review window. Search for the user's recent work by Jira keys, PR titles, branch/workstream terms, docs, stakeholder names when known, and likely support or coordination phrases. Use channel history and thread reads when search results point to relevant context. Capture Slack as evidence when it reveals work that GitHub or Jira will miss, such as decisions, requests, coordination, blockers, rollout notes, support triage, or follow-ups. Cite Slack by channel or thread context and timestamp when useful, but summarize instead of copying long messages or private details.
 
 Prefer direct evidence over inference. Do not copy long chat excerpts or sensitive details into Jira unless they are necessary for tracking the work.
 
@@ -188,8 +192,8 @@ When only `me.md` changes on a run (no new report file), commit with `docs: refr
 
 1. Establish the review window from checkpoint tracking unless the user specifies a window.
 2. Read any pending draft first and show it as Pending Approval, preserving its proposed-changes table and change IDs.
-3. Run the access gate for Jira/Atlassian, GitHub, the daily reports repo, and `gws`. Stop and ask for auth if any required source is unavailable.
-4. Inspect relevant sources, including Cursor chats updated during the window.
+3. Run the access gate for Jira/Atlassian, GitHub, Slack, the daily reports repo, and `gws`. Stop and ask for auth if any required source is unavailable.
+4. Inspect relevant sources, including Cursor chats and Slack activity updated during the window.
 5. Build a comprehensive work log from the evidence before deciding which items need Jira or PR updates.
 6. Triage the user's current Jira tickets and compare them against recent evidence.
 7. Run the stale-ticket review and call out long-stale tickets separately from evidence-backed proposed updates.
