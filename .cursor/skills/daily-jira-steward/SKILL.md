@@ -94,7 +94,23 @@ For Cursor chats, include transcripts updated during the review window, even if 
 
 For Jira in the ROS workspace, first read `.cursor/skills/ros-atlassian/SKILL.md` and follow its routing. Outside ROS, use the available Jira or Atlassian skill. For GitHub, prefer the `gh` CLI when available.
 
-For Slack, first read `/Users/jgoon/.agents/skills/slack/SKILL.md` and follow its read-only workflow. Always run a Slack pass for the review window. Start with the same time window chosen from steward state, usually `last_reviewed_through_at` or `pending_since_at` through `last_started_at`. Search within that window by Jira keys, PR titles, branch/workstream terms, docs, stakeholder names when known, and likely support or coordination phrases. Expand outside the window only when needed for context, such as reading a thread that started earlier, following a referenced decision, or running a broader global search to identify the right channel or workstream. Use channel history and thread reads when search results point to relevant context. Capture Slack as evidence when it reveals work that GitHub or Jira will miss, such as decisions, requests, coordination, blockers, rollout notes, support triage, or follow-ups. Cite Slack by channel or thread context and timestamp when useful, but summarize instead of copying long messages or private details.
+For Slack, first read `/Users/jgoon/.agents/skills/slack/SKILL.md` and follow its read-only workflow. Always run a Slack pass for the review window. Start with the same time window chosen from steward state, usually `last_reviewed_through_at` or `pending_since_at` through `last_started_at`.
+
+Run the Slack pass in this order:
+
+1. Broad outbound search for the current user, such as `from:<user> after:YYYY-MM-DD before:YYYY-MM-DD`. This is required before targeted searches because it catches coordination that GitHub, Jira, and transcripts will not name with stable keys.
+2. Targeted searches from evidence already found in GitHub, Jira, Cursor chats, and local branches. Use Jira keys, PR numbers, PR titles, branch names, repo names, product/workstream terms, docs, stakeholder names when known, and likely support or coordination phrases.
+3. Search for likely follow-up or blocker language when the work log suggests coordination, for example `blocking`, `rerun`, `review`, `approved`, `apply`, `sync`, `incident`, or `handoff` with the workstream term.
+
+Treat Slack as work-signal evidence, not as transcript material. Capture decisions, requests, coordination, blockers, rollout notes, support triage, follow-ups, and stakeholder confirmations. Ignore standalone acknowledgements such as `thanks`, `no problem`, or emoji-only messages unless they anchor a thread with useful context.
+
+Expand only the 2-5 highest-signal threads or channel-history results. Prefer threads that include decisions, blockers, asks, approvals, incident/support context, or links to PRs, Jira, TFE, dashboards, or docs. Do not expand every result; it creates noise and increases rate-limit risk.
+
+If a Slack `thread` or `history` command hits rate limits, fails repeatedly, or appears stuck, stop after one failed expansion attempt for that item. Record the search result snippet, channel/thread link, and that expansion was skipped due to rate limiting. Continue the steward run with the remaining evidence instead of blocking.
+
+Record both useful Slack hits and important Slack misses. For example, note that broad user search found ArgoCD and IAM coordination, while targeted searches for a Jira key or WAF term returned no matches. Slack misses are useful because they show the steward looked for coordination and found none.
+
+Cite Slack by channel or thread context and timestamp when useful, but summarize instead of copying long messages or private details. Expand outside the window only when needed for context, such as reading a thread that started earlier or following a referenced decision.
 
 Prefer direct evidence over inference. Do not copy long chat excerpts or sensitive details into Jira unless they are necessary for tracking the work.
 
@@ -197,7 +213,7 @@ When only `me.md` changes on a run (no new report file), commit with `docs: refr
 1. Establish the review window from checkpoint tracking unless the user specifies a window.
 2. Read any pending draft first and show it as Pending Approval, preserving its proposed-changes table and change IDs.
 3. Run the access gate for Jira/Atlassian, GitHub, Slack, the daily reports repo, and `gws`. Stop and ask for auth if any required source is unavailable.
-4. Inspect relevant sources, including Cursor chats and Slack activity updated during the window.
+4. Inspect relevant sources, including Cursor chats and Slack activity updated during the window. For Slack, run the broad outbound search before targeted searches, then expand only high-signal threads.
 5. Build a comprehensive work log from the evidence before deciding which items need Jira or PR updates.
 6. Triage the user's current Jira tickets and compare them against recent evidence.
 7. Run the stale-ticket review and call out long-stale tickets separately from evidence-backed proposed updates.
@@ -252,6 +268,12 @@ Report saved at: [repo path]
 ## Work Log
 
 - [workstream or project]: [what the user did, evidence or artifacts, outcome or progress, blockers or next step if visible]
+
+## Slack Evidence
+
+- Broad search: [time window, query shape, high-signal hits, and important misses]
+- Targeted search: [Jira keys, PRs, workstream terms searched, high-signal hits, and important misses]
+- Threads expanded: [channel/thread context, what decision/blocker/coordination was found, or rate-limit skip]
 
 ## Artifact Summary
 
