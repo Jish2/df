@@ -23,7 +23,7 @@ Use this skill as a morning routine to turn recent work into a saved daily work 
 - Report repo writes are operational artifacts and do not need separate approval.
 - The `me.md` work visibility doc and Google Doc sync are operational artifacts and do not need separate approval.
 - The daily report and proposed Jira or PR updates have different jobs. The report is a comprehensive work log for later performance-cycle recall. Proposed updates are only the subset of work that needs Jira or GitHub tracking changes.
-- `me.md` is a short-lived dashboard, not a transcript. Refresh it from the evidence pass and triage; do not copy the full daily report into it.
+- `me.md` is a short-lived visibility dashboard for other people, not a transcript. Refresh it from the evidence pass and triage; do not copy the full daily report into it.
 
 ## Daily Work Report Scope
 
@@ -129,6 +129,10 @@ Maintain `/Users/jgoon/github/daily-reports/me.md` as the stable index for activ
 
 After the evidence pass and before presenting approvals, refresh `me.md` from the same sources used for the daily report. Set `Last updated: YYYY-MM-DD` to the review-window end date in local time.
 
+Write `me.md` for readers who may not have the user's local context, chat history, branch names, or shorthand. Each item should name the workstream, explain why it matters, state the current status, and make the next step or blocker understandable without requiring the daily report.
+
+Because `me.md` is synced to Google Docs, every link in it must work for someone reading the Google Doc. Never put local filesystem paths, `file://` URLs, `localhost` URLs, or machine-specific links in `me.md`. For files or reports that are pushed to GitHub, use their remote GitHub URL. If an artifact only exists locally, describe it without linking until it has a shareable remote URL.
+
 Keep this structure:
 
 ```markdown
@@ -141,7 +145,7 @@ Last updated: YYYY-MM-DD
 - **Goal:** ...
 - **Status:** ...
 - **Needs attention:** ...
-- **Links:** [latest daily report](reports/YYYY-MM-DD.md), ...
+- **Links:** [latest daily report](https://github.rbx.com/jgoon/daily-reports/blob/main/reports/YYYY-MM-DD.md), ...
 
 ## Next
 - [concrete next actions with PR/Jira links]
@@ -153,7 +157,7 @@ Last updated: YYYY-MM-DD
 - [3-6 bullets for work completed or materially advanced in the last ~2 weeks; drop items older than that]
 
 ## Useful Links
-- Daily reports: [YYYY-MM-DD](reports/YYYY-MM-DD.md), ...
+- Daily reports: [YYYY-MM-DD](https://github.rbx.com/jgoon/daily-reports/blob/main/reports/YYYY-MM-DD.md), ...
 - Jira: [active ROS work](...)
 - GitHub: [ROS PRs by Josh](...), [ros-infra PRs by Josh](...)
 - Docs: ...
@@ -165,7 +169,7 @@ Guidelines:
 - **Next** is ordered, actionable, and uses the readable `PR #N: title` / `ROS-N: title` style.
 - **Backlog** holds tickets or themes not actively being worked this week.
 - **Done Recently** rotates forward; remove bullets that are no longer useful for standups or manager visibility.
-- Prefer markdown links over bare URLs. Use relative paths for in-repo daily reports.
+- Prefer markdown links over bare URLs. Use full remote URLs, not relative paths, because Google Docs readers need links that work outside the local checkout.
 - Do not include approval-gated Jira or GitHub writes that are still `Pending` unless they are already part of the user's committed plan.
 
 Sync to Google Docs after saving `me.md` (uses Drive native Markdown import, then a date chip on `Last updated`):
