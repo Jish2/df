@@ -31,6 +31,8 @@ Read any pending draft first and preserve its proposed-changes table and change 
 
 Run the access gate for Jira/Atlassian, GitHub, Slack, the daily reports repo, and `gws`. If a required source fails because of auth, missing credentials, unavailable CLI/tooling, or permissions, stop and ask the user to repair access unless they explicitly approve a degraded run.
 
+When stopping for access, name the failed source, the failed command or tool category, and the shortest next action. Do not write a clean report, refresh `me.md`, sync the Google Doc, advance `last_completed_at`, advance `last_reviewed_through_at`, or mark pending items reviewed until access is repaired or the user explicitly approves a degraded run.
+
 Start with Cursor chats and Slack for the same checkpoint window.
 
 Cursor chat commands:
@@ -42,6 +44,8 @@ python3 /Users/jgoon/.cursor/skills/daily-jira-steward/scripts/cursor-chat-searc
 ```
 
 `list --state-window` selects parent transcripts by file modification time from `pending_since_at` or `last_reviewed_through_at` through `last_started_at`. It includes chats updated during the window even if they were created earlier. Treat every listed parent chat prompt as a candidate work signal. Use `show <chat-id>` only for chats that need deeper reconstruction; do not dump all full chats.
+
+When transcript message timestamps are available, summarize only messages or events inside the review window. If timestamps are unclear, include the chat as candidate evidence and summarize only concrete work signals that appear relevant.
 
 For Slack, first read `/Users/jgoon/.agents/skills/slack/SKILL.md` and follow its read-only workflow. Always run a broad outbound search for the current user across the checkpoint window before targeted Slack searches. Then search targeted terms from Cursor, GitHub, Jira, docs, branch names, PR titles, blocker words, and follow-up language. Expand only the highest-signal Slack threads or channel-history results.
 
@@ -69,13 +73,15 @@ python3 /Users/jgoon/github/daily-reports/scripts/sync-me-to-gdoc.py
 
 When only `me.md` changes, commit with `docs: refresh work visibility for YYYY-MM-DD` and still run the Google Doc sync script.
 
+If `/Users/jgoon/github/daily-reports` is missing, clone `https://github.rbx.com/jgoon/daily-reports.git` before writing. Do not put approval-gated pending Jira/GitHub writes into `me.md` unless they are already part of the user's committed plan.
+
 ### 3. Draft Pending External Updates
 
 From the synthesized work log, draft exact pending updates for Jira, GitHub, and any other trackers. Draft creates, comments, status transitions, field changes, PR body/title updates, PR comments, and explicit skips.
 
 Triage current assigned/reported Jira tickets every run. Look for stale status, missing progress comments, blockers, completed work, duplicate tracking, and tickets that should be linked to recent PRs or docs.
 
-Treat `[n/a]` in a PR title as missing tracking when the PR contains concrete work. Draft a Jira ticket plan and a PR update that links the approved ticket. For related `[n/a]` PRs in the same workstream, prefer a parent ticket with useful immediate child tickets instead of unrelated standalone tickets.
+Treat `[n/a]` in a PR title as missing tracking when the PR contains concrete work. Draft a Jira ticket plan and a PR update that links the approved ticket. For related `[n/a]` PRs in the same workstream, prefer a parent ticket with useful immediate child tickets instead of unrelated standalone tickets. Reuse existing Jira tickets when they clearly cover the work.
 
 Use these default Jira status recommendations unless a team workflow or user instruction says otherwise:
 
@@ -84,6 +90,8 @@ Use these default Jira status recommendations unless a team workflow or user ins
 - PR is merged and still needs rollout, observation, or validation: move the ticket to `In Testing`.
 - PR is merged and acceptance criteria are complete with no known follow-up: move the ticket to `Closed`.
 - Parent workstream with active child tickets: keep the parent at `In Progress`.
+- Parent workstream with only review-state child tickets: use `In Review` if the parent is mainly waiting on review.
+- Parent workstream with all child tickets closed or verified: draft closing the parent.
 
 Run stale-ticket searches every run:
 
@@ -94,15 +102,19 @@ project in (ROS, ROSHELP) AND reporter = currentUser() AND statusCategory != Don
 
 Stale tickets are reminder signals, not automatic writes. Include stale callouts in the report, but draft comments or transitions only when evidence supports action.
 
+Use these stale-ticket thresholds unless the ticket, team workflow, or user instruction suggests a better bar: In Review 7+ days, In Testing 14+ days, In Progress 21+ days, To Do/Backlog/unstarted 30+ days, and any active assigned ticket 60+ days. For each stale callout, include age, current status, relationship to the user, why it may matter, and the lightest useful next step. Prefer `needs a quick look`, `candidate to close`, `waiting on external signal`, `probably still fine`, or `needs user judgment` over inventing urgency.
+
 Save the pending draft to `~/.cursor/skills/daily-jira-steward/pending-draft.md` with the proposed-changes table before detailed notes.
 
 ### 4. Approval Gate and Apply Approved Writes
 
-Present the daily report summary, `me.md`/Google Doc status, and pending proposed changes. Use the answers UI when available, with one selectable option per proposed write. Add `Apply all proposed changes` only when every row is low-risk and fully evidenced. Add `Skip all for now` when there are pending writes.
+Present the daily report summary, `me.md`/Google Doc status, and pending proposed changes. Use the answers UI when available, with one selectable option per proposed write. Each option label must include the action, target identifier, and target title or summary. Add `Apply all proposed changes` only when every row is low-risk and fully evidenced. Add `Skip all for now` when there are pending writes.
 
 Apply only rows the user explicitly approves. Keep unapproved rows pending. Do not show rejected rows again unless new evidence appears or the user asks to revisit them.
 
 After a clean run, set `last_completed_at`, set `last_reviewed_through_at` to the review-window end, and record `last_report_path`. If proposed Jira/GitHub changes remain unapproved, keep `pending_since_at` and `pending_draft_path` set so the next run includes them.
+
+Clear `pending_since_at` and `pending_draft_path` only after updates are applied, the user says to mark them reviewed, or there are no proposed external changes.
 
 ## Subagents
 
@@ -145,6 +157,8 @@ For Jira in the ROS workspace, first read `.cursor/skills/ros-atlassian/SKILL.md
 For Slack, first read `/Users/jgoon/.agents/skills/slack/SKILL.md` and follow its read-only workflow. Always run a Slack pass for the checkpoint window between the previous reviewed point and this run's `last_started_at`. Treat Slack as work-signal evidence, not transcript material. Capture decisions, requests, coordination, blockers, rollout notes, support triage, follow-ups, and stakeholder confirmations. Ignore standalone acknowledgements such as `thanks`, `no problem`, or emoji-only messages unless they anchor useful context.
 
 Expand only the highest-signal Slack threads or channel-history results. If a Slack `thread` or `history` command hits rate limits, fails repeatedly, or appears stuck, stop after one failed expansion attempt for that item. Record the snippet, channel/thread link, and that expansion was skipped.
+
+Record both useful Slack hits and important Slack misses. Expand outside the window only when needed for context, such as reading a thread that started earlier or following a referenced decision.
 
 Prefer direct evidence over inference. Do not copy long chat excerpts or sensitive details into Jira unless necessary for tracking the work.
 

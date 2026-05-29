@@ -34,6 +34,15 @@ Last updated: YYYY-MM-DD
 - Docs: ...
 ```
 
+Guidelines:
+
+- `Now` reflects current focus, goal, status, blockers, and 3-5 high-signal links.
+- `Next` is ordered, actionable, and uses readable `PR #N: title` / `ROS-N: title` style.
+- `Backlog` holds tickets or themes not actively being worked this week.
+- `Done Recently` rotates forward; remove bullets that are no longer useful for standups or manager visibility.
+- Prefer markdown links over bare URLs. Use full remote URLs, not relative paths, because Google Docs readers need links that work outside the local checkout.
+- Do not include approval-gated Jira or GitHub writes that are still pending unless they are already part of the user's committed plan.
+
 ## Daily Report
 
 Use this structure when writing the report file:
@@ -121,3 +130,5 @@ Use only these columns:
 | JIRA-1 | Jira transition for `ROS-123: Add status reconciliation` | Move from `In Progress` to `In Review`. Evidence: `PR #456: Add reconciliation` is open. | Pending |
 | GH-1 | GitHub PR update for `PR #456: Add reconciliation` | Replace `[n/a]` with `ROS-123: Add status reconciliation`. Evidence: PR implements tracked Jira work. | Pending |
 ```
+
+For new ticket creation, start the `Write` cell with `Jira create: [ticket summary]`. For existing tickets and PRs, include both the target identifier and readable title in the `Write` cell.
