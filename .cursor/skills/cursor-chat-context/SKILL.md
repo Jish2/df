@@ -29,7 +29,7 @@ Search transcript text:
 
 ```bash
 python3 /Users/jgoon/.cursor/skills/cursor-chat-context/scripts/cursor-chat-search.py search --since 2026-05-28 "ROS-123"
-python3 /Users/jgoon/.cursor/skills/cursor-chat-context/scripts/cursor-chat-search.py search --since 2026-05-28 --regex "frontend-slides|impact"
+python3 /Users/jgoon/.cursor/skills/cursor-chat-context/scripts/cursor-chat-search.py search --since 2026-05-28 --regex 'frontend-slides|impact'
 ```
 
 Render one chat (use only when list/search is not enough):
@@ -49,6 +49,31 @@ Add `--json` to `list` or `search` for machine-readable output.
 | `--transcripts-root <path>` | One explicit transcripts directory |
 
 Multi-project `list`/`search` output includes `project=<key>` on each row.
+
+## Search matching
+
+**Default (no `--regex`):** the query is a **literal substring**. Special characters are not regex syntax — they match themselves:
+
+| You type | Matches |
+|----------|---------|
+| `ROS-123` | the text `ROS-123` |
+| `eks.*1.31|staging` | that exact string, including `.`, `*`, and `|` |
+| `foo|bar` | the characters `foo|bar`, not `foo` OR `bar` |
+
+Use this for ticket keys, filenames, error strings, and fixed phrases.
+
+**With `--regex`:** the query is a **Python regular expression** (case-insensitive unless `--case-sensitive`). Then `|`, `.*`, `\\d+`, groups, etc. work as regex:
+
+```bash
+# OR across phrases; .* = any characters between parts
+python3 /Users/jgoon/.cursor/skills/cursor-chat-context/scripts/cursor-chat-search.py search \
+  --since 2026-05-01 --project-root /Users/jgoon/github/ros --regex \
+  'eks.*1\.31|staging.*eks|dev.*eks.*upgrade'
+```
+
+Prefer **single-quoted** queries for regex so the shell does not expand `*` or interpret `|`. Escape dots in version numbers (`1\.31`) when you mean a literal dot.
+
+If a regex search returns almost nothing but you expected many hits, you probably omitted `--regex` and searched for literal `|` or `.*`.
 
 ## Window selection
 
@@ -75,7 +100,7 @@ Pass `--state-file` with the path to the owning skill's checkpoint state JSON.
 ## Workflow
 
 1. **List** chats in the window. Treat every parent-chat first prompt as a candidate signal.
-2. **Search** targeted terms (ticket keys, feature names, filenames, error strings) before opening full transcripts.
+2. **Search** targeted terms before opening full transcripts. Use plain queries for literals; add `--regex` when you need OR (`|`), wildcards (`.*`), or other pattern syntax.
 3. **Show** only high-signal chats. Prefer summaries over dumping entire transcripts into the current chat.
 4. **Cite** parent chats as `[Short title](uuid)` using the citation from `list` output. Never cite subagent transcript IDs to the user.
 5. **Respect privacy** — ask before summarizing content that may include PII, credentials, or HR-sensitive data. Do not paste long sensitive excerpts into Jira or public docs.

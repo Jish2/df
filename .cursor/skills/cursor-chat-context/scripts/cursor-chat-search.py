@@ -474,8 +474,15 @@ def build_parser() -> argparse.ArgumentParser:
     search_parser = subparsers.add_parser("search", help="Search transcript text in a date window.")
     add_common_args(search_parser)
     add_window_args(search_parser)
-    search_parser.add_argument("query", help="Search string or regex pattern.")
-    search_parser.add_argument("--regex", action="store_true", help="Treat query as a regular expression.")
+    search_parser.add_argument(
+        "query",
+        help="Search text. Literal substring by default; use --regex for |, .*, etc.",
+    )
+    search_parser.add_argument(
+        "--regex",
+        action="store_true",
+        help="Treat query as a Python regex (enables | for OR, .* for wildcards). Default: literal match via re.escape.",
+    )
     search_parser.add_argument("--case-sensitive", action="store_true", help="Use case-sensitive matching.")
     search_parser.add_argument("--context-chars", type=int, default=160, help="Characters of context around each hit.")
     search_parser.add_argument("--limit", type=int, default=20, help="Maximum chats to return.")
