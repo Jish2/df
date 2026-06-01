@@ -7,7 +7,7 @@ description: Lists, searches, and renders local Cursor agent chat transcripts so
 
 Use this skill whenever a task needs **prior Cursor sessions** as evidence: work recaps, ticket drafts, handoffs, debugging continuity, or "find the chat where we decided X."
 
-Transcripts live under `~/.cursor/projects/<project-key>/agent-transcripts/` as `*.jsonl` files. By default the CLI infers the folder from `--project-root` (ROS: `/Users/jgoon/github/ros`). Override with `--transcripts-root` for other workspaces.
+Transcripts live under `~/.cursor/projects/<project-key>/agent-transcripts/` as `*.jsonl` files. **By default** `list` and `search` scan **all** projects under `~/.cursor/projects/`. Pass `--project-root` to limit to one workspace (e.g. `/Users/jgoon/github/ros`), or `--transcripts-root` for a single explicit folder.
 
 Script path (stable):
 
@@ -21,8 +21,8 @@ List chats touched in a time window (by file mtime):
 
 ```bash
 python3 /Users/jgoon/.cursor/skills/cursor-chat-context/scripts/cursor-chat-search.py list --since 2026-05-28
+python3 /Users/jgoon/.cursor/skills/cursor-chat-context/scripts/cursor-chat-search.py list --since 2026-05-28 --project-root /Users/jgoon/github/ros
 python3 /Users/jgoon/.cursor/skills/cursor-chat-context/scripts/cursor-chat-search.py list --date 2026-05-29
-python3 /Users/jgoon/.cursor/skills/cursor-chat-context/scripts/cursor-chat-search.py list --start 2026-05-28T09:00:00-07:00 --end 2026-05-29T18:00:00-07:00
 ```
 
 Search transcript text:
@@ -39,6 +39,16 @@ python3 /Users/jgoon/.cursor/skills/cursor-chat-context/scripts/cursor-chat-sear
 ```
 
 Add `--json` to `list` or `search` for machine-readable output.
+
+## Scope
+
+| Flag | Behavior |
+|------|----------|
+| *(none)* | All `~/.cursor/projects/*/agent-transcripts` (default) |
+| `--project-root <path>` | Single workspace only |
+| `--transcripts-root <path>` | One explicit transcripts directory |
+
+Multi-project `list`/`search` output includes `project=<key>` on each row.
 
 ## Window selection
 

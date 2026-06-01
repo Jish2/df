@@ -14,7 +14,7 @@ from typing import Any, Iterable
 from urllib.parse import urlparse
 
 
-DEFAULT_PROJECT_ROOT = Path("/Users/jgoon/github/ros")
+CURSOR_PROJECTS_DIR = Path.home() / ".cursor" / "projects"
 LOCAL_TZ = datetime.now().astimezone().tzinfo
 
 STATE_START_KEYS = ("window_start_at", "pending_since_at", "last_reviewed_through_at")
@@ -38,6 +38,7 @@ class Chat:
     prompt: str
     citation: str
     is_subagent: bool
+    project_key: str | None = None
 
 
 @dataclass(frozen=True)
@@ -123,24 +124,53 @@ def build_window(args: argparse.Namespace) -> TimeWindow:
     return TimeWindow(start=start, end=end, label=label)
 
 
-def project_key(project_root: Path) -> str:
+def workspace_project_key(project_root: Path) -> str:
     return str(project_root.expanduser().resolve()).lstrip(os.sep).replace(os.sep, "-")
 
 
-def transcript_root(args: argparse.Namespace) -> Path:
+def project_key_from_transcript_path(path: Path) -> str | None:
+    parts = path.parts
+    if "projects" not in parts:
+        return None
+    idx = parts.index("projects")
+    if idx + 1 < len(parts):
+        return parts[idx + 1]
+    return None
+
+
+def transcript_roots(args: argparse.Namespace) -> list[Path]:
+    if args.transcripts_root and args.project_root:
+        raise SystemExit("Use only one of --transcripts-root or --project-root.")
+
     if args.transcripts_root:
-        return Path(args.transcripts_root).expanduser().resolve()
-    project_root = Path(args.project_root).expanduser().resolve()
-    return Path.home() / ".cursor" / "projects" / project_key(project_root) / "agent-transcripts"
+        return [Path(args.transcripts_root).expanduser().resolve()]
+
+    if args.project_root:
+        project_root = Path(args.project_root).expanduser().resolve()
+        return [CURSOR_PROJECTS_DIR / workspace_project_key(project_root) / "agent-transcripts"]
+
+    if not CURSOR_PROJECTS_DIR.exists():
+        raise SystemExit(f"Cursor projects directory does not exist: {CURSOR_PROJECTS_DIR}")
+
+    roots = sorted(path for path in CURSOR_PROJECTS_DIR.glob("*/agent-transcripts") if path.is_dir())
+    if not roots:
+        raise SystemExit(f"No agent-transcripts directories under {CURSOR_PROJECTS_DIR}")
+    return roots
 
 
-def iter_transcript_paths(root: Path, include_subagents: bool) -> Iterable[Path]:
-    if not root.exists():
-        raise SystemExit(f"Transcript root does not exist: {root}")
-    for path in root.glob("**/*.jsonl"):
-        if not include_subagents and "subagents" in path.parts:
+def iter_transcript_paths(roots: list[Path], include_subagents: bool) -> Iterable[Path]:
+    found_any = False
+    for root in roots:
+        if not root.exists():
             continue
-        yield path
+        found_any = True
+        for path in root.glob("**/*.jsonl"):
+            if not include_subagents and "subagents" in path.parts:
+                continue
+            yield path
+    if not found_any:
+        roots_label = ", ".join(str(root) for root in roots)
+        raise SystemExit(f"No transcript roots exist: {roots_label}")
 
 
 def in_window(path: Path, window: TimeWindow) -> bool:
@@ -246,15 +276,16 @@ def chat_from_path(path: Path) -> Chat:
         prompt=prompt,
         citation=citation,
         is_subagent=is_subagent,
+        project_key=project_key_from_transcript_path(path),
     )
 
 
 def selected_chats(args: argparse.Namespace) -> list[Chat]:
-    root = transcript_root(args)
+    roots = transcript_roots(args)
     window = build_window(args)
     chats = [
         chat_from_path(path)
-        for path in iter_transcript_paths(root, args.include_subagents)
+        for path in iter_transcript_paths(roots, args.include_subagents)
         if in_window(path, window)
     ]
     return sorted(chats, key=lambda chat: chat.mtime, reverse=True)
@@ -265,14 +296,15 @@ def resolve_chat_path(args: argparse.Namespace, chat_ref: str) -> Path:
     if maybe_path.exists():
         return maybe_path.resolve()
 
-    root = transcript_root(args)
+    roots = transcript_roots(args)
     matches = [
         path
-        for path in iter_transcript_paths(root, include_subagents=True)
+        for path in iter_transcript_paths(roots, include_subagents=True)
         if path.stem == chat_ref or path.stem.startswith(chat_ref)
     ]
     if not matches:
-        raise SystemExit(f"No transcript matched {chat_ref!r} under {root}")
+        roots_label = ", ".join(str(root) for root in roots)
+        raise SystemExit(f"No transcript matched {chat_ref!r} under {roots_label}")
     if len(matches) > 1:
         choices = "\n".join(str(path) for path in matches[:10])
         raise SystemExit(f"Multiple transcripts matched {chat_ref!r}; use a longer id:\n{choices}")
@@ -289,6 +321,7 @@ def chat_to_dict(chat: Chat) -> dict[str, Any]:
         "messages": chat.line_count,
         "path": str(chat.path),
         "is_subagent": chat.is_subagent,
+        "project_key": chat.project_key,
     }
 
 
@@ -301,8 +334,10 @@ def render_chat(chat: Chat, *, include_tool_json: bool) -> str:
         f"Updated: {chat.mtime.isoformat()}",
         f"Citation: {chat.citation}",
         f"Path: {chat.path}",
-        "",
     ]
+    if chat.project_key:
+        parts.append(f"Project: {chat.project_key}")
+    parts.extend(["", ""])
     for index, event in enumerate(events, start=1):
         parts.append(f"## {index}. {event.role}")
         parts.append("")
@@ -324,18 +359,22 @@ def render_snippet(text: str, match: re.Match[str], context_chars: int) -> str:
 
 
 def command_list(args: argparse.Namespace) -> int:
+    roots = transcript_roots(args)
     chats = selected_chats(args)
     if args.json:
         print(json.dumps([chat_to_dict(chat) for chat in chats], indent=2))
         return 0
 
     window = build_window(args)
-    print(f"Cursor chats updated in {window.label}: {len(chats)}")
+    scope = roots[0].parent.name if len(roots) == 1 else f"{len(roots)} projects"
+    print(f"Cursor chats updated in {window.label} ({scope}): {len(chats)}")
+    show_project = len(roots) > 1
     for chat in chats:
         subagent = " subagent" if chat.is_subagent else ""
+        project = f"  project={chat.project_key}" if show_project and chat.project_key else ""
         print(
             f"{chat.mtime.strftime('%Y-%m-%d %H:%M:%S %Z')}  "
-            f"{chat.citation}  messages={chat.line_count}{subagent}"
+            f"{chat.citation}  messages={chat.line_count}{subagent}{project}"
         )
         print(f"  id: {chat.id}")
         if chat.prompt:
@@ -371,11 +410,14 @@ def command_search(args: argparse.Namespace) -> int:
         print(json.dumps(results, indent=2))
         return 0
 
+    roots = transcript_roots(args)
+    show_project = len(roots) > 1
     print(f"Search: {args.query!r}")
     print(f"Chats with hits: {len(results)}")
     for result in results:
         chat = result["chat"]
-        print(f"\n{chat['updated_at']}  {chat['citation']}")
+        project = f"  project={chat['project_key']}" if show_project and chat.get("project_key") else ""
+        print(f"\n{chat['updated_at']}  {chat['citation']}{project}")
         print(f"  id: {chat['id']}")
         for index, hit in enumerate(result["hits"], start=1):
             print(f"  hit {index}: {hit['snippet']}")
@@ -406,12 +448,12 @@ def add_window_args(parser: argparse.ArgumentParser) -> None:
 
 
 def add_common_args(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument(
+    scope = parser.add_argument_group("scope")
+    scope.add_argument(
         "--project-root",
-        default=str(DEFAULT_PROJECT_ROOT),
-        help="Workspace root used to infer Cursor's project transcript folder.",
+        help="Limit search to one workspace (maps to ~/.cursor/projects/<key>/agent-transcripts). Default: all projects.",
     )
-    parser.add_argument("--transcripts-root", help="Explicit agent-transcripts directory.")
+    scope.add_argument("--transcripts-root", help="Explicit agent-transcripts directory (overrides default all-projects search).")
     parser.add_argument(
         "--include-subagents",
         action="store_true",
