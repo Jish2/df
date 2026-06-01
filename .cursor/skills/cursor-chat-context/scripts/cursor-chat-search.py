@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""List, search, and render Cursor agent transcripts for daily steward runs."""
+"""List, search, and render Cursor agent transcripts for evidence and context."""
 
 from __future__ import annotations
 
@@ -15,8 +15,10 @@ from urllib.parse import urlparse
 
 
 DEFAULT_PROJECT_ROOT = Path("/Users/jgoon/github/ros")
-DEFAULT_STATE_FILE = Path("/Users/jgoon/.cursor/skills/daily-jira-steward/state.json")
 LOCAL_TZ = datetime.now().astimezone().tzinfo
+
+STATE_START_KEYS = ("window_start_at", "pending_since_at", "last_reviewed_through_at")
+STATE_END_KEYS = ("window_end_at", "last_started_at")
 
 
 @dataclass(frozen=True)
@@ -56,6 +58,35 @@ def parse_local_datetime(value: str) -> datetime:
     return parsed.astimezone(LOCAL_TZ)
 
 
+def resolve_state_value(state: dict[str, Any], keys: tuple[str, ...]) -> str | None:
+    for key in keys:
+        value = state.get(key)
+        if value:
+            return str(value)
+    return None
+
+
+def build_state_window(state_file: Path) -> TimeWindow:
+    if not state_file.exists():
+        raise SystemExit(f"State file does not exist: {state_file}")
+    with state_file.open("r", encoding="utf-8") as handle:
+        state = json.load(handle)
+
+    start_value = resolve_state_value(state, STATE_START_KEYS)
+    end_value = resolve_state_value(state, STATE_END_KEYS)
+    if not start_value:
+        raise SystemExit(
+            f"State file has no window start ({', '.join(STATE_START_KEYS)}): {state_file}"
+        )
+
+    start = parse_local_datetime(start_value)
+    parsed_end = parse_local_datetime(end_value) if end_value else None
+    end = parsed_end if parsed_end and parsed_end > start else datetime.now(tz=LOCAL_TZ)
+    if end <= start:
+        raise SystemExit(f"State window end must be after start: {start.isoformat()} to {end.isoformat()}")
+    return TimeWindow(start=start, end=end, label=f"state window {start.isoformat()} to {end.isoformat()}")
+
+
 def build_window(args: argparse.Namespace) -> TimeWindow:
     window_args = [
         bool(getattr(args, "state_window", False)),
@@ -67,6 +98,8 @@ def build_window(args: argparse.Namespace) -> TimeWindow:
         raise SystemExit("Use only one window selector: --state-window, --date, --since, or --start/--end.")
 
     if getattr(args, "state_window", False):
+        if not args.state_file:
+            raise SystemExit("--state-window requires --state-file.")
         return build_state_window(Path(args.state_file).expanduser().resolve())
 
     if args.since:
@@ -88,25 +121,6 @@ def build_window(args: argparse.Namespace) -> TimeWindow:
     else:
         label = "all time"
     return TimeWindow(start=start, end=end, label=label)
-
-
-def build_state_window(state_file: Path) -> TimeWindow:
-    if not state_file.exists():
-        raise SystemExit(f"State file does not exist: {state_file}")
-    with state_file.open("r", encoding="utf-8") as handle:
-        state = json.load(handle)
-
-    start_value = state.get("pending_since_at") or state.get("last_reviewed_through_at")
-    end_value = state.get("last_started_at")
-    if not start_value:
-        raise SystemExit(f"State file has no pending_since_at or last_reviewed_through_at: {state_file}")
-
-    start = parse_local_datetime(start_value)
-    parsed_end = parse_local_datetime(end_value) if end_value else None
-    end = parsed_end if parsed_end and parsed_end > start else datetime.now(tz=LOCAL_TZ)
-    if end <= start:
-        raise SystemExit(f"State window end must be after start: {start.isoformat()} to {end.isoformat()}")
-    return TimeWindow(start=start, end=end, label=f"state window {start.isoformat()} to {end.isoformat()}")
 
 
 def project_key(project_root: Path) -> str:
@@ -376,8 +390,15 @@ def command_show(args: argparse.Namespace) -> int:
 
 
 def add_window_args(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("--state-window", action="store_true", help="Use pending_since_at/last_reviewed_through_at through last_started_at from the steward state file.")
-    parser.add_argument("--state-file", default=str(DEFAULT_STATE_FILE), help="Daily Jira Steward state file for --state-window.")
+    parser.add_argument(
+        "--state-window",
+        action="store_true",
+        help="Use start/end timestamps from a JSON state file (see cursor-chat-context skill).",
+    )
+    parser.add_argument(
+        "--state-file",
+        help="JSON state file for --state-window. Start keys: window_start_at, pending_since_at, last_reviewed_through_at. End keys: window_end_at, last_started_at.",
+    )
     parser.add_argument("--date", help="Local day to inspect, as YYYY-MM-DD.")
     parser.add_argument("--since", help="Inclusive local/ISO start timestamp with no end; use for from this date through now.")
     parser.add_argument("--start", help="Inclusive local/ISO start timestamp.")
@@ -385,9 +406,17 @@ def add_window_args(parser: argparse.ArgumentParser) -> None:
 
 
 def add_common_args(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("--project-root", default=str(DEFAULT_PROJECT_ROOT), help="Workspace root used to infer Cursor's project transcript folder.")
+    parser.add_argument(
+        "--project-root",
+        default=str(DEFAULT_PROJECT_ROOT),
+        help="Workspace root used to infer Cursor's project transcript folder.",
+    )
     parser.add_argument("--transcripts-root", help="Explicit agent-transcripts directory.")
-    parser.add_argument("--include-subagents", action="store_true", help="Include subagent transcripts. Parent chats are used by default.")
+    parser.add_argument(
+        "--include-subagents",
+        action="store_true",
+        help="Include subagent transcripts. Parent chats are used by default.",
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -415,7 +444,11 @@ def build_parser() -> argparse.ArgumentParser:
     show_parser = subparsers.add_parser("show", help="Render one full chat by id prefix or path.")
     add_common_args(show_parser)
     show_parser.add_argument("chat", help="Chat id, id prefix, or transcript path.")
-    show_parser.add_argument("--include-tool-json", action="store_true", help="Include full tool call inputs and tool result content.")
+    show_parser.add_argument(
+        "--include-tool-json",
+        action="store_true",
+        help="Include full tool call inputs and tool result content.",
+    )
     show_parser.set_defaults(func=command_show)
 
     return parser
