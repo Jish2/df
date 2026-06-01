@@ -18,7 +18,7 @@ Use this skill as a daily checkpoint routine. Its normal job is to capture what 
 - Do not create tickets for passing thoughts. Create tracking only when the user asks to track an idea or concrete evidence shows active work.
 - Prefer updating existing tickets over creating duplicates.
 - Never close or transition a ticket from local commits alone. Require merged PR evidence, explicit user instruction, or a clear Jira workflow signal.
-- Cursor chats and Slack are mandatory evidence sources for every normal run. Always inspect both for the checkpoint window before synthesizing what happened.
+- Cursor chats and Slack are mandatory evidence sources for every normal run. Always inspect both for the checkpoint window before synthesizing what happened. For Cursor chats, read and follow `/Users/jgoon/.cursor/skills/cursor-chat-context/SKILL.md`.
 - Do not silently drop reviewed evidence. When a discovered chat, PR, Slack thread, Jira ticket, or stale item is intentionally left out of the work log, `me.md`, or proposed updates, record a short reason.
 
 ## Core Workflow
@@ -35,17 +35,15 @@ When stopping for access, name the failed source, the failed command or tool cat
 
 Start with Cursor chats and Slack for the same checkpoint window.
 
-Cursor chat commands:
+For Cursor chats, use the steward state file with `cursor-chat-search.py` (see `cursor-chat-context` skill):
 
 ```bash
-python3 /Users/jgoon/.cursor/skills/daily-jira-steward/scripts/cursor-chat-search.py list --state-window
-python3 /Users/jgoon/.cursor/skills/daily-jira-steward/scripts/cursor-chat-search.py search --state-window "ROS-123"
-python3 /Users/jgoon/.cursor/skills/daily-jira-steward/scripts/cursor-chat-search.py show <chat-id>
+python3 /Users/jgoon/.cursor/skills/cursor-chat-context/scripts/cursor-chat-search.py list \
+  --state-window --state-file /Users/jgoon/.cursor/skills/daily-jira-steward/state.json
+python3 /Users/jgoon/.cursor/skills/cursor-chat-context/scripts/cursor-chat-search.py search \
+  --state-window --state-file /Users/jgoon/.cursor/skills/daily-jira-steward/state.json "ROS-123"
+python3 /Users/jgoon/.cursor/skills/cursor-chat-context/scripts/cursor-chat-search.py show <chat-id>
 ```
-
-`list --state-window` selects parent transcripts by file modification time from `pending_since_at` or `last_reviewed_through_at` through `last_started_at`. It includes chats updated during the window even if they were created earlier. Treat every listed parent chat prompt as a candidate work signal. Use `show <chat-id>` only for chats that need deeper reconstruction; do not dump all full chats.
-
-When transcript message timestamps are available, summarize only messages or events inside the review window. If timestamps are unclear, include the chat as candidate evidence and summarize only concrete work signals that appear relevant.
 
 For Slack, first read `/Users/jgoon/.agents/skills/slack/SKILL.md` and follow its read-only workflow. Always run a broad outbound search for the current user across the checkpoint window before targeted Slack searches. Then search targeted terms from Cursor, GitHub, Jira, docs, branch names, PR titles, blocker words, and follow-up language. Expand only the highest-signal Slack threads or channel-history results.
 
@@ -124,7 +122,7 @@ Use read-only subagents after the access gate when available. Give every subagen
 
 Recommended split:
 
-- Cursor chat evidence: run `cursor-chat-search.py list --state-window`, inspect every prompt, selectively `search` and `show <chat-id>`, then return workstreams, artifacts, decisions, blockers, follow-ups, and chat IDs.
+- **Cursor chat evidence** (mandatory each run): read `cursor-chat-context` for CLI usage. Use `--state-window` with this skill's `state.json` (see commands in step 1). Inspect every listed parent prompt, selectively `search` and `show <chat-id>`, then return workstreams, artifacts, decisions, blockers, follow-ups, and parent chat IDs — not full transcript dumps. When delegating to a read-only subagent, pass the exact review-window start and end, citation rules, and the `cursor-chat-search.py` path. Omit `--project-root` unless the run should be limited to one workspace.
 - GitHub evidence: list PRs, commits, branches, reviews, and materially updated PRs during the window across relevant repos. Call out `[n/a]` gaps, merged PRs that may close tickets, and open PRs that imply status changes.
 - Slack evidence: search outbound activity first across the checkpoint window, then targeted terms from Cursor/GitHub/Jira. Return high-signal coordination, decisions, support asks, blockers, important misses, and only the highest-signal expanded threads.
 - Jira triage evidence: read current assigned/reported tickets, tickets linked from evidence, and stale-ticket searches. Return status mismatches, likely duplicates, needed comments, no-action tickets, and stale callouts.

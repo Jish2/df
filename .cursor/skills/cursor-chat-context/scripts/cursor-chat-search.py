@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""List, search, and render Cursor agent transcripts for daily steward runs."""
+"""List, search, and render Cursor agent transcripts for evidence and context."""
 
 from __future__ import annotations
 
@@ -14,9 +14,11 @@ from typing import Any, Iterable
 from urllib.parse import urlparse
 
 
-DEFAULT_PROJECT_ROOT = Path("/Users/jgoon/github/ros")
-DEFAULT_STATE_FILE = Path("/Users/jgoon/.cursor/skills/daily-jira-steward/state.json")
+CURSOR_PROJECTS_DIR = Path.home() / ".cursor" / "projects"
 LOCAL_TZ = datetime.now().astimezone().tzinfo
+
+STATE_START_KEYS = ("window_start_at", "pending_since_at", "last_reviewed_through_at")
+STATE_END_KEYS = ("window_end_at", "last_started_at")
 
 
 @dataclass(frozen=True)
@@ -36,6 +38,7 @@ class Chat:
     prompt: str
     citation: str
     is_subagent: bool
+    project_key: str | None = None
 
 
 @dataclass(frozen=True)
@@ -56,6 +59,35 @@ def parse_local_datetime(value: str) -> datetime:
     return parsed.astimezone(LOCAL_TZ)
 
 
+def resolve_state_value(state: dict[str, Any], keys: tuple[str, ...]) -> str | None:
+    for key in keys:
+        value = state.get(key)
+        if value:
+            return str(value)
+    return None
+
+
+def build_state_window(state_file: Path) -> TimeWindow:
+    if not state_file.exists():
+        raise SystemExit(f"State file does not exist: {state_file}")
+    with state_file.open("r", encoding="utf-8") as handle:
+        state = json.load(handle)
+
+    start_value = resolve_state_value(state, STATE_START_KEYS)
+    end_value = resolve_state_value(state, STATE_END_KEYS)
+    if not start_value:
+        raise SystemExit(
+            f"State file has no window start ({', '.join(STATE_START_KEYS)}): {state_file}"
+        )
+
+    start = parse_local_datetime(start_value)
+    parsed_end = parse_local_datetime(end_value) if end_value else None
+    end = parsed_end if parsed_end and parsed_end > start else datetime.now(tz=LOCAL_TZ)
+    if end <= start:
+        raise SystemExit(f"State window end must be after start: {start.isoformat()} to {end.isoformat()}")
+    return TimeWindow(start=start, end=end, label=f"state window {start.isoformat()} to {end.isoformat()}")
+
+
 def build_window(args: argparse.Namespace) -> TimeWindow:
     window_args = [
         bool(getattr(args, "state_window", False)),
@@ -67,6 +99,8 @@ def build_window(args: argparse.Namespace) -> TimeWindow:
         raise SystemExit("Use only one window selector: --state-window, --date, --since, or --start/--end.")
 
     if getattr(args, "state_window", False):
+        if not args.state_file:
+            raise SystemExit("--state-window requires --state-file.")
         return build_state_window(Path(args.state_file).expanduser().resolve())
 
     if args.since:
@@ -90,43 +124,53 @@ def build_window(args: argparse.Namespace) -> TimeWindow:
     return TimeWindow(start=start, end=end, label=label)
 
 
-def build_state_window(state_file: Path) -> TimeWindow:
-    if not state_file.exists():
-        raise SystemExit(f"State file does not exist: {state_file}")
-    with state_file.open("r", encoding="utf-8") as handle:
-        state = json.load(handle)
-
-    start_value = state.get("pending_since_at") or state.get("last_reviewed_through_at")
-    end_value = state.get("last_started_at")
-    if not start_value:
-        raise SystemExit(f"State file has no pending_since_at or last_reviewed_through_at: {state_file}")
-
-    start = parse_local_datetime(start_value)
-    parsed_end = parse_local_datetime(end_value) if end_value else None
-    end = parsed_end if parsed_end and parsed_end > start else datetime.now(tz=LOCAL_TZ)
-    if end <= start:
-        raise SystemExit(f"State window end must be after start: {start.isoformat()} to {end.isoformat()}")
-    return TimeWindow(start=start, end=end, label=f"state window {start.isoformat()} to {end.isoformat()}")
-
-
-def project_key(project_root: Path) -> str:
+def workspace_project_key(project_root: Path) -> str:
     return str(project_root.expanduser().resolve()).lstrip(os.sep).replace(os.sep, "-")
 
 
-def transcript_root(args: argparse.Namespace) -> Path:
+def project_key_from_transcript_path(path: Path) -> str | None:
+    parts = path.parts
+    if "projects" not in parts:
+        return None
+    idx = parts.index("projects")
+    if idx + 1 < len(parts):
+        return parts[idx + 1]
+    return None
+
+
+def transcript_roots(args: argparse.Namespace) -> list[Path]:
+    if args.transcripts_root and args.project_root:
+        raise SystemExit("Use only one of --transcripts-root or --project-root.")
+
     if args.transcripts_root:
-        return Path(args.transcripts_root).expanduser().resolve()
-    project_root = Path(args.project_root).expanduser().resolve()
-    return Path.home() / ".cursor" / "projects" / project_key(project_root) / "agent-transcripts"
+        return [Path(args.transcripts_root).expanduser().resolve()]
+
+    if args.project_root:
+        project_root = Path(args.project_root).expanduser().resolve()
+        return [CURSOR_PROJECTS_DIR / workspace_project_key(project_root) / "agent-transcripts"]
+
+    if not CURSOR_PROJECTS_DIR.exists():
+        raise SystemExit(f"Cursor projects directory does not exist: {CURSOR_PROJECTS_DIR}")
+
+    roots = sorted(path for path in CURSOR_PROJECTS_DIR.glob("*/agent-transcripts") if path.is_dir())
+    if not roots:
+        raise SystemExit(f"No agent-transcripts directories under {CURSOR_PROJECTS_DIR}")
+    return roots
 
 
-def iter_transcript_paths(root: Path, include_subagents: bool) -> Iterable[Path]:
-    if not root.exists():
-        raise SystemExit(f"Transcript root does not exist: {root}")
-    for path in root.glob("**/*.jsonl"):
-        if not include_subagents and "subagents" in path.parts:
+def iter_transcript_paths(roots: list[Path], include_subagents: bool) -> Iterable[Path]:
+    found_any = False
+    for root in roots:
+        if not root.exists():
             continue
-        yield path
+        found_any = True
+        for path in root.glob("**/*.jsonl"):
+            if not include_subagents and "subagents" in path.parts:
+                continue
+            yield path
+    if not found_any:
+        roots_label = ", ".join(str(root) for root in roots)
+        raise SystemExit(f"No transcript roots exist: {roots_label}")
 
 
 def in_window(path: Path, window: TimeWindow) -> bool:
@@ -232,15 +276,16 @@ def chat_from_path(path: Path) -> Chat:
         prompt=prompt,
         citation=citation,
         is_subagent=is_subagent,
+        project_key=project_key_from_transcript_path(path),
     )
 
 
 def selected_chats(args: argparse.Namespace) -> list[Chat]:
-    root = transcript_root(args)
+    roots = transcript_roots(args)
     window = build_window(args)
     chats = [
         chat_from_path(path)
-        for path in iter_transcript_paths(root, args.include_subagents)
+        for path in iter_transcript_paths(roots, args.include_subagents)
         if in_window(path, window)
     ]
     return sorted(chats, key=lambda chat: chat.mtime, reverse=True)
@@ -251,14 +296,15 @@ def resolve_chat_path(args: argparse.Namespace, chat_ref: str) -> Path:
     if maybe_path.exists():
         return maybe_path.resolve()
 
-    root = transcript_root(args)
+    roots = transcript_roots(args)
     matches = [
         path
-        for path in iter_transcript_paths(root, include_subagents=True)
+        for path in iter_transcript_paths(roots, include_subagents=True)
         if path.stem == chat_ref or path.stem.startswith(chat_ref)
     ]
     if not matches:
-        raise SystemExit(f"No transcript matched {chat_ref!r} under {root}")
+        roots_label = ", ".join(str(root) for root in roots)
+        raise SystemExit(f"No transcript matched {chat_ref!r} under {roots_label}")
     if len(matches) > 1:
         choices = "\n".join(str(path) for path in matches[:10])
         raise SystemExit(f"Multiple transcripts matched {chat_ref!r}; use a longer id:\n{choices}")
@@ -275,6 +321,7 @@ def chat_to_dict(chat: Chat) -> dict[str, Any]:
         "messages": chat.line_count,
         "path": str(chat.path),
         "is_subagent": chat.is_subagent,
+        "project_key": chat.project_key,
     }
 
 
@@ -287,8 +334,10 @@ def render_chat(chat: Chat, *, include_tool_json: bool) -> str:
         f"Updated: {chat.mtime.isoformat()}",
         f"Citation: {chat.citation}",
         f"Path: {chat.path}",
-        "",
     ]
+    if chat.project_key:
+        parts.append(f"Project: {chat.project_key}")
+    parts.extend(["", ""])
     for index, event in enumerate(events, start=1):
         parts.append(f"## {index}. {event.role}")
         parts.append("")
@@ -310,18 +359,22 @@ def render_snippet(text: str, match: re.Match[str], context_chars: int) -> str:
 
 
 def command_list(args: argparse.Namespace) -> int:
+    roots = transcript_roots(args)
     chats = selected_chats(args)
     if args.json:
         print(json.dumps([chat_to_dict(chat) for chat in chats], indent=2))
         return 0
 
     window = build_window(args)
-    print(f"Cursor chats updated in {window.label}: {len(chats)}")
+    scope = roots[0].parent.name if len(roots) == 1 else f"{len(roots)} projects"
+    print(f"Cursor chats updated in {window.label} ({scope}): {len(chats)}")
+    show_project = len(roots) > 1
     for chat in chats:
         subagent = " subagent" if chat.is_subagent else ""
+        project = f"  project={chat.project_key}" if show_project and chat.project_key else ""
         print(
             f"{chat.mtime.strftime('%Y-%m-%d %H:%M:%S %Z')}  "
-            f"{chat.citation}  messages={chat.line_count}{subagent}"
+            f"{chat.citation}  messages={chat.line_count}{subagent}{project}"
         )
         print(f"  id: {chat.id}")
         if chat.prompt:
@@ -357,11 +410,14 @@ def command_search(args: argparse.Namespace) -> int:
         print(json.dumps(results, indent=2))
         return 0
 
+    roots = transcript_roots(args)
+    show_project = len(roots) > 1
     print(f"Search: {args.query!r}")
     print(f"Chats with hits: {len(results)}")
     for result in results:
         chat = result["chat"]
-        print(f"\n{chat['updated_at']}  {chat['citation']}")
+        project = f"  project={chat['project_key']}" if show_project and chat.get("project_key") else ""
+        print(f"\n{chat['updated_at']}  {chat['citation']}{project}")
         print(f"  id: {chat['id']}")
         for index, hit in enumerate(result["hits"], start=1):
             print(f"  hit {index}: {hit['snippet']}")
@@ -376,8 +432,15 @@ def command_show(args: argparse.Namespace) -> int:
 
 
 def add_window_args(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("--state-window", action="store_true", help="Use pending_since_at/last_reviewed_through_at through last_started_at from the steward state file.")
-    parser.add_argument("--state-file", default=str(DEFAULT_STATE_FILE), help="Daily Jira Steward state file for --state-window.")
+    parser.add_argument(
+        "--state-window",
+        action="store_true",
+        help="Use start/end timestamps from a JSON state file (see cursor-chat-context skill).",
+    )
+    parser.add_argument(
+        "--state-file",
+        help="JSON state file for --state-window. Start keys: window_start_at, pending_since_at, last_reviewed_through_at. End keys: window_end_at, last_started_at.",
+    )
     parser.add_argument("--date", help="Local day to inspect, as YYYY-MM-DD.")
     parser.add_argument("--since", help="Inclusive local/ISO start timestamp with no end; use for from this date through now.")
     parser.add_argument("--start", help="Inclusive local/ISO start timestamp.")
@@ -385,9 +448,17 @@ def add_window_args(parser: argparse.ArgumentParser) -> None:
 
 
 def add_common_args(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("--project-root", default=str(DEFAULT_PROJECT_ROOT), help="Workspace root used to infer Cursor's project transcript folder.")
-    parser.add_argument("--transcripts-root", help="Explicit agent-transcripts directory.")
-    parser.add_argument("--include-subagents", action="store_true", help="Include subagent transcripts. Parent chats are used by default.")
+    scope = parser.add_argument_group("scope")
+    scope.add_argument(
+        "--project-root",
+        help="Limit search to one workspace (maps to ~/.cursor/projects/<key>/agent-transcripts). Default: all projects.",
+    )
+    scope.add_argument("--transcripts-root", help="Explicit agent-transcripts directory (overrides default all-projects search).")
+    parser.add_argument(
+        "--include-subagents",
+        action="store_true",
+        help="Include subagent transcripts. Parent chats are used by default.",
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -415,7 +486,11 @@ def build_parser() -> argparse.ArgumentParser:
     show_parser = subparsers.add_parser("show", help="Render one full chat by id prefix or path.")
     add_common_args(show_parser)
     show_parser.add_argument("chat", help="Chat id, id prefix, or transcript path.")
-    show_parser.add_argument("--include-tool-json", action="store_true", help="Include full tool call inputs and tool result content.")
+    show_parser.add_argument(
+        "--include-tool-json",
+        action="store_true",
+        help="Include full tool call inputs and tool result content.",
+    )
     show_parser.set_defaults(func=command_show)
 
     return parser
