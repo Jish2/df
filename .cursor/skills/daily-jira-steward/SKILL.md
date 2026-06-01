@@ -122,7 +122,7 @@ Use read-only subagents after the access gate when available. Give every subagen
 
 Recommended split:
 
-- Cursor chat evidence: follow `cursor-chat-context` with `--state-window` and the steward `state.json`; inspect every listed prompt, selectively `search` and `show <chat-id>`, then return workstreams, artifacts, decisions, blockers, follow-ups, and chat IDs.
+- **Cursor chat evidence** (mandatory each run): read `cursor-chat-context` for CLI usage. Use `--state-window` with this skill's `state.json` (see commands in step 1). Inspect every listed parent prompt, selectively `search` and `show <chat-id>`, then return workstreams, artifacts, decisions, blockers, follow-ups, and parent chat IDs — not full transcript dumps. When delegating to a read-only subagent, pass the exact review-window start and end, `--project-root`, citation rules, and the `cursor-chat-search.py` path.
 - GitHub evidence: list PRs, commits, branches, reviews, and materially updated PRs during the window across relevant repos. Call out `[n/a]` gaps, merged PRs that may close tickets, and open PRs that imply status changes.
 - Slack evidence: search outbound activity first across the checkpoint window, then targeted terms from Cursor/GitHub/Jira. Return high-signal coordination, decisions, support asks, blockers, important misses, and only the highest-signal expanded threads.
 - Jira triage evidence: read current assigned/reported tickets, tickets linked from evidence, and stale-ticket searches. Return status mismatches, likely duplicates, needed comments, no-action tickets, and stale callouts.

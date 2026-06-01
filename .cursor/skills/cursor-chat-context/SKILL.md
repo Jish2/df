@@ -60,13 +60,7 @@ Use **exactly one** window mode per command:
 - **Start** (first non-null): `window_start_at`, `pending_since_at`, `last_reviewed_through_at`
 - **End** (first non-null, else now): `window_end_at`, `last_started_at`
 
-Example for Daily Jira Steward after setting `last_started_at`:
-
-```bash
-python3 /Users/jgoon/.cursor/skills/cursor-chat-context/scripts/cursor-chat-search.py list \
-  --state-window \
-  --state-file /Users/jgoon/.cursor/skills/daily-jira-steward/state.json
-```
+Pass `--state-file` with the path to the owning skill's checkpoint state JSON.
 
 ## Workflow
 
@@ -77,13 +71,3 @@ python3 /Users/jgoon/.cursor/skills/cursor-chat-context/scripts/cursor-chat-sear
 5. **Respect privacy** — ask before summarizing content that may include PII, credentials, or HR-sensitive data. Do not paste long sensitive excerpts into Jira or public docs.
 
 When message-level timestamps are available in the transcript, summarize only events inside the review window. If timestamps are unclear, include the chat as candidate evidence and summarize concrete work signals only.
-
-## Integration
-
-- **daily-jira-steward** — mandatory chat evidence for each checkpoint; uses `--state-window` with the steward `state.json`.
-- **work-summary** — use `--since` for the recap window instead of manual `find`.
-- **jira-tickets** — search transcripts for related implementation context before drafting tickets.
-
-## Subagent handoff
-
-When delegating read-only chat evidence collection, pass the exact window, project root, citation rules, and this script path. Return workstreams, artifacts, decisions, blockers, follow-ups, and parent chat IDs — not full transcript dumps.
