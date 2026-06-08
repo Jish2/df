@@ -1,5 +1,10 @@
-# reload
-alias r="source ~/.zshrc && tmux source-file ~/.tmux.conf"
+# reload shell config; reload tmux only when a server is already running
+unalias r 2>/dev/null
+r() {
+  source ~/.zshrc
+  local _tmux_sock="/tmp/tmux-$(id -u)/default"
+  [[ -S "$_tmux_sock" ]] && tmux source-file ~/.tmux.conf
+}
 
 # open config
 alias config="nvim ~/.zshrc"

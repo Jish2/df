@@ -7,7 +7,7 @@
    `$ nix-shell -p yadm`
 
 3. yadm clone repo
-   `$ yadm clone git@github.tesla.com:jgoon/df.git`
+   `$ yadm clone https://github.com/Jish2/df.git`
 
 4. run make in nix
    `$ cd ~/.config/nix && make`
