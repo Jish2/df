@@ -26,7 +26,8 @@ focus_pane_right = ["prefix+l", "ctrl+l"]
 navigate_workspace_up = ["up", "k"]
 navigate_workspace_down = ["down", "j"]
 # Jump to agent 1–9 in the Agents panel order (topmost = 1).
-focus_agent = "prefix+alt+1..9"
+# Use ctrl (not alt): macOS Option+1 types ¡ and never reaches Herdr.
+focus_agent = "prefix+ctrl+1..9"
 
 [[keys.command]]
 key = "prefix+alt+g"
@@ -35,7 +36,7 @@ command = "lazygit"
 description = "lazygit"
 
 [ui]
-mouse_scroll_lines = 1
+mouse_scroll_lines = 2
 # Attention queue: blocked → done → working → idle (done near the top).
 agent_panel_sort = "priority"
 
