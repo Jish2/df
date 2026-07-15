@@ -1,0 +1,23 @@
+{
+  "hooks": {
+    "afterAgentResponse": [
+      {
+        "command": "bash '/Users/jgoon/.cursor/herdr-tab-from-cursor-title.sh'"
+      }
+    ],
+    "sessionStart": [
+      {
+        "command": "bash '/Users/jgoon/.cursor/herdr-agent-state.sh' session"
+      },
+      {
+        "command": "bash '/Users/jgoon/.cursor/herdr-tab-from-cursor-title.sh'"
+      }
+    ],
+    "stop": [
+      {
+        "command": "bash '/Users/jgoon/.cursor/herdr-tab-from-cursor-title.sh'"
+      }
+    ]
+  },
+  "version": 1
+}
