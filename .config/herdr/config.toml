@@ -17,11 +17,21 @@ auto_switch = true
 light_name = "catppuccin-latte"
 dark_name = "catppuccin"
 
+[keys]
+prefix = "ctrl+a"
+focus_pane_left = ["prefix+h", "ctrl+h"]
+focus_pane_down = ["prefix+j", "ctrl+j"]
+focus_pane_up = ["prefix+k", "ctrl+k"]
+focus_pane_right = ["prefix+l", "ctrl+l"]
+
 [[keys.command]]
 key = "prefix+alt+g"
 type = "pane"
 command = "lazygit"
 description = "lazygit"
+
+[ui]
+mouse_scroll_lines = 1
 
 [ui.toast]
 delivery = "system"
@@ -53,3 +63,9 @@ cursor = [
 
 [session]
 resume_agents_on_restore = true
+
+[advanced]
+scrollback_limit_bytes = 100000000
+
+[experimental]
+pane_history = true
