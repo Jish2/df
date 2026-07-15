@@ -24,11 +24,8 @@ command = "lazygit"
 description = "lazygit"
 
 [ui.toast]
-delivery = "herdr"
+delivery = "system"
 delay_seconds = 1
-
-[ui.toast.herdr]
-position = "bottom-right"
 
 [ui.sidebar.agents]
 row_gap = 1
