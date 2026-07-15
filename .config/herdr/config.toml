@@ -25,6 +25,8 @@ focus_pane_up = ["prefix+k", "ctrl+k"]
 focus_pane_right = ["prefix+l", "ctrl+l"]
 navigate_workspace_up = ["up", "k"]
 navigate_workspace_down = ["down", "j"]
+# Jump to agent 1–9 in the Agents panel order (topmost = 1).
+focus_agent = "prefix+alt+1..9"
 
 [[keys.command]]
 key = "prefix+alt+g"
@@ -34,6 +36,8 @@ description = "lazygit"
 
 [ui]
 mouse_scroll_lines = 1
+# Attention queue: blocked → done → working → idle (done near the top).
+agent_panel_sort = "priority"
 
 [ui.toast]
 delivery = "system"
