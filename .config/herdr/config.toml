@@ -39,6 +39,8 @@ description = "lazygit"
 mouse_scroll_lines = 2
 # Attention queue: blocked → done → working → idle (done near the top).
 agent_panel_sort = "priority"
+# tmux-style shared dividers (default true leaves a gap between pane borders)
+pane_gaps = false
 
 [ui.toast]
 delivery = "system"
