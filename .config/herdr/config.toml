@@ -23,6 +23,9 @@ focus_pane_left = ["prefix+h", "ctrl+h"]
 focus_pane_down = ["prefix+j", "ctrl+j"]
 focus_pane_up = ["prefix+k", "ctrl+k"]
 focus_pane_right = ["prefix+l", "ctrl+l"]
+# Also accept ctrl+n/p after prefix so holding Control still cycles tabs.
+previous_tab = ["prefix+p", "prefix+ctrl+p"]
+next_tab = ["prefix+n", "prefix+ctrl+n"]
 navigate_workspace_up = ["up", "k"]
 navigate_workspace_down = ["down", "j"]
 # Jump to agent 1–9 in the Agents panel order (topmost = 1).
@@ -41,10 +44,14 @@ mouse_scroll_lines = 2
 agent_panel_sort = "priority"
 # tmux-style shared dividers (default true leaves a gap between pane borders)
 pane_gaps = false
+navigator_start_in_search = true
 
 [ui.toast]
 delivery = "system"
 delay_seconds = 1
+
+[ui.sidebar.spaces]
+row_gap = 1
 
 [ui.sidebar.agents]
 row_gap = 1
