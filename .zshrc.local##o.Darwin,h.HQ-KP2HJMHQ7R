@@ -13,3 +13,10 @@ export PATH=/opt/rbx/infosec/safe-git-push:$PATH
 export ENABLE_PRE_PUSH_CHECK=false
 export ENABLE_PUSH_REVIEW=false
 
+# codex
+alias codex='CODEX_HOME=/Users/jgoon/.brodex brodex'
+
+# herdr / libghostty-vt needs Homebrew zig 0.15.2 (not PATH zig 0.16)
+if [ -x "$(brew --prefix zig@0.15 2>/dev/null)/bin/zig" ]; then
+  export ZIG="$(brew --prefix zig@0.15)/bin/zig"
+fi
