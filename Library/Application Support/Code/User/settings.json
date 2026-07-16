@@ -137,5 +137,5 @@
     "vscode",
     "vscode-insiders",
     "docker-desktop"
-  ]
+  ],"remote.SSH.remotePlatform": {"coder-vscode.dev.rbx.com--jgoon--jgoon-test.dev":"linux"},"remote.SSH.connectTimeout": 1800,"remote.SSH.serverShutdownTimeout": 28800,"remote.SSH.reconnectionGraceTime": 28800,"remote.SSH.maxReconnectionAttempts": null
 }
