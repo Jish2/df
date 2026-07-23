@@ -1,0 +1,28 @@
+{
+  "description": "Personal Herdr integrations for Codex chats.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "^resume$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '/Users/jgoon/.codex/herdr-tab-from-codex-title.sh'",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '/Users/jgoon/.codex/herdr-tab-from-codex-title.sh'",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
