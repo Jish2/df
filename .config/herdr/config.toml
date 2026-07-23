@@ -39,6 +39,18 @@ type = "pane"
 command = "lazygit"
 description = "lazygit"
 
+[[keys.command]]
+key = "prefix+shift+c"
+type = "shell"
+command = '''
+set -eu
+worktree="$(treehouse get --lease --lease-holder herdr)"
+created="$("$HERDR_BIN_PATH" tab create --workspace "$HERDR_ACTIVE_WORKSPACE_ID" --cwd "$worktree" --focus)"
+pane_id="$(printf '%s\n' "$created" | python3 -c 'import json, sys; print(json.load(sys.stdin)["result"]["root_pane"]["pane_id"])')"
+"$HERDR_BIN_PATH" pane run "$pane_id" "exec agent"
+'''
+description = "new feature agent"
+
 [ui]
 mouse_scroll_lines = 2
 # Attention queue: blocked → done → working → idle (done near the top).
