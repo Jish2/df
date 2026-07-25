@@ -1,0 +1,3 @@
+[hooks]
+post_create = ["./scripts/post-create.sh"]
+pre_destroy = ["./scripts/pre-destroy.sh"]
