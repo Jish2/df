@@ -59,7 +59,7 @@
                         "title": "MS Remote Desktop"
                     },
                     {
-                        "description": "CAPS > ESC, CAPS+H/J/K/L > ←↓↑→, CAPS+D/U > PG↓↑",
+                        "description": "CAPS > ESC, CAPS+A > CTRL+A, CAPS+H/J/K/L > ←↓↑→, CAPS+D/U > PG↓↑",
                         "manipulators": [
                             {
                                 "conditions": [
@@ -278,6 +278,28 @@
                                 "to": [
                                     {
                                         "key_code": "page_up"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "caps_lock pressed",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    }
+                                ],
+                                "description": "caps + a -> control + a",
+                                "from": {
+                                    "key_code": "a"
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "a",
+                                        "modifiers": [
+                                            "left_control"
+                                        ]
                                     }
                                 ],
                                 "type": "basic"
