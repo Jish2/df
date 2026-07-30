@@ -48,6 +48,32 @@ alias gwtc='create_genji_worktree'
 
 alias gwt='git worktree'
 
+# fuzzy cd into a git worktree
+cwt() {
+  local selection path
+
+  selection=$(
+    git worktree list --porcelain |
+    awk '
+      /^worktree / {
+        path = substr($0, 10)
+      }
+      /^branch / {
+        branch = $2
+        sub("refs/heads/", "", branch)
+        print branch "\t" path
+      }
+      /^detached/ {
+        print "(detached)\t" path
+      }
+    ' |
+    fzf --delimiter=$'\t' --with-nth=1,2
+  ) || return
+
+  path="${selection#*$'\t'}"
+  cd "$path"
+}
+
 alias sqlite='/opt/homebrew/Cellar/sqlite/3.50.1/bin/sqlite3'
 
 alias kubectl='kubecolor'
