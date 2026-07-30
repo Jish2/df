@@ -249,7 +249,7 @@ require('lazy').setup({
     -- Fuzzy Finder (files, lsp, etc)
     'nvim-telescope/telescope.nvim',
     event = 'VimEnter',
-    branch = '0.1.x',
+    branch = 'master',
     dependencies = {
       'nvim-lua/plenary.nvim',
       {
@@ -293,9 +293,6 @@ require('lazy').setup({
       require('telescope').setup {
         -- You can put your default mappings / updates / etc. in here
         --  All the info you're looking for is in `:help telescope.setup()`
-        defaults = {
-          preview = { treesitter = false },
-        },
         extensions = {
           ['ui-select'] = {
             require('telescope.themes').get_dropdown(),
@@ -942,12 +939,57 @@ require('lazy').setup({
   {
     -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
+    branch = 'main',
+    lazy = false,
     build = ':TSUpdate',
-    dependencies = { 'nvim-treesitter/nvim-treesitter-textobjects' },
-    main = 'nvim-treesitter.configs', -- Sets main module to use for opts
-    -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
-    opts = {
-      ensure_installed = {
+    dependencies = {
+      {
+        'nvim-treesitter/nvim-treesitter-textobjects',
+        branch = 'main',
+        config = function()
+          require('nvim-treesitter-textobjects').setup {
+            select = { lookahead = true },
+            move = { set_jumps = true },
+          }
+
+          local select = require 'nvim-treesitter-textobjects.select'
+          local function select_map(lhs, query, desc)
+            vim.keymap.set({ 'x', 'o' }, lhs, function()
+              select.select_textobject(query, 'textobjects')
+            end, { desc = desc })
+          end
+
+          select_map('af', '@function.outer', 'Select outer function')
+          select_map('if', '@function.inner', 'Select inner function')
+          select_map('ac', '@class.outer', 'Select outer class')
+          select_map('ic', '@class.inner', 'Select inner class')
+
+          local move = require 'nvim-treesitter-textobjects.move'
+          local function move_map(lhs, method, query, query_group, desc)
+            vim.keymap.set({ 'n', 'x', 'o' }, lhs, function()
+              move[method](query, query_group)
+            end, { desc = desc })
+          end
+
+          move_map(']m', 'goto_next_start', '@function.outer', 'textobjects', 'Next function start')
+          move_map(']]', 'goto_next_start', '@class.outer', 'textobjects', 'Next class start')
+          move_map(']o', 'goto_next_start', { '@loop.inner', '@loop.outer' }, 'textobjects', 'Next loop start')
+          move_map(']s', 'goto_next_start', '@local.scope', 'locals', 'Next scope')
+          move_map(']z', 'goto_next_start', '@fold', 'folds', 'Next fold')
+          move_map(']M', 'goto_next_end', '@function.outer', 'textobjects', 'Next function end')
+          move_map('][', 'goto_next_end', '@class.outer', 'textobjects', 'Next class end')
+          move_map('[m', 'goto_previous_start', '@function.outer', 'textobjects', 'Previous function start')
+          move_map('[[', 'goto_previous_start', '@class.outer', 'textobjects', 'Previous class start')
+          move_map('[M', 'goto_previous_end', '@function.outer', 'textobjects', 'Previous function end')
+          move_map('[]', 'goto_previous_end', '@class.outer', 'textobjects', 'Previous class end')
+          move_map(']d', 'goto_next', '@conditional.outer', 'textobjects', 'Next conditional')
+          move_map('[d', 'goto_previous', '@conditional.outer', 'textobjects', 'Previous conditional')
+        end,
+      },
+    },
+    config = function()
+      local treesitter = require 'nvim-treesitter'
+      local ensure_installed = {
         'bash',
         'c',
         'diff',
@@ -963,75 +1005,19 @@ require('lazy').setup({
         'typescript',
         'tsx',
         'python',
-      },
-      -- Autoinstall languages that are not installed
-      auto_install = true,
-      highlight = {
-        enable = true,
-        -- Some languages depend on vim's regex highlighting system (such as Ruby) for indent rules.
-        --  If you are experiencing weird indenting issues, add the language to
-        --  the list of additional_vim_regex_highlighting and disabled languages for indent.
-        additional_vim_regex_highlighting = { 'ruby' },
-      },
-      indent = { enable = true, disable = { 'ruby' } },
-      textobjects = {
-        select = {
-          enable = true,
-          lookahead = true,
-          keymaps = {
-            -- You can use the capture groups defined in textobjects.scm
-            ['af'] = '@function.outer',
-            ['if'] = '@function.inner',
-            ['ac'] = '@class.outer',
-            ['ic'] = '@class.inner',
-          },
-        },
-        move = {
-          enable = true,
-          set_jumps = true, -- whether to set jumps in the jumplist
-          goto_next_start = {
-            [']m'] = '@function.outer',
-            [']]'] = { query = '@class.outer', desc = 'Next class start' },
-            --
-            -- You can use regex matching (i.e. lua pattern) and/or pass a list in a "query" key to group multiple queries.
-            [']o'] = '@loop.*',
-            -- ["]o"] = { query = { "@loop.inner", "@loop.outer" } }
-            --
-            -- You can pass a query group to use query from `queries/<lang>/<query_group>.scm file in your runtime path.
-            -- Below example nvim-treesitter's `locals.scm` and `folds.scm`. They also provide highlights.scm and indent.scm.
-            [']s'] = { query = '@local.scope', query_group = 'locals', desc = 'Next scope' },
-            [']z'] = { query = '@fold', query_group = 'folds', desc = 'Next fold' },
-          },
-          goto_next_end = {
-            [']M'] = '@function.outer',
-            [']['] = '@class.outer',
-          },
-          goto_previous_start = {
-            ['[m'] = '@function.outer',
-            ['[['] = '@class.outer',
-          },
-          goto_previous_end = {
-            ['[M'] = '@function.outer',
-            ['[]'] = '@class.outer',
-          },
-          -- Below will go to either the start or the end, whichever is closer.
-          -- Use if you want more granular movements
-          -- Make it even more gradual by adding multiple queries and regex.
-          goto_next = {
-            [']d'] = '@conditional.outer',
-          },
-          goto_previous = {
-            ['[d'] = '@conditional.outer',
-          },
-        },
-      },
-    },
-    -- There are additional nvim-treesitter modules that you can use to interact
-    -- with nvim-treesitter. You should go explore a few and see what interests you:
-    --
-    --    - Incremental selection: Included, see `:help nvim-treesitter-incremental-selection-mod`
-    --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
-    --    - Treesitter + textobjects: [link](https://github.com/nvim-treesitter/nvim-treesitter-textobjects)
+      }
+
+      treesitter.install(ensure_installed)
+
+      vim.api.nvim_create_autocmd('FileType', {
+        desc = 'Enable Tree-sitter highlighting and indentation',
+        callback = function()
+          if pcall(vim.treesitter.start) then
+            vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+          end
+        end,
+      })
+    end,
   },
   {
     'folke/flash.nvim',
