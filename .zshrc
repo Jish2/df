@@ -14,6 +14,11 @@ source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 # aliases
 source $HOME/.aliases
 
+# custom functions
+for f in ~/.config/zsh/functions/*.zsh(N); do
+  source "$f"
+done
+
 # zoxide
 eval "$(zoxide init zsh --cmd cd)"
 
@@ -32,6 +37,7 @@ command -v pyenv >/dev/null && eval "$(pyenv init -)"
 
 # volta
 export PATH="/Users/jgoon/.volta/bin:$PATH"
+export PATH="$HOME/bin:$PATH"
 
 # kubectl krew
 export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
@@ -85,4 +91,9 @@ export PATH="$HOME/.local/bin:$PATH"
 
 # load secrets
 [[ -f ~/.zshrc.secrets ]] && source ~/.zshrc.secrets
-alias gpt='~/github/scripts/query-chat-gpt-through-codex.sh'
+
+# Auto-start or attach tmux on SSH login
+# if [ -n "$SSH_CONNECTION" ] && [ -z "$TMUX" ]; then
+#   tmux attach -t main || tmux new -s main
+# fi
+export PATH="/opt/homebrew/opt/rustup/bin:$PATH"
