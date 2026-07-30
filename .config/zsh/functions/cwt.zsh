@@ -1,6 +1,6 @@
 # fuzzy cd into a git worktree
 cwt() {
-  local selection path
+  local selection worktree_path
 
   selection=$(
     git worktree list --porcelain |
@@ -20,6 +20,6 @@ cwt() {
     fzf --delimiter=$'\t' --with-nth=1,2
   ) || return
 
-  path="${selection#*$'\t'}"
-  cd "$path"
+  worktree_path="${selection#*$'\t'}"
+  cd "$worktree_path"
 }
