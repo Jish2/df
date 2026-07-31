@@ -158,6 +158,15 @@ export PATH="$HOME/.local/bin:$PATH"
 #   tmux attach -t main || tmux new -s main
 # fi
 export PATH="/opt/homebrew/opt/rustup/bin:$PATH"
+
+alias codex="$HOME/.local/bin/codex-rbx"
+
 alias gpt='~/github/scripts/query-chat-gpt-through-codex.sh'
 
 unset _brew_prefix
+
+
+# # Auto-start or attach tmux on SSH login
+# if [ -n "$SSH_CONNECTION" ] && [ -z "$TMUX" ]; then
+#   tmux attach -t main || tmux new -s main
+# fi
