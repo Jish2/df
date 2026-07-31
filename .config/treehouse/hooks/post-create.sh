@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Treehouse post_create hook: warm package installs when a worktree is new/empty.
-# Opt-in: enable from ~/.config/treehouse/config.toml (repo treehouse.toml hooks
+# Opt-in: uncomment in ~/.config/treehouse/config.toml (repo treehouse.toml hooks
 # are ignored). Runs with cwd set to the acquired worktree.
 #
 #   [hooks]
-#   post_create = ["bash ./scripts/treehouse-post-create.sh"]
+#   post_create = ["bash \"$HOME/.config/treehouse/hooks/post-create.sh\""]
 #
 set -euo pipefail
 
