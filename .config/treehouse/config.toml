@@ -1,3 +1,8 @@
+# User-level treehouse config (hooks are ignored in repo treehouse.toml).
+# Hook commands run with cwd = the worktree directory.
+#
+# Opt-in: uncomment post_create to warm deps on first acquire of an empty tree.
+
 [hooks]
-# post_create = ["./scripts/post-create.sh"]
-# pre_destroy = ["./scripts/pre-destroy.sh"]
+# post_create = ["bash \"$HOME/.config/treehouse/hooks/post-create.sh\""]
+# pre_destroy = ["bash \"$HOME/.config/treehouse/hooks/pre-destroy.sh\""]
