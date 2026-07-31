@@ -1,5 +1,8 @@
 # work .zshrc.local config
 
+# Inherit Darwin-wide defaults first.
+[ -f "$HOME/.zshrc.local##o.Darwin" ] && source "$HOME/.zshrc.local##o.Darwin"
+
 # setup go + rbx
 export GOPROXY=https://artifactory.rbx.com/api/go/go-all
 export GONOSUMDB=github.rbx.com
