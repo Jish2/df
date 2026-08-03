@@ -26,7 +26,20 @@ eval "$(zoxide init zsh --cmd cd)"
 # fpath+=("$(brew --prefix)/share/zsh/site-functions")
 autoload -U promptinit; promptinit
 prompt pure
-prompt_newline=$(echo -n "\u00A0")
+
+# A tree marks shells opened by `treehouse get` or `treehouse enter`.
+# Keep it in Pure's preprompt (the path and Git information line), and put the
+# command prompt itself on a separate line. Pure expands `prompt_newline` only
+# once, so use its native psvar state rather than a nested command substitution.
+treehouse_prompt_precmd() {
+  psvar[21]=
+  if [[ -n ${TREEHOUSE_DIR:-} ]] &&
+     { [[ $PWD == "$TREEHOUSE_DIR" ]] || [[ $PWD == "$TREEHOUSE_DIR"/* ]]; }; then
+    psvar[21]='🌳'
+  fi
+}
+add-zsh-hook precmd treehouse_prompt_precmd
+prompt_newline=' %(21V.%F{green}%21v%f.)'$'\n%{\r%}'
 
 # terraform
 autoload -U +X bashcompinit && bashcompinit
@@ -96,4 +109,5 @@ export PATH="$HOME/.local/bin:$PATH"
 # if [ -n "$SSH_CONNECTION" ] && [ -z "$TMUX" ]; then
 #   tmux attach -t main || tmux new -s main
 # fi
+
 export PATH="/opt/homebrew/opt/rustup/bin:$PATH"
