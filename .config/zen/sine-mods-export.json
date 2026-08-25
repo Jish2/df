@@ -1,0 +1,64 @@
+[
+  {
+    "id": "zen-command-palette",
+    "homepage": "https://github.com/Vertex-Mods/Zen-Command-Palette",
+    "name": "Zen Command Palette",
+    "description": "A powerful, extensible command interface for Zen Browser, seamlessly integrated into the URL bar. Inspired by Raycast and Arc.",
+    "author": "Bibek Bhusal",
+    "version": "1.9.1",
+    "updatedAt": "2026-08-25",
+    "tags": [
+      "command",
+      "palette",
+      "raycast",
+      "arc",
+      "productivity",
+      "zen browser",
+      "urlbar"
+    ],
+    "fork": ["zen"],
+    "preferences": "preferences.json",
+    "style": {
+      "chrome": "style.css",
+      "content": ""
+    },
+    "scripts": {
+      "zen-command-palette.uc.js": {
+        "include": ["chrome://browser/content/browser.xhtml"]
+      }
+    },
+    "readme": "https://raw.githubusercontent.com/Vertex-Mods/Zen-Command-Palette/main/readme.md",
+    "createdAt": "2024-09-07",
+    "no-updates": false,
+    "enabled": true
+  },
+  {
+    "id": "zen-live-calendar",
+    "name": "Live Calendar",
+    "description": "Brings the live calendar functionality from Arc to Zen, making it feel as native as possible.",
+    "homepage": "https://github.com/Vertex-Mods/Zen-Live-Calendar",
+    "readme": "https://raw.githubusercontent.com/Vertex-Mods/Zen-Live-Calendar/refs/heads/main/README.md",
+    "image": "https://github.com/Vertex-Mods/Zen-Live-Calendar/blob/main/image.png?raw=true",
+    "scripts": {
+      "live-calendar.uc.mjs": {
+        "include": ["chrome://browser/content/browser.xhtml"],
+        "version": "2.0",
+        "name": "Live Calendar",
+        "description": "Arc-style calendar preview for Google Calendar tabs (Firefox/Zen)"
+      }
+    },
+    "author": "Vertex",
+    "version": "1.0.0",
+    "tags": ["Zen", "fx-autoconfig", "Calendar", "Arc", "Live"],
+    "createdAt": "2025-06-18",
+    "updatedAt": "2025-06-18",
+    "fork": ["zen"],
+    "style": {
+      "chrome": "",
+      "content": ""
+    },
+    "preferences": "",
+    "no-updates": false,
+    "enabled": true
+  }
+]
