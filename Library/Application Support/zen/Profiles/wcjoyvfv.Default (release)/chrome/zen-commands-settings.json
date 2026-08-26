@@ -1,0 +1,29 @@
+{
+  "hiddenCommands": [],
+  "customIcons": {},
+  "customShortcuts": {},
+  "toolbarButtons": [],
+  "customCommands": [
+    {
+      "type": "js",
+      "id": "zen-inbox-move",
+      "name": "Move Tab to Inbox",
+      "icon": "chrome://browser/skin/zen-icons/selectable/inbox.svg",
+      "code": "const w = Services.wm.getMostRecentWindow(\"navigator:browser\");\nw.__zenInbox?.setInbox([w.gBrowser.selectedTab], true);"
+    },
+    {
+      "type": "js",
+      "id": "zen-inbox-remove",
+      "name": "Remove Tab from Inbox",
+      "icon": "chrome://browser/skin/zen-icons/selectable/inbox.svg",
+      "code": "const w = Services.wm.getMostRecentWindow(\"navigator:browser\");\nw.__zenInbox?.setInbox([w.gBrowser.selectedTab], false);"
+    },
+    {
+      "type": "js",
+      "id": "zen-inbox-toggle",
+      "name": "Toggle Tab in Inbox",
+      "icon": "chrome://browser/skin/zen-icons/selectable/inbox.svg",
+      "code": "const w = Services.wm.getMostRecentWindow(\"navigator:browser\");\nconst tab = w.gBrowser.selectedTab;\nw.__zenInbox?.setInbox([tab], !tab.hasAttribute(\"zen-inbox\"));"
+    }
+  ]
+}
