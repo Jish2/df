@@ -72,6 +72,7 @@
   let preferenceObserver = null;
   let collapseObserver = null;
   let inboxDragOverHeader = null;
+  let inboxTabDragInProgress = false;
 
   function isTab(tab) {
     return Boolean(tab && window.gBrowser?.isTab(tab));
@@ -526,8 +527,16 @@
     setInbox(candidates, true);
   }
 
+  function onInboxDragStart(event) {
+    if (event.target?.closest?.(".tabbrowser-tab")) {
+      inboxTabDragInProgress = true;
+    }
+  }
+
   function onInboxDragEnd() {
+    inboxTabDragInProgress = false;
     clearInboxDragOver();
+    refreshSoon();
   }
 
   function prepareHeader(header) {
@@ -934,15 +943,24 @@
   function scheduleRefresh() {
     clearTimeout(refreshTimer);
     const delay = MINUTE_MS - (Date.now() % MINUTE_MS) + 100;
-    refreshTimer = setTimeout(refresh, delay);
+    refreshTimer = setTimeout(() => {
+      refreshTimer = null;
+      if (inboxTabDragInProgress) {
+        return;
+      }
+      refresh();
+    }, delay);
   }
 
   function refreshSoon() {
-    if (refreshSoonTimer) {
+    if (refreshSoonTimer || inboxTabDragInProgress) {
       return;
     }
     refreshSoonTimer = setTimeout(() => {
       refreshSoonTimer = null;
+      if (inboxTabDragInProgress) {
+        return;
+      }
       refresh();
     }, 0);
   }
@@ -1181,6 +1199,7 @@
     window.addEventListener("ZenWorkspacesUIUpdate", onWorkspaceEvent);
     window.addEventListener("ZenWorkspaceDataChanged", onWorkspaceEvent);
     window.addEventListener("AfterWorkspacesSessionRestore", onWorkspaceEvent);
+    window.addEventListener("dragstart", onInboxDragStart, true);
     window.addEventListener("dragover", onInboxDragOver, true);
     window.addEventListener("drop", onInboxDrop, true);
     window.addEventListener("dragend", onInboxDragEnd, true);
@@ -1219,9 +1238,11 @@
     collapseObserver?.disconnect();
     collapseObserver = null;
     document.removeEventListener("command", onCommand, true);
+    window.removeEventListener("dragstart", onInboxDragStart, true);
     window.removeEventListener("dragover", onInboxDragOver, true);
     window.removeEventListener("drop", onInboxDrop, true);
     window.removeEventListener("dragend", onInboxDragEnd, true);
+    inboxTabDragInProgress = false;
     clearInboxDragOver();
 
     if (contextMenu) {
