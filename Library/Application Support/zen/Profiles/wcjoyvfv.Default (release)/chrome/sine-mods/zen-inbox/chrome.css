@@ -1,0 +1,293 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
+/*
+ * Inbox tabs live in the pinned section, immediately before Zen's divider.
+ * They remain unpinned tabs, so Zen's tab model and unload behavior stay
+ * intact while the Inbox has its own visual lane.
+ */
+.zen-workspace-pinned-tabs-section {
+  & > .zen-inbox-header {
+    --tab-group-color: transparent !important;
+    --tab-group-color-pale: transparent !important;
+
+    align-items: center;
+    cursor: pointer;
+    display: flex;
+    flex: 0 0 auto !important;
+    font-weight: 600;
+    height: calc(var(--tab-margin-block) * 2 + var(--tab-min-height));
+    margin: 0 var(--tab-margin-block) !important;
+    margin-inline-end: 0 !important;
+    padding-block-end: 0 !important;
+    padding-inline: var(--tab-group-label-padding);
+    position: relative;
+    top: 0 !important;
+    width: calc(100% - var(--tab-margin-block));
+    -moz-window-dragging: no-drag;
+
+    &::before {
+      background-color: transparent;
+      border-radius: var(--border-radius-medium);
+      content: "";
+      height: calc(100% - 4px);
+      left: 2px;
+      pointer-events: none;
+      position: absolute;
+      top: 2px;
+      width: calc(100% - 4px);
+      z-index: -1;
+    }
+
+    &:is(:hover, [zen-inbox-dragover="true"])::before {
+      background-color: var(--tab-background-color-hover) !important;
+    }
+
+    &[zen-inbox-dragover="true"]::before {
+      outline: 1px solid
+        color-mix(in srgb, var(--zen-primary-color) 65%, transparent);
+      outline-offset: -1px;
+    }
+
+    &::after {
+      display: none;
+    }
+
+    :root[zen-sidebar-expanded="true"] & {
+      padding-inline-end: calc(var(--tab-group-label-padding) * 2);
+    }
+  }
+
+  & > .zen-inbox-header[hidden="true"] {
+    display: none;
+  }
+
+  & > .zen-inbox-header .zen-current-workspace-indicator-stack {
+    align-items: center;
+    display: flex;
+    height: 28px;
+    justify-content: center;
+    pointer-events: none;
+    position: absolute;
+    width: 28px;
+    -moz-context-properties: fill, fill-opacity;
+    fill: currentColor;
+    fill-opacity: 1;
+
+    :root[zen-sidebar-expanded="true"] & {
+      left: 3px;
+    }
+
+    & > .zen-current-workspace-indicator-icon {
+      height: 16px;
+      width: 16px;
+    }
+
+    & .zen-current-workspace-indicator-icon {
+      display: flex;
+      opacity: 1;
+      transform: translateX(-1px);
+      -moz-context-properties: fill, fill-opacity !important;
+      fill: currentColor !important;
+      list-style-image: url("chrome://browser/skin/zen-icons/selectable/inbox.svg");
+    }
+
+    & .zen-current-workspace-indicator-chevron {
+      transform: rotate(90deg) !important;
+    }
+  }
+
+  :root[zen-sidebar-expanded="true"] & > .zen-inbox-header {
+    &:is(:hover, [aria-expanded="false"]) {
+      & .zen-current-workspace-indicator-stack {
+        margin-inline-end: 0;
+      }
+
+      & .zen-current-workspace-indicator-icon {
+        display: none;
+      }
+
+      & .zen-current-workspace-indicator-chevron {
+        display: flex !important;
+        opacity: 1;
+      }
+    }
+
+    &[aria-expanded="false"] {
+      & .zen-current-workspace-indicator-chevron {
+        transform: rotate(0deg) !important;
+      }
+    }
+  }
+
+  & > .zen-inbox-header .zen-inbox-header-label {
+    align-items: center;
+    display: flex;
+    flex: 1;
+    height: 100% !important;
+    justify-content: flex-start !important;
+    margin: 0 !important;
+    min-width: 0;
+    padding: 0 0 0 32px !important;
+    align-content: center;
+    align-self: center !important;
+    border: none !important;
+    color: var(--toolbar-color) !important;
+    font-weight: 600;
+    overflow: hidden;
+    text-align: start !important;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100% !important;
+  }
+
+  & > .zen-inbox-header .zen-inbox-header-count {
+    background: color-mix(in srgb, var(--zen-primary-color) 24%, transparent);
+    border-radius: 999px;
+    font-size: 0.75em;
+    min-width: 1.5em;
+    padding: 1px 5px;
+    position: absolute;
+    right: calc(var(--tab-group-label-padding) * 2);
+    text-align: center;
+  }
+
+  &[zen-inbox-collapsed] > .tabbrowser-tab[zen-inbox="true"] {
+    display: none !important;
+  }
+
+  &[zen-inbox-animating] {
+    overflow-y: clip;
+  }
+
+  &[zen-inbox-animating] > .tabbrowser-tab[zen-inbox="true"] {
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  & > .tabbrowser-tab[zen-inbox="true"] {
+    :root[zen-sidebar-expanded="true"] & {
+      --zen-folder-indent: 14px;
+
+      margin-inline-start: var(--zen-folder-indent) !important;
+      transition: var(--zen-tabbox-element-indent-transition);
+    }
+
+    & .tab-label-container {
+      align-items: center;
+      flex: 1 1 auto;
+      flex-direction: row;
+      min-width: 0;
+    }
+
+    & .tab-label {
+      min-width: 0;
+      white-space: nowrap;
+    }
+
+    & .zen-inbox-age {
+      align-self: center;
+      color: var(--zen-inbox-age-color);
+      flex: 0 0 auto;
+      font: inherit;
+      font-weight: inherit;
+      line-height: inherit;
+      margin: 0;
+      margin-inline-start: 4px;
+      padding: 0;
+      pointer-events: none;
+      transition: transform 0.15s ease-in-out;
+      white-space: nowrap;
+    }
+
+    &:hover {
+      & .zen-inbox-age {
+        transform: translateX(-4px);
+      }
+
+      & .tab-close-button {
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
+    }
+  }
+}
+
+zen-workspace[zen-inbox-preserve-collapse]
+  > .workspace-arrowscrollbox
+  > .zen-workspace-pinned-tabs-section {
+  display: flex !important;
+  height: auto !important;
+  max-height: none !important;
+  min-height: fit-content !important;
+  overflow: visible !important;
+}
+
+zen-workspace[collapsedpinnedtabs][zen-inbox-preserve-collapse]
+  > .workspace-arrowscrollbox
+  > .zen-workspace-pinned-tabs-section
+  > :not(.zen-inbox-header):not([zen-inbox="true"]) {
+  display: none !important;
+}
+
+:root:not([zen-sidebar-expanded="true"]) {
+  & .zen-workspace-pinned-tabs-section > .zen-inbox-header {
+    display: flex;
+    justify-content: center;
+    height: calc(var(--tab-margin-block) * 2 + var(--tab-min-height));
+    margin: 0 !important;
+    padding: 0;
+    width: var(--tab-min-width);
+  }
+
+  & .zen-inbox-header-icon-stack {
+    left: auto;
+  }
+
+  & .zen-inbox-header-label {
+    visibility: hidden !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+
+  & .zen-inbox-header-count {
+    font-size: 9px;
+    min-width: 1.3em;
+    padding: 0 2px;
+    position: absolute;
+    right: 1px;
+    top: 1px;
+  }
+
+  &
+    .zen-workspace-pinned-tabs-section
+    > .tabbrowser-tab[zen-inbox="true"]
+    .zen-inbox-age {
+    display: none;
+  }
+
+  &
+    .zen-workspace-pinned-tabs-section
+    > .tabbrowser-tab[zen-inbox="true"]::after {
+    color: var(--zen-inbox-age-color);
+    content: attr(zen-inbox-age);
+    display: block;
+    font: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+    pointer-events: none;
+    position: absolute;
+    right: 1px;
+    top: 1px;
+  }
+
+  &
+    .zen-workspace-pinned-tabs-section
+    > .tabbrowser-tab[zen-inbox="true"]:hover::after {
+    transform: translateX(-4px);
+  }
+}

@@ -1,0 +1,80 @@
+[
+  {
+    "property": "zen.inbox.enabled",
+    "label": "Enable Zen Inbox",
+    "type": "checkbox",
+    "defaultValue": true
+  },
+  {
+    "property": "zen.inbox.green-hours",
+    "label": "Yellow color point",
+    "type": "dropdown",
+    "defaultValue": "4",
+    "options": [
+      {
+        "label": "1 hour",
+        "value": "1"
+      },
+      {
+        "label": "4 hours",
+        "value": "4"
+      },
+      {
+        "label": "8 hours",
+        "value": "8"
+      },
+      {
+        "label": "12 hours",
+        "value": "12"
+      }
+    ]
+  },
+  {
+    "property": "zen.inbox.yellow-hours",
+    "label": "Orange color point",
+    "type": "dropdown",
+    "defaultValue": "24",
+    "options": [
+      {
+        "label": "12 hours",
+        "value": "12"
+      },
+      {
+        "label": "24 hours",
+        "value": "24"
+      },
+      {
+        "label": "48 hours",
+        "value": "48"
+      },
+      {
+        "label": "72 hours",
+        "value": "72"
+      }
+    ]
+  },
+  {
+    "property": "zen.inbox.orange-hours",
+    "label": "Red color point",
+    "type": "dropdown",
+    "defaultValue": "72",
+    "options": [
+      {
+        "label": "24 hours",
+        "value": "24"
+      },
+      {
+        "label": "48 hours",
+        "value": "48"
+      },
+      {
+        "label": "72 hours",
+        "value": "72"
+      },
+      {
+        "label": "7 days",
+        "value": "168"
+      }
+    ]
+  }
+]
