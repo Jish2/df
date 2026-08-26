@@ -41,6 +41,7 @@
   const DRAGOVER_ATTRIBUTE = "zen-inbox-dragover";
 
   const ENABLED_PREF = "zen.inbox.enabled";
+  const SHOW_WHEN_EMPTY_PREF = "zen.inbox.show-when-empty";
   const GREEN_HOURS_PREF = "zen.inbox.green-hours";
   const YELLOW_HOURS_PREF = "zen.inbox.yellow-hours";
   const ORANGE_HOURS_PREF = "zen.inbox.orange-hours";
@@ -631,7 +632,12 @@
 
   function updateHeader(section, count) {
     const header = ensureHeader(section);
-    header.hidden = count === 0;
+    const enabled = Services.prefs.getBoolPref(ENABLED_PREF, true);
+    const showWhenEmpty = Services.prefs.getBoolPref(
+      SHOW_WHEN_EMPTY_PREF,
+      true,
+    );
+    header.hidden = !enabled || (count === 0 && !showWhenEmpty);
     header.setAttribute(
       "aria-label",
       `Inbox, ${count} tab${count === 1 ? "" : "s"}`,

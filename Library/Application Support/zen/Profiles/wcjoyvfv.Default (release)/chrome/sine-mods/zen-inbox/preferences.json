@@ -6,6 +6,12 @@
     "defaultValue": true
   },
   {
+    "property": "zen.inbox.show-when-empty",
+    "label": "Show Inbox when empty",
+    "type": "checkbox",
+    "defaultValue": true
+  },
+  {
     "property": "zen.inbox.green-hours",
     "label": "Yellow color point",
     "type": "dropdown",
