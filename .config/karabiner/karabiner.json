@@ -5,7 +5,7 @@
             "complex_modifications": {
                 "rules": [
                     {
-                        "description": "Zen Browser - Cmd+Option+Left/Right to previous/next tab (including QMK macro order)",
+                        "description": "Zen Browser - Cmd+Option+Left/Right to previous/next tab (all keyboards, including QMK macro order)",
                         "manipulators": [
                             {
                                 "conditions": [
@@ -94,15 +94,6 @@
                                             "app.zen-browser.zen"
                                         ],
                                         "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "identifiers": [
-                                            {
-                                                "product_id": 24926,
-                                                "vendor_id": 7504
-                                            }
-                                        ],
-                                        "type": "device_if"
                                     }
                                 ],
                                 "from": {
@@ -124,6 +115,32 @@
                                             "app.zen-browser.zen"
                                         ],
                                         "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "right_arrow",
+                                    "modifiers": { "mandatory": ["command", "option"] }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "close_bracket",
+                                        "modifiers": ["command", "shift"]
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "bundle_identifiers": [
+                                            "app.zen-browser.zen"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "caps_lock pressed",
+                                        "type": "variable_if",
+                                        "value": 1
                                     },
                                     {
                                         "identifiers": [
@@ -132,12 +149,49 @@
                                                 "vendor_id": 7504
                                             }
                                         ],
-                                        "type": "device_if"
+                                        "type": "device_unless"
                                     }
                                 ],
+                                "description": "Mac keyboard Caps+Control+H to previous Zen tab",
                                 "from": {
-                                    "key_code": "right_arrow",
-                                    "modifiers": { "mandatory": ["command", "option"] }
+                                    "key_code": "h",
+                                    "modifiers": { "mandatory": ["left_control"] }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "open_bracket",
+                                        "modifiers": ["command", "shift"]
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "bundle_identifiers": [
+                                            "app.zen-browser.zen"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "caps_lock pressed",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    },
+                                    {
+                                        "identifiers": [
+                                            {
+                                                "product_id": 24926,
+                                                "vendor_id": 7504
+                                            }
+                                        ],
+                                        "type": "device_unless"
+                                    }
+                                ],
+                                "description": "Mac keyboard Caps+Control+L to next Zen tab",
+                                "from": {
+                                    "key_code": "l",
+                                    "modifiers": { "mandatory": ["left_control"] }
                                 },
                                 "to": [
                                     {
