@@ -20,6 +20,10 @@
                                             {
                                                 "product_id": 24926,
                                                 "vendor_id": 7504
+                                            },
+                                            {
+                                                "product_id": 866,
+                                                "vendor_id": 10730
                                             }
                                         ],
                                         "type": "device_if"
@@ -60,6 +64,10 @@
                                             {
                                                 "product_id": 24926,
                                                 "vendor_id": 7504
+                                            },
+                                            {
+                                                "product_id": 866,
+                                                "vendor_id": 10730
                                             }
                                         ],
                                         "type": "device_if"
@@ -2047,6 +2055,15 @@
                         "is_pointing_device": true,
                         "product_id": 24926,
                         "vendor_id": 7504
+                    },
+                    "ignore": false
+                },
+                {
+                    "identifiers": {
+                        "is_keyboard": true,
+                        "is_pointing_device": true,
+                        "product_id": 866,
+                        "vendor_id": 10730
                     },
                     "ignore": false
                 }
