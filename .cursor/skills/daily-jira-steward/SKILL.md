@@ -18,7 +18,7 @@ Use this skill as a daily checkpoint routine. Its normal job is to capture what 
 - Do not create tickets for passing thoughts. Create tracking only when the user asks to track an idea or concrete evidence shows active work.
 - Prefer updating existing tickets over creating duplicates.
 - Never close or transition a ticket from local commits alone. Require merged PR evidence, explicit user instruction, or a clear Jira workflow signal.
-- Cursor chats and Slack are mandatory evidence sources for every normal run. Always inspect both for the checkpoint window before synthesizing what happened. For Cursor chats, read and follow `/Users/jgoon/.cursor/skills/cursor-chat-context/SKILL.md`.
+- Agent-harness chats and Slack are mandatory evidence sources for every normal run. Always inspect both for the checkpoint window before synthesizing what happened. Chats span multiple harnesses — gather them with the `sessions` CLI (one index over Cursor, Pi/tau, Claude Code, Codex, and OpenCode; see commands in step 1).
 - Do not silently drop reviewed evidence. When a discovered chat, PR, Slack thread, Jira ticket, or stale item is intentionally left out of the work log, `me.md`, or proposed updates, record a short reason.
 
 ## Core Workflow
@@ -37,28 +37,45 @@ approve a degraded run.
 
 When stopping for access, name the failed source, the failed command or tool category, and the shortest next action. Do not write a clean report, refresh `me.md`, sync the Google Doc, advance `last_completed_at`, advance `last_reviewed_through_at`, or mark pending items reviewed until access is repaired or the user explicitly approves a degraded run.
 
-Start with Cursor chats and Slack for the same checkpoint window.
+Start with agent-harness chats and Slack for the same checkpoint window.
 
-For Cursor chats, use the steward state file with `cursor-chat-search.py` (see `cursor-chat-context` skill):
+For chats, use the `sessions` CLI (user's fork of nicknisi/sessions — covers Cursor transcripts plus Pi/tau multi-home, Claude Code, Codex, and OpenCode in one index):
 
 ```bash
-python3 /Users/jgoon/.cursor/skills/cursor-chat-context/scripts/cursor-chat-search.py list \
-  --state-window --state-file /Users/jgoon/.cursor/skills/daily-jira-steward/state.json
-python3 /Users/jgoon/.cursor/skills/cursor-chat-context/scripts/cursor-chat-search.py search \
-  --state-window --state-file /Users/jgoon/.cursor/skills/daily-jira-steward/state.json "ROS-123"
-python3 /Users/jgoon/.cursor/skills/cursor-chat-context/scripts/cursor-chat-search.py show <chat-id>
+# Enumerate recent sessions across every harness (empty query = newest first);
+# filter the `date` field to the checkpoint window client-side. --print is
+# mandatory: without it the CLI opens an fzf picker that blocks without a TTY.
+sessions --print --json "" --limit 200
+
+# Search session content across all harnesses
+sessions --print --json "<query>" --limit 20
+
+# Read one session's arc (accepts an indexed sessionId or a jsonl file path)
+sessions digest <sessionId | filePath>
 ```
 
-For Slack, read `/Users/jgoon/.cursor/skills/slack/SKILL.md` and follow
-`/Users/jgoon/.cursor/skills/slack/WORKFLOWS.md` for the evidence-pass pattern.
-Use the bundled CLI (`SKILL_DIR="$HOME/.cursor/skills/slack"`,
-`CLI="$SKILL_DIR/scripts/slack_cli.py"`). In the access gate, refresh Mac-host
-auth with `bash "$SKILL_DIR/scripts/refresh-mcp-gateway-token.sh"` when needed,
-then run `uv run "$CLI" tools --env prod` before any real call. Always run a
-broad outbound `from:<@USER_ID>` search across the checkpoint window before
-targeted Slack searches. Then search terms from Cursor, GitHub, Jira, docs,
-branch names, PR titles, blocker words, and follow-up language. Expand only the
-highest-signal Slack threads or channel-history results.
+Result fields to use: `tool` (which harness), `project`, `date` (last-activity day; Cursor messages carry no per-message timestamps, so treat day boundaries as approximate), `sessionId`, `filePath`, `messageHits[]`. Digests are ~8k chars and may elide exchanges; read the session jsonl directly only when the digest signals missing evidence.
+
+The bundled `scripts/harness-session-scan.py` is superseded by `sessions` and kept only for reference.
+
+For Slack, read `/Users/jgoon/.cursor/skills/slack/SKILL.md` for auth and tool
+discovery. Two working CLIs hit the same MCP gateway:
+
+- `~/.tau/agent/skills/slack/scripts/slack_cli.py`: direct search, and its
+  `--after`/`--before` flags accept Unix epochs and correctly scope the window
+  (`uv run <cli> search --query "from:<@USER_ID>" --after <epoch> --before <epoch> --limit 50 --env prod`).
+- `~/.cursor/skills/slack/scripts/slack_cli.py`: `call <tool> --input <json>`
+  interface; reaches `slack_search_public_and_private`, but the gateway ignores
+  `after:`/`before:` tokens inside the query string — scope windows client-side.
+
+In the access gate, run `uv run <cli> tools --env prod` before any real call
+(refresh Mac-host auth with `bash ~/.cursor/skills/slack/scripts/refresh-mcp-gateway-token.sh`
+when needed). Always run a broad outbound `from:<@USER_ID>` search across the
+checkpoint window before targeted Slack searches. Then search terms from chats,
+GitHub, Jira, docs, branch names, PR titles, blocker words, and follow-up
+language. Expand only the highest-signal Slack threads or channel-history
+results: one failed expansion attempt per item, then record the channel/thread
+link and skip reason.
 
 Search GitHub, Slack, Jira, local branches/commits, docs, Confluence, Google Drive, Gmail, calendar, production signals, or other relevant systems when they identify work, blockers, decisions, or completion evidence.
 
@@ -131,20 +148,13 @@ Clear `pending_since_at` and `pending_draft_path` only after updates are applied
 
 The parent agent owns the review window, state file, access gate, synthesis, report-repo writes, Google Doc sync, pending draft, answers UI, and approved external writes.
 
-Use read-only subagents after the access gate when available. Give every subagent the exact review-window start and end, the citation rules, and a clear instruction to return concise evidence. Subagents must not mutate Jira, GitHub, Google Docs, the daily reports repo, or the steward state.
+The default run is a parallel fan-out: after the access gate passes, fire one read-only subagent per evidence lane below, then synthesize. Run lanes inline yourself only when subagents are unavailable. Give every subagent the exact review-window start and end, the citation rules, and a clear instruction to return concise evidence. Subagents must not mutate Jira, GitHub, Google Docs, the daily reports repo, or the steward state.
 
-Recommended split:
+Default lanes:
 
-- **Cursor chat evidence** (mandatory each run): read `cursor-chat-context` for CLI usage. Use `--state-window` with this skill's `state.json` (see commands in step 1). Inspect every listed parent prompt, selectively `search` and `show <chat-id>`, then return workstreams, artifacts, decisions, blockers, follow-ups, and parent chat IDs — not full transcript dumps. When delegating to a read-only subagent, pass the exact review-window start and end, citation rules, and the `cursor-chat-search.py` path. Omit `--project-root` unless the run should be limited to one workspace.
+- **Agent-harness chat evidence** (mandatory): use the `sessions` CLI commands from step 1. Enumerate the window (empty `--print --json ""` listing filtered to the window by `date`), review every in-window session's opening prompt, run targeted `sessions` searches on workstream terms, and `digest` the high-signal sessions. Return workstreams, artifacts, decisions, blockers, follow-ups, and session IDs — not full transcript dumps.
 - GitHub evidence: list PRs, commits, branches, reviews, and materially updated PRs during the window across relevant repos. Call out `[n/a]` gaps, merged PRs that may close tickets, and open PRs that imply status changes.
-- **Slack evidence** (mandatory each run): read `~/.cursor/skills/slack/SKILL.md`
-  and `WORKFLOWS.md`. Use `SKILL_DIR="$HOME/.cursor/skills/slack"` and
-  `uv run "$SKILL_DIR/scripts/slack_cli.py"`. Run `tools --env prod` first;
-  resolve the current user; broad outbound `from:<@USER_ID>` search with Unix
-  `after`/`before` for the window; targeted term searches; expand only
-  highest-signal threads or channel slices. Read-only — do not call mutating
-  Slack tools. Return coordination, decisions, support asks, blockers, important
-  misses, and expansion skips.
+- **Slack evidence** (mandatory each run): use the CLIs and window-scoping rules from step 1. Broad outbound `from:<@USER_ID>` search first; targeted term searches second; expand only highest-signal threads or channel slices. Read-only — do not call mutating Slack tools. Return coordination, decisions, support asks, blockers, important misses, and expansion skips.
 - Jira triage evidence: read current assigned/reported tickets, tickets linked from evidence, and stale-ticket searches. Return status mismatches, likely duplicates, needed comments, no-action tickets, and stale callouts.
 
 Ask each subagent to return:
@@ -172,17 +182,14 @@ If sources disagree, prefer direct artifact evidence and note uncertainty in the
 
 For Jira in the ROS workspace, first read `.cursor/skills/ros-atlassian/SKILL.md` and follow its routing. Outside ROS, use the available Jira or Atlassian skill. For GitHub, prefer `gh`.
 
-For Slack, read `/Users/jgoon/.cursor/skills/slack/SKILL.md` and
-`/Users/jgoon/.cursor/skills/slack/WORKFLOWS.md`. Always run a Slack pass for
+For Slack, read `/Users/jgoon/.cursor/skills/slack/SKILL.md` and use the CLI
+mechanics from step 1. Always run a Slack pass for
 the checkpoint window between the previous reviewed point and this run's
 `last_started_at`. Treat Slack as work-signal evidence, not transcript material.
 Capture decisions, requests, coordination, blockers, rollout notes, support
 triage, follow-ups, and stakeholder confirmations. Ignore standalone
 acknowledgements such as `thanks`, `no problem`, or emoji-only messages unless
 they anchor useful context.
-
-Follow `WORKFLOWS.md` for expansion and rate-limit rules: one failed expansion
-attempt per item, then record the channel/thread link and skip reason.
 
 Record both useful Slack hits and important Slack misses. Expand outside the window only when needed for context, such as reading a thread that started earlier or following a referenced decision.
 
@@ -204,6 +211,8 @@ Prefer direct evidence over inference. Do not copy long chat excerpts or sensiti
 State file: `~/.cursor/skills/daily-jira-steward/state.json`.
 
 Pending draft: `~/.cursor/skills/daily-jira-steward/pending-draft.md`.
+
+Canonical skill location: `~/.cursor/skills/daily-jira-steward`, mirrored to `~/.tau/agent/skills/daily-jira-steward`. The state and pending-draft paths above are absolute and shared, so both copies drive the same steward state. Edit the canonical copy, then re-mirror with `cp -R ~/.cursor/skills/daily-jira-steward ~/.tau/agent/skills/`.
 
 Daily reports repo: `/Users/jgoon/github/daily-reports`.
 
