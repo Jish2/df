@@ -177,7 +177,10 @@ export PATH="$HOME/.local/bin:$PATH"
 
 export PATH="/opt/homebrew/opt/rustup/bin:$PATH"
 
-alias codex="$HOME/.local/bin/codex-rbx"
+unalias codex 2>/dev/null
+if [ -x "$HOME/.local/bin/codex-rbx" ]; then
+  alias codex="$HOME/.local/bin/codex-rbx"
+fi
 
 alias gpt='~/github/scripts/query-chat-gpt-through-codex.sh'
 
