@@ -77,6 +77,10 @@ if whence -w prompt_pure_setup >/dev/null 2>&1; then
   }
   add-zsh-hook precmd treehouse_prompt_precmd
   prompt_newline=' %(21V.%F{green}%21v%f.)'$'\n%{\r%}'
+else
+  # Keep a useful Pure-style prompt on machines where Pure is not installed.
+  # The arrow turns red when the previous command failed.
+  PROMPT='%F{blue}%~%f'$'\n''%(?.%F{magenta}.%F{red})❯%f '
 fi
 
 # terraform
