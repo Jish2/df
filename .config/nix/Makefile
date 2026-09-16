@@ -6,10 +6,11 @@ FLAKE ?= ~/.config/nix
 
 work personal mini:
 	darwin-rebuild switch --flake $(FLAKE)#$@ || nix run nix-darwin -- switch --flake $(FLAKE)#$@
-	@$(MAKE) extensions
+	# @$(MAKE) extensions   # disabled for now — vscode manages extensions itself
 
 pc devspace:
 	home-manager switch --flake $(FLAKE)#$@ || nix run home-manager -- switch --flake $(FLAKE)#$@
 
+# not wired into the mac targets for now; run manually if wanted
 extensions:
 	@sh vscode/install-extensions.sh
