@@ -1,10 +1,15 @@
-.PHONY: default apply extensions
-default: apply extensions
+FLAKE ?= ~/.config/nix
 
-.PHONY: apply
-apply:
-	@darwin-rebuild switch --flake ~/.config/nix
+# fallback `nix run` covers first bootstraps where the CLI isn't installed yet
 
-.PHONY: extensions
+.PHONY: work personal mini pc devspace extensions
+
+work personal mini:
+	darwin-rebuild switch --flake $(FLAKE)#$@ || nix run nix-darwin -- switch --flake $(FLAKE)#$@
+	@$(MAKE) extensions
+
+pc devspace:
+	home-manager switch --flake $(FLAKE)#$@ || nix run home-manager -- switch --flake $(FLAKE)#$@
+
 extensions:
 	@sh vscode/install-extensions.sh
