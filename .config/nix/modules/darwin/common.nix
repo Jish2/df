@@ -55,6 +55,7 @@
       KeyRepeat = 2;
       InitialKeyRepeat = 15;
       "com.apple.swipescrolldirection" = true; # natural scrolling
+      "com.apple.mouse.scaling" = 0.6875; # mouse tracking speed (scroll speed is system default)
     };
 
     dock = {
@@ -71,7 +72,28 @@
       SecondClickThreshold = 1;
     };
 
+    menuExtraClock = {
+      ShowAMPM = true;
+      ShowDate = 2; # only when space allows
+      ShowDayOfWeek = false;
+    };
+
     CustomUserPreferences = {
+      # menu bar: battery hidden, wifi/sound/nowplaying/focus shown.
+      # keys written verbatim from a Tahoe dump — nix-darwin's first-class
+      # controlcenter options predate Tahoe's VisibleCC rename.
+      # (bento/cc item positions and analytics blobs deliberately not imported)
+      "com.apple.controlcenter" = {
+        "NSStatusItem Visible Battery" = 0;
+        "NSStatusItem Visible BentoBox" = 1;
+        "NSStatusItem Visible Shortcuts" = 0;
+        "NSStatusItem VisibleCC Clock" = 1;
+        "NSStatusItem VisibleCC FocusModes" = 1;
+        "NSStatusItem VisibleCC NowPlaying" = 1;
+        "NSStatusItem VisibleCC Sound" = 1;
+        "NSStatusItem VisibleCC WiFi" = 1;
+      };
+
       "com.apple.symbolichotkeys" = {
         AppleSymbolicHotKeys = {
           # keep spotlight (cmd+space), disable screenshot shortcuts
