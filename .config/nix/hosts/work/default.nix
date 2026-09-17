@@ -160,6 +160,9 @@
     ];
   };
 
+  # after verifying this import on the machine, go self-cleaning:
+  # homebrew.onActivation.cleanup = "zap";
+
   # not ported (imperative package managers, left as-is for now):
   #   krew plugins: modify-secret, resource-capacity, view-utilization
   #   npm globals:  corepack, pi-acp (volta/corepack manage these)
