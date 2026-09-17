@@ -63,6 +63,18 @@ make pc          # home-manager switch --flake ~/.config/nix#pc       (linux)
 **devspace:** same, `--no-daemon` if no sudo; put both steps in the Coder
 startup script so rebuilds re-apply. TODO: confirm arch + home persistence.
 
+## Per-mac onboarding (work is done; do this ON each new mac)
+
+1. `brew bundle dump` → reconcile into `hosts/<name>/default.nix`.
+   MANDATORY before first rebuild — `onActivation.cleanup = "zap"` uninstalls
+   anything undeclared. Insurance: set cleanup to `"none"` for the first run
+   if the import looks off, flip back after.
+2. defaults: nothing to do — the mac inherits work's `imported-defaults.nix`.
+   Diverge only deliberately: `scripts/fetch-baseline.sh` once, then
+   `export-defaults.py --baseline baseline/tahoe modules/darwin/imported-defaults-<name>.nix`
+   and import THAT from the host module instead of the shared one.
+3. HM `.bak`-backs-up any dotfile it replaces on first switch.
+
 ## Migration from yadm
 
 yadm stays live until the last file moves. Port in waves:
