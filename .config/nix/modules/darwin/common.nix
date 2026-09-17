@@ -198,10 +198,6 @@
   system.configurationRevision = self.rev or self.dirtyRev or null;
   system.stateVersion = 5;
 
-  system.activationScripts.postActivation.text = ''
-    defaultbrowser chrome
-  '';
-
   # copy apps into /Applications (as finder aliases) so spotlight indexes them
   system.activationScripts.applications.text =
     let

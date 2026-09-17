@@ -7,6 +7,12 @@
   networking.localHostName = "HQ-KP2HJMHQ7R";
   networking.computerName = "HQ-KP2HJMHQ7R";
 
+  # set the default browser (bundle id com.jgoon.satori; the defaultbrowser
+  # cli wants the lowercased last component, i.e. "satori")
+  system.activationScripts.postActivation.text = ''
+    defaultbrowser satori
+  '';
+
   # actual dock contents (`defaults read com.apple.dock persistent-apps`).
   # note: this makes the dock fully declarative — drag a new app in and the
   # next rebuild removes it again.
