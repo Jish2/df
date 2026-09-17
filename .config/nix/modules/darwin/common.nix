@@ -175,7 +175,10 @@
 
   homebrew = {
     enable = true;
-    onActivation.cleanup = "zap"; # anything undeclared gets uninstalled
+    # never delete by default: a rebuild only ever ADDS. after verifying the
+    # import on a machine (`brew bundle cleanup` lists what zap would
+    # remove), opt in per-host with "zap" so drift self-cleans.
+    onActivation.cleanup = "none";
   };
 
   programs.zsh = {
