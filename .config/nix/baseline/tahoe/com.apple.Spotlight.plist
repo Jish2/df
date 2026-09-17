@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>DisabledUTTypes</key>
+	<array/>
+	<key>EnabledPreferenceRules</key>
+	<array/>
+	<key>FTEResetForSuperSpotlight</key>
+	<true/>
+	<key>NSStatusItem VisibleCC Item-0</key>
+	<true/>
+	<key>PasteboardHistoryVersion</key>
+	<integer>2</integer>
+	<key>PreferencesVersion</key>
+	<integer>1</integer>
+	<key>SSActionKeyboardAliasStoreVersion</key>
+	<integer>1</integer>
+	<key>__NSEnableTSMDocumentWindowLevel</key>
+	<true/>
+	<key>startTime</key>
+	<real>811371509.625203</real>
+</dict>
+</plist>

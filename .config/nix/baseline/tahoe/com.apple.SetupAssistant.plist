@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>DidSeeAccessibility</key>
+	<true/>
+	<key>DidSeeActivationLock</key>
+	<false/>
+	<key>DidSeeAppStore</key>
+	<false/>
+	<key>DidSeeAppearanceSetup</key>
+	<true/>
+	<key>DidSeeApplePaySetup</key>
+	<false/>
+	<key>DidSeeCloudSetup</key>
+	<true/>
+	<key>DidSeeLockdownMode</key>
+	<false/>
+	<key>DidSeePrivacy</key>
+	<true/>
+	<key>DidSeeScreenTime</key>
+	<true/>
+	<key>DidSeeSiriSetup</key>
+	<true/>
+	<key>DidSeeSyncSetup</key>
+	<false/>
+	<key>DidSeeSyncSetup2</key>
+	<false/>
+	<key>DidSeeTermsOfAddress</key>
+	<false/>
+	<key>DidSeeTouchIDSetup</key>
+	<false/>
+	<key>DidSeeiCloudLoginForStorageServices</key>
+	<true/>
+	<key>InitialAccountOnMac</key>
+	<true/>
+	<key>InitialAccountSetupDate</key>
+	<date>2026-08-18T16:18:19Z</date>
+	<key>InitialSetupBuildVersion</key>
+	<string>25G83</string>
+	<key>LastPreLoginTasksPerformedBuild</key>
+	<string>25G83</string>
+	<key>LastPrivacyBundleVersion</key>
+	<string>2</string>
+	<key>LastSeenBuddyBuildVersion</key>
+	<string>25G83</string>
+	<key>MiniBuddyLaunchReason</key>
+	<integer>0</integer>
+	<key>MiniBuddyLaunchedPostMigration</key>
+	<false/>
+	<key>MiniBuddyShouldLaunchToResumeSetup</key>
+	<false/>
+	<key>NSAddServicesToContextMenus</key>
+	<false/>
+	<key>PreviousBuildVersion</key>
+	<string>0</string>
+	<key>PreviousSystemVersion</key>
+	<string>0</string>
+	<key>SkipExpressSettingsUpdating</key>
+	<false/>
+	<key>SkipFirstLoginOptimization</key>
+	<false/>
+	<key>selectedFDEEscrowType</key>
+	<string>DeclinedFDE</string>
+</dict>
+</plist>

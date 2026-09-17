@@ -174,8 +174,8 @@
   homebrew = {
     enable = true;
     # never delete by default: a rebuild only ever ADDS. after verifying the
-    # import on a machine (`brew bundle cleanup` lists what zap would
-    # remove), opt in per-host with "zap" so drift self-cleans.
+    # import on a machine (diff fresh `brew bundle dump` output vs
+    # the host's declared lists), opt in per-host with "zap" so drift self-cleans.
     onActivation.cleanup = "none";
   };
 

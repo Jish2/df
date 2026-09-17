@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>AdPlatformsStatusConditionSetDate</key>
+	<date>2026-09-17T20:58:39Z</date>
+	<key>AppUsageBiomeStartDate</key>
+	<date>2026-08-18T16:18:20Z</date>
+	<key>ArcadeDeviceGUID</key>
+	<string>7276F45ED814</string>
+	<key>ArcadeDeviceIDCreationDate</key>
+	<date>2026-08-18T16:13:52Z</date>
+	<key>ArcadePayoutIntervalStartDate</key>
+	<date>2026-08-18T16:13:52Z</date>
+	<key>ArcadePayoutResetDate</key>
+	<date>2026-09-20T00:00:00Z</date>
+	<key>ArcadeSubscriptionState</key>
+	<string>Unsubscribed</string>
+	<key>ArcadeSummaryIntervalStartDate</key>
+	<date>2026-08-18T16:13:52Z</date>
+	<key>CrossfireIntervalStartDate</key>
+	<date>2026-08-18T16:18:20Z</date>
+	<key>CurrentUpdateSource</key>
+	<true/>
+	<key>LastOSBuildVersion</key>
+	<string>25G83</string>
+	<key>LastOSInstallDate</key>
+	<date>2026-08-18T16:13:52Z</date>
+	<key>LastUpdatesCheck</key>
+	<date>2026-09-05T09:01:33Z</date>
+	<key>LastWeeklyAnalyticsPostDate</key>
+	<date>2026-09-05T09:01:13Z</date>
+	<key>TargetDateAd Platforms Status Condition</key>
+	<date>2026-10-19T20:58:39Z</date>
+	<key>TargetDateArcadePostPayout</key>
+	<date>2026-09-18T08:58:38Z</date>
+	<key>TargetDateArcadePostSummary</key>
+	<date>2026-09-18T02:58:38Z</date>
+	<key>TargetDateCacheDelete Push</key>
+	<date>2026-09-17T21:13:39Z</date>
+	<key>TargetDateCrossfirePost</key>
+	<date>2026-09-18T02:58:38Z</date>
+</dict>
+</plist>

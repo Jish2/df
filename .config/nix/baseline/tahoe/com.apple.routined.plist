@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>BluePOIDailyEventBackgroundQueryCount</key>
+	<integer>0</integer>
+	<key>BluePOIDailyEventOnDemandQueryCount</key>
+	<integer>0</integer>
+	<key>BluePOIDailyEventOpportunisticWiFiScanRequestCount</key>
+	<integer>0</integer>
+	<key>BluePOIDailyEventSavedTileCount</key>
+	<integer>0</integer>
+	<key>BluePOIDailyEventTileDownloadCountOnBattery</key>
+	<integer>0</integer>
+	<key>BluePOIDailyEventTileDownloadCountOnCharger</key>
+	<integer>0</integer>
+	<key>BluePOIDailyEventTotalSavedModelSize</key>
+	<integer>0</integer>
+	<key>CKPerBootTasks</key>
+	<array>
+		<string>CKAccountInfoCacheReset</string>
+	</array>
+	<key>CKStartupTime</key>
+	<integer>1789678698</integer>
+	<key>CloudKitAccountInfoCache</key>
+	<dict/>
+	<key>LastLaunchDate.routined</key>
+	<date>2026-09-17T20:58:29Z</date>
+	<key>RTDefaultsSafetyCacheActiveSessionDetailsFetchFailureDateKey</key>
+	<date>2026-09-17T20:58:36Z</date>
+	<key>RTDefaultsSafetyCacheActiveSessionDetailsFetchedFromCloudKitSinceBootKey</key>
+	<false/>
+	<key>RTDefaultsSessionManagerHysteresisEventTypeKey</key>
+	<integer>0</integer>
+	<key>RTDefaultsSessionManagerUnsupportedDeviceSeparationKey</key>
+	<false/>
+	<key>RTDefaultsSuggestionLastDateWalkingBoutTriggerIsScheduled</key>
+	<date>4001-01-01T00:00:00Z</date>
+	<key>RTDefaultsSuggestionsManagerSystemVersionUpdateDate</key>
+	<date>2026-08-18T16:13:43Z</date>
+	<key>XPCActivityLastAttemptDate.com.apple.routined.cloudkit.initializeSentinelZone</key>
+	<date>2026-09-05T08:58:54Z</date>
+	<key>XPCActivityLastAttemptDate.com.apple.routined.locationAwareness.heartbeat</key>
+	<date>2026-09-05T09:03:35Z</date>
+	<key>XPCActivityLastCompleteDate.com.apple.routined.cloudkit.initializeSentinelZone</key>
+	<date>2026-09-05T08:58:54Z</date>
+	<key>XPCActivityLastCompleteDate.com.apple.routined.locationAwareness.heartbeat</key>
+	<date>2026-09-05T09:03:35Z</date>
+</dict>
+</plist>

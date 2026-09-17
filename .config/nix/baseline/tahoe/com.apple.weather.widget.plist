@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>wdsAuthToken</key>
+	<string>eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJzdWIiOiJBcHBsZSIsImlhdCI6MTc4NzAxMTIwMCwibmJmIjoxNzg3MDExMjAwLCJpc3MiOiJBcHBsZSIsImV4cCI6MTc4OTY4OTYwMH0.QyBI3mGorYysdDqf2nfn4BGriK3kcKwI4ga8JilyuJ3dLf2jG5wBc2RuHhJrp40Adie_AsbRSMIlw_hoWkDaEw</string>
+</dict>
+</plist>

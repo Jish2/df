@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>MetadataSyncState</key>
+	<dict>
+		<key>AttemptCount</key>
+		<integer>0</integer>
+		<key>Date</key>
+		<date>2026-08-18T16:15:55Z</date>
+		<key>Status</key>
+		<integer>2</integer>
+	</dict>
+	<key>MetadataSyncState.com.apple.MobileAsset.SpotlightResources</key>
+	<dict>
+		<key>AttemptCount</key>
+		<integer>0</integer>
+		<key>Date</key>
+		<date>2026-09-17T20:58:37Z</date>
+		<key>Status</key>
+		<integer>2</integer>
+	</dict>
+	<key>UpdateCatalogMetadata-com.apple.MobileAsset.LinguisticData</key>
+	<date>2026-08-18T16:15:55Z</date>
+	<key>UpdateCatalogMetadata-com.apple.MobileAsset.SpotlightResources</key>
+	<date>2026-09-17T20:58:37Z</date>
+</dict>
+</plist>

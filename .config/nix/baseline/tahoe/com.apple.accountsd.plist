@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>AuthenticationPluginCache</key>
+	<dict>
+		<key>com.apple.account.126</key>
+		<string>EmailAuthenticationPlugin.bundle</string>
+		<key>com.apple.account.163</key>
+		<string>EmailAuthenticationPlugin.bundle</string>
+		<key>com.apple.account.AppleAccount</key>
+		<string>iCloudIDAuthentication.bundle</string>
+		<key>com.apple.account.AppleIDAuthentication</key>
+		<string>AppleIDSSOAuthenticationPlugin.bundle</string>
+		<key>com.apple.account.CalDAV</key>
+		<string>DAAccountAuthenticator.bundle</string>
+		<key>com.apple.account.CardDAV</key>
+		<string>ContactsAccountsAuthenticationPlugin.bundle</string>
+		<key>com.apple.account.CloudKit</key>
+		<string>CloudKitAuthenticationPlugin.bundle</string>
+		<key>com.apple.account.Exchange</key>
+		<string>ExchangeAuthenticationPlugin.bundle</string>
+		<key>com.apple.account.FaceTime</key>
+		<string>AAIDSAuthenticationPlugin.bundle</string>
+		<key>com.apple.account.GameCenter</key>
+		<string>iCloudIDAuthentication.bundle</string>
+		<key>com.apple.account.Google</key>
+		<string>GoogleAuthenticationPlugin.bundle</string>
+		<key>com.apple.account.IMAP</key>
+		<string>EmailAuthenticationPlugin.bundle</string>
+		<key>com.apple.account.IdentityServices</key>
+		<string>AAIDSAuthenticationPlugin.bundle</string>
+		<key>com.apple.account.LDAP</key>
+		<string>ContactsAccountsAuthenticationPlugin.bundle</string>
+		<key>com.apple.account.Madrid</key>
+		<string>AAIDSAuthenticationPlugin.bundle</string>
+		<key>com.apple.account.POP</key>
+		<string>EmailAuthenticationPlugin.bundle</string>
+		<key>com.apple.account.PublishedCalendar</key>
+		<string>DAAccountAuthenticator.bundle</string>
+		<key>com.apple.account.SMTP</key>
+		<string>EmailAuthenticationPlugin.bundle</string>
+		<key>com.apple.account.SubscribedCalendar</key>
+		<string>DAAccountAuthenticator.bundle</string>
+		<key>com.apple.account.Yahoo</key>
+		<string>YahooAuthenticationPlugin.bundle</string>
+		<key>com.apple.account.aol</key>
+		<string>YahooAuthenticationPlugin.bundle</string>
+		<key>com.apple.account.iTunesStore</key>
+		<string>AMSAccountAuthenticationPlugin.bundle</string>
+		<key>com.apple.account.iTunesStore.sandbox</key>
+		<string>AMSAccountAuthenticationPlugin.bundle</string>
+		<key>com.apple.account.qq</key>
+		<string>EmailAuthenticationPlugin.bundle</string>
+		<key>com.apple.tudou</key>
+		<string>TudouAuthenticationPlugin.bundle</string>
+		<key>com.apple.youku</key>
+		<string>YoukuAuthenticationPlugin.bundle</string>
+	</dict>
+	<key>LastSystemVersion</key>
+	<string>25G83</string>
+</dict>
+</plist>

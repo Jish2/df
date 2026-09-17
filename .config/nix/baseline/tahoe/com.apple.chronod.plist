@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>extensionsPendingDescriptorRefetch</key>
+	<array/>
+	<key>hasMigratedRemoteWidgetsEnabledState</key>
+	<true/>
+	<key>hasRemoteWidgets</key>
+	<false/>
+	<key>lastEffectiveSignificantTimeChange</key>
+	<date>2026-09-17T20:58:28Z</date>
+	<key>lastKnownTimes</key>
+	<dict>
+		<key>timeZoneSecondsFromGMT</key>
+		<integer>0</integer>
+		<key>world</key>
+		<real>1789678715.567144</real>
+	</dict>
+</dict>
+</plist>

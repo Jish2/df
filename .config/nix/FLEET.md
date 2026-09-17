@@ -68,7 +68,7 @@ startup script so rebuilds re-apply. TODO: confirm arch + home persistence.
 1. `brew bundle dump` → reconcile into `hosts/<name>/default.nix`.
    Removal is opt-in: cleanup defaults to `"none"` fleet-wide, so a rebuild
    only ever ADDS. After eyeballing the import on the machine
-   (`brew bundle cleanup` lists what "zap" would remove), enable
+   (diff fresh `brew bundle dump` output vs the host's declared lists), enable
    `homebrew.onActivation.cleanup = "zap";` in the host module.
 2. defaults: nothing to do — the mac inherits work's `imported-defaults.nix`.
    Diverge only deliberately: `scripts/fetch-baseline.sh` once, then

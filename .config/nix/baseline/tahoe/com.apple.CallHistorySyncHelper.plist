@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CHCallProvidersHashKey</key>
+	<integer>1</integer>
+	<key>CHFacetimeSearchableStatus</key>
+	<integer>0</integer>
+	<key>CHSpotlightReindexingReasonKey</key>
+	<integer>24</integer>
+	<key>CKPerBootTasks</key>
+	<array>
+		<string>CKAccountInfoCacheReset</string>
+	</array>
+	<key>CKStartupTime</key>
+	<integer>1787069391</integer>
+	<key>CloudKitAccountInfoCache</key>
+	<dict/>
+	<key>com.apple.callhistory.cloud-storage2</key>
+	<dict/>
+</dict>
+</plist>

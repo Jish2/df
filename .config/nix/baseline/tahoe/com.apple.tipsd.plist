@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>SearchItemIndexerSchemaVersion</key>
+	<integer>1</integer>
+	<key>TPSContentUpdatedNotificationDate</key>
+	<date>2026-09-05T09:01:53Z</date>
+	<key>TPSCurrentWelcomeXPCActivityIdentifier</key>
+	<string>com.apple.tipsd.showWelcomeNotification.reminderCount-0</string>
+	<key>TPSDidRevertArchivedTipStatuses</key>
+	<true/>
+	<key>TPSLastMajorVersion</key>
+	<string>26</string>
+	<key>TPSTipKitProcessedDate</key>
+	<date>2026-09-05T09:00:50Z</date>
+	<key>TPSTipsAppInstalled</key>
+	<true/>
+	<key>TPSWelcomeNotificationReminderState</key>
+	<integer>0</integer>
+	<key>TPSWelcomeNotificationStartDate</key>
+	<date>2026-08-18T16:19:08Z</date>
+	<key>TPSWelcomeNotificationViewedVersion</key>
+	<integer>-1</integer>
+	<key>TPSWidgetShownTips</key>
+	<array/>
+	<key>TPSWidgetUpdateDate</key>
+	<date>2026-09-05T09:00:51Z</date>
+</dict>
+</plist>

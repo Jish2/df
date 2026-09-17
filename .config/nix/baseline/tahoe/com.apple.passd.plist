@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CKPerBootTasks</key>
+	<array>
+		<string>CKAccountInfoCacheReset</string>
+	</array>
+	<key>CKStartupTime</key>
+	<integer>1789678702</integer>
+	<key>CloudKitAccountInfoCache</key>
+	<dict/>
+	<key>PDLastLogDate</key>
+	<date>2026-08-18T16:14:48Z</date>
+	<key>PassesDirectoryFileProtectionFixed</key>
+	<true/>
+</dict>
+</plist>

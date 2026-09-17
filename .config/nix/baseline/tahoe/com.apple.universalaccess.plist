@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>History</key>
+	<dict>
+		<key>MouseKeys</key>
+		<array>
+			<dict>
+				<key>Date</key>
+				<string>2026-08-18 09:13:47</string>
+				<key>Reason</key>
+				<string>Reset</string>
+				<key>State</key>
+				<false/>
+			</dict>
+			<dict>
+				<key>Date</key>
+				<string>2026-08-18 09:13:56</string>
+				<key>Reason</key>
+				<string>Reset</string>
+				<key>State</key>
+				<false/>
+			</dict>
+			<dict>
+				<key>Date</key>
+				<string>2026-08-18 09:13:56</string>
+				<key>Reason</key>
+				<string>Reset</string>
+				<key>State</key>
+				<false/>
+			</dict>
+			<dict>
+				<key>Date</key>
+				<string>2026-08-18 09:13:58</string>
+				<key>Reason</key>
+				<string>Reset</string>
+				<key>State</key>
+				<false/>
+			</dict>
+			<dict>
+				<key>Date</key>
+				<string>2026-08-18 09:14:04</string>
+				<key>Reason</key>
+				<string>Reset</string>
+				<key>State</key>
+				<false/>
+			</dict>
+			<dict>
+				<key>Date</key>
+				<string>2026-08-18 16:18:20</string>
+				<key>Reason</key>
+				<string>Reset</string>
+				<key>State</key>
+				<false/>
+			</dict>
+			<dict>
+				<key>Date</key>
+				<string>2026-09-05 08:56:12</string>
+				<key>Reason</key>
+				<string>Reset</string>
+				<key>State</key>
+				<false/>
+			</dict>
+			<dict>
+				<key>Date</key>
+				<string>2026-09-05 09:03:35</string>
+				<key>Reason</key>
+				<string>Reset</string>
+				<key>State</key>
+				<false/>
+			</dict>
+			<dict>
+				<key>Date</key>
+				<string>2026-09-17 20:58:29</string>
+				<key>Reason</key>
+				<string>Reset</string>
+				<key>State</key>
+				<false/>
+			</dict>
+		</array>
+	</dict>
+	<key>closeViewHotkeysEnabled</key>
+	<false/>
+	<key>closeViewZoomDisplayID</key>
+	<integer>0</integer>
+	<key>closeViewZoomFactor</key>
+	<real>1.0</real>
+	<key>login</key>
+	<false/>
+	<key>sessionChange</key>
+	<false/>
+	<key>voiceOverOnOffKey</key>
+	<false/>
+</dict>
+</plist>

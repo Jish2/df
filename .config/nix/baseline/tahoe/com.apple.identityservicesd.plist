@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CKPerBootTasks</key>
+	<array>
+		<string>CKAccountInfoCacheReset</string>
+	</array>
+	<key>CKStartupTime</key>
+	<integer>1789678698</integer>
+	<key>CloudKitAccountInfoCache</key>
+	<dict/>
+	<key>DidCleanLegacyAccountPrefs</key>
+	<true/>
+	<key>GDRRequestMadeForRelayRepair</key>
+	<true/>
+	<key>ImportedLegacyIDSAccounts2</key>
+	<true/>
+	<key>ImportedLegacyIMAccounts</key>
+	<true/>
+	<key>LastKeyGeneration</key>
+	<real>1787069634.1208029</real>
+	<key>MigratedToNewDisabledState</key>
+	<true/>
+	<key>activityTopics</key>
+	<array>
+		<string>com.apple.private.alloy.home-com.apple.HomeKit</string>
+	</array>
+	<key>hasRegIdentityContainer</key>
+	<integer>0</integer>
+	<key>hasUnregIdentityContainer</key>
+	<integer>1</integer>
+	<key>ids-swift-data-force-version</key>
+	<integer>3</integer>
+	<key>performed-user-intent-migrate</key>
+	<true/>
+	<key>persister-migration-com.apple.identityservices.accountInfoStore</key>
+	<true/>
+	<key>persister-migration-com.apple.identityservices.dailyDeviceAddedNotificationData</key>
+	<true/>
+	<key>persister-migration-com.apple.identityservices.userStore</key>
+	<true/>
+	<key>persister-migration-com.apple.identityservicesd.invitation.store</key>
+	<true/>
+	<key>persister-migration-com.apple.identityservicesd.offgrid.provisioning.store</key>
+	<true/>
+	<key>persister-migration-com.apple.identityservicesd.waking-push-priority</key>
+	<true/>
+</dict>
+</plist>

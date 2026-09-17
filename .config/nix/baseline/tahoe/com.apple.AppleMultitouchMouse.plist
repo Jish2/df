@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>MouseButtonDivision</key>
+	<integer>55</integer>
+	<key>MouseButtonMode</key>
+	<string>OneButton</string>
+	<key>MouseHorizontalScroll</key>
+	<true/>
+	<key>MouseMomentumScroll</key>
+	<true/>
+	<key>MouseOneFingerDoubleTapGesture</key>
+	<integer>0</integer>
+	<key>MouseTwoFingerDoubleTapGesture</key>
+	<integer>3</integer>
+	<key>MouseTwoFingerHorizSwipeGesture</key>
+	<integer>2</integer>
+	<key>MouseVerticalScroll</key>
+	<true/>
+	<key>UserPreferences</key>
+	<true/>
+	<key>version</key>
+	<integer>1</integer>
+</dict>
+</plist>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>privateUserIdentifierLastResetDate</key>
+	<date>2026-08-01T07:00:00Z</date>
+	<key>reportWeatherIdentifierLastResetDate</key>
+	<date>2026-08-01T07:00:00Z</date>
+	<key>userIdentifierLastResetDate</key>
+	<date>2026-08-01T07:00:00Z</date>
+	<key>userStartDate</key>
+	<date>2026-08-01T07:00:00Z</date>
+</dict>
+</plist>

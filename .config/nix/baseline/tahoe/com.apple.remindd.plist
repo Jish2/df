@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CloudConfigurationPath</key>
+	<string>/System/Library/PrivateFrameworks/ReminderKit.framework/Versions/A/Resources/CloudConfigurations/Normal.plist</string>
+	<key>extraneousAlarmsCollectorContainerDeemedClean</key>
+	<true/>
+	<key>isDatabaseMigrated</key>
+	<true/>
+	<key>lastCloudConfigurationDownload</key>
+	<date>2026-09-05T09:00:33Z</date>
+	<key>lastDatabaseMigrationSystemBuildVersion</key>
+	<string>25G83</string>
+	<key>lastExtraneousAlarmsCollectorExecutionDate</key>
+	<date>2026-08-18T16:14:28Z</date>
+	<key>lastSyncPoll</key>
+	<date>2026-08-18T16:14:16Z</date>
+	<key>preferredDefaultListID</key>
+	<string>x-apple-reminderkit://REMCDList/3C8C2A71-84BF-4C87-8EFD-BB4827650D15</string>
+	<key>preferredDefaultListObjectIDUrl</key>
+	<string>x-coredata://6A85C09B-095F-4826-A682-3C4C0EDCEDE3/REMCDList/p1</string>
+	<key>spotlightIndexVersion</key>
+	<integer>7</integer>
+	<key>staledFileAttachmentCleanupLastExecutionDate</key>
+	<date>2026-09-05T08:58:23Z</date>
+</dict>
+</plist>

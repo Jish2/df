@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>SpacesDisplayConfiguration</key>
+	<dict>
+		<key>Management Data</key>
+		<dict>
+			<key>Age</key>
+			<real>712.6181509583334</real>
+			<key>Management Mode</key>
+			<integer>1</integer>
+			<key>Monitors</key>
+			<array>
+				<dict>
+					<key>Current Space</key>
+					<dict>
+						<key>ManagedSpaceID</key>
+						<integer>1</integer>
+						<key>id64</key>
+						<integer>1</integer>
+						<key>type</key>
+						<integer>0</integer>
+						<key>uuid</key>
+						<string></string>
+					</dict>
+					<key>Display Identifier</key>
+					<string>Main</string>
+					<key>Spaces</key>
+					<array>
+						<dict>
+							<key>ManagedSpaceID</key>
+							<integer>1</integer>
+							<key>id64</key>
+							<integer>1</integer>
+							<key>type</key>
+							<integer>0</integer>
+							<key>uuid</key>
+							<string></string>
+						</dict>
+					</array>
+				</dict>
+			</array>
+			<key>Primary</key>
+			<dict>
+				<key>CreatedCount</key>
+				<integer>0</integer>
+				<key>DeletedCount</key>
+				<integer>0</integer>
+				<key>LifetimeEntryCount</key>
+				<integer>0</integer>
+				<key>LifetimeMax</key>
+				<real>0.0</real>
+				<key>LifetimeMin</key>
+				<real>0.0</real>
+				<key>LifetimeSum</key>
+				<real>0.0</real>
+				<key>PersistedCount</key>
+				<integer>0</integer>
+			</dict>
+			<key>Secondary</key>
+			<dict>
+				<key>CreatedCount</key>
+				<integer>0</integer>
+				<key>DeletedCount</key>
+				<integer>0</integer>
+				<key>LifetimeEntryCount</key>
+				<integer>0</integer>
+				<key>LifetimeMax</key>
+				<real>0.0</real>
+				<key>LifetimeMin</key>
+				<real>0.0</real>
+				<key>LifetimeSum</key>
+				<real>0.0</real>
+				<key>PersistedCount</key>
+				<integer>0</integer>
+			</dict>
+		</dict>
+		<key>Space Properties</key>
+		<array>
+			<dict>
+				<key>name</key>
+				<string></string>
+				<key>windows</key>
+				<array>
+					<integer>15</integer>
+					<integer>37</integer>
+					<integer>36</integer>
+					<integer>35</integer>
+					<integer>10</integer>
+					<integer>9</integer>
+				</array>
+			</dict>
+		</array>
+	</dict>
+</dict>
+</plist>

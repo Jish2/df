@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>KnownResources</key>
+	<dict>
+		<key>photoLibrary@/Users/admin/Pictures/Photos Library.photoslibrary</key>
+		<dict>
+			<key>resourcePath</key>
+			<string>/Users/admin/Pictures/Photos Library.photoslibrary/</string>
+			<key>resourceType</key>
+			<string>photoLibrary</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+	</dict>
+	<key>PHALastSettingsReportMonth</key>
+	<integer>9</integer>
+</dict>
+</plist>

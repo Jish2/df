@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Home Automation Server Flow Bypassed</key>
+	<true/>
+	<key>Is Trial config set to disable NL Server Fallback for Domain</key>
+	<false/>
+	<key>Is Trial config set to disable NL Server Fallback for NL</key>
+	<false/>
+	<key>Is Trial config set to disable media entity sync</key>
+	<true/>
+	<key>Is user data sync needed for peer watch</key>
+	<false/>
+	<key>Last client experiment check date</key>
+	<date>2026-09-05T08:56:33Z</date>
+	<key>Last server experiment check date</key>
+	<date>2026-09-05T08:56:33Z</date>
+	<key>MultiUser Shared Data Needs Sync</key>
+	<true/>
+	<key>Voice Trigger Needs Sync</key>
+	<true/>
+</dict>
+</plist>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>allowClassroomLockDevice-00000000-0000-0000-0000-000000000000:0</key>
+	<true/>
+	<key>allowClassroomLockDevice-00000000-0000-0000-0000-000000000000:0-ask</key>
+	<false/>
+	<key>allowClassroomOpenApp</key>
+	<true/>
+	<key>allowClassroomOpenApp-00000000-0000-0000-0000-000000000000:0</key>
+	<true/>
+	<key>allowClassroomOpenApp-00000000-0000-0000-0000-000000000000:0-ask</key>
+	<false/>
+	<key>allowClassroomOpenApp-ask</key>
+	<false/>
+	<key>allowClassroomOpenURL</key>
+	<true/>
+	<key>allowClassroomOpenURL-00000000-0000-0000-0000-000000000000:0</key>
+	<true/>
+	<key>allowClassroomOpenURL-00000000-0000-0000-0000-000000000000:0-ask</key>
+	<false/>
+	<key>allowClassroomOpenURL-ask</key>
+	<false/>
+	<key>allowClassroomScreenObservation-00000000-0000-0000-0000-000000000000:0</key>
+	<true/>
+	<key>allowClassroomScreenObservation-00000000-0000-0000-0000-000000000000:0-ask</key>
+	<false/>
+	<key>forceUnpromptedRemoteScreenObservation-00000000-0000-0000-0000-000000000000:0</key>
+	<true/>
+	<key>forceUnpromptedRemoteScreenObservation-00000000-0000-0000-0000-000000000000:0-ask</key>
+	<false/>
+</dict>
+</plist>

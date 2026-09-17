@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CatalystPreferenceMigrationVersion</key>
+	<integer>1</integer>
+	<key>DeviceForcesUnknownFiltering</key>
+	<false/>
+	<key>FilterMessageRequestsMigrationVersion</key>
+	<integer>2</integer>
+	<key>PersonalRequestsMigrationVersion</key>
+	<integer>2</integer>
+	<key>PromotionsRequestsMigrationVersion</key>
+	<integer>2</integer>
+	<key>RebuildMutedChatListVersion</key>
+	<integer>1</integer>
+	<key>TimeSensitiveRequestsMigrationVersion</key>
+	<integer>2</integer>
+	<key>TransactionsRequestsMigrationVersion</key>
+	<integer>2</integer>
+	<key>VerificationCodesRequestsMigrationVersion</key>
+	<integer>2</integer>
+	<key>spamFilterExtensionCapabilitiesOptions</key>
+	<integer>1</integer>
+</dict>
+</plist>

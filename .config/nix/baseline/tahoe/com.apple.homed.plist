@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CKPerBootTasks</key>
+	<array>
+		<string>CKAccountInfoCacheReset</string>
+	</array>
+	<key>CKStartupTime</key>
+	<integer>1789678702</integer>
+	<key>CloudKitAccountInfoCache</key>
+	<dict/>
+	<key>HMDHH2AutoMigrationRunOnCurrentBuildFlagKey</key>
+	<false/>
+	<key>HMDHH2AutoMigrationRunOnCurrentBuildStartedOnHH1Key</key>
+	<false/>
+	<key>HMDHomeManagerGenerationCounter</key>
+	<integer>10</integer>
+	<key>HMDMetricsDeviceStateManagerLastStoredSoftwareDateKey</key>
+	<date>2026-08-18T00:00:00Z</date>
+	<key>excessiveHistoryPruningCheckDateKey</key>
+	<string>2026-08-18 16:13:56 +0000</string>
+	<key>excessiveHistoryPruningCheckHomeKitVersionKey</key>
+	<string>13.4</string>
+	<key>homedLaunchTime</key>
+	<date>2026-09-17T20:58:37Z</date>
+</dict>
+</plist>

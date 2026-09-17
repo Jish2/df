@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>AppleLanguages</key>
+	<array>
+		<string>en-US</string>
+	</array>
+	<key>AppleLocale</key>
+	<string>en_US</string>
+	<key>Sig_AppleLanguages</key>
+	<string>UserAccountUpdater(1038): 2026-08-18 09:13:46 (PDT)</string>
+	<key>Sig_AppleLocale</key>
+	<string>DirectoryTools(991): 2026-08-18 09:13:39 (PDT)</string>
+</dict>
+</plist>

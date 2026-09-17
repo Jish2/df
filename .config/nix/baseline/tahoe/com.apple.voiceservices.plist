@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>subscribedAssets</key>
+	<dict>
+		<key></key>
+		<dict>
+			<key>com.apple.TelephonyUtilities</key>
+			<array>
+				<dict>
+					<key>Languages</key>
+					<array>
+						<string>en-US</string>
+					</array>
+				</dict>
+			</array>
+		</dict>
+	</dict>
+	<key>subscribedPreviousAssets</key>
+	<dict>
+		<key></key>
+		<dict>
+			<key>com.apple.TelephonyUtilities</key>
+			<array>
+				<dict>
+					<key>Languages</key>
+					<array>
+						<string>en-US</string>
+					</array>
+				</dict>
+			</array>
+		</dict>
+	</dict>
+</dict>
+</plist>

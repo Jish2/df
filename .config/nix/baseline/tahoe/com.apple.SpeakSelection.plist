@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>PreferencesLastLoadedOn</key>
+	<dict>
+		<key>AXVoices</key>
+		<real>810291362.3273349</real>
+		<key>OnDisk</key>
+		<real>808762191.4395101</real>
+		<key>Siri_custom</key>
+		<real>810291362.3273349</real>
+		<key>Siri_gryphon</key>
+		<real>810291362.3273349</real>
+		<key>Siri_natural</key>
+		<real>810291362.3273349</real>
+		<key>Siri_neural</key>
+		<real>810291362.3273349</real>
+		<key>Siri_neuralAX</key>
+		<real>810291362.3273349</real>
+		<key>TTSVBVoiceLoader</key>
+		<real>810291362.3273349</real>
+		<key>ausp_axsr_appl</key>
+		<real>810291362.3273349</real>
+		<key>ausp_crnc_appl</key>
+		<real>810291362.3273349</real>
+		<key>ausp_kona_appl</key>
+		<real>810291362.3273349</real>
+		<key>ausp_mctk_appl</key>
+		<real>810291362.3273349</real>
+		<key>ausp_wrda_appl</key>
+		<real>810291362.3273349</real>
+	</dict>
+</dict>
+</plist>
