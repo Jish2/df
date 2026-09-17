@@ -1,0 +1,34 @@
+# Local override shadowing the remote pi manifest (~/.local/state/herdr/agent-detection/remote/pi.toml).
+# Tau is a rebranded pi installation and matches this same manifest.
+#
+# Problems with the remote rule (contains = ["Working..."] over whole_recent):
+#   1. Current pi/tau renders the busy status line as "⠦ Working" (no dots),
+#      so the literal only matched stale/transcript text -> flaky state.
+#   2. whole_recent (~5KB scrollback) keeps matching old transcript content
+#      (including any chat about "Working...") long after the pane idles.
+#
+# Fix: match the live status line itself, anchored per line, restricted to the
+# bottom of the screen where pi/tau renders the spinner/status area.
+id = "pi"
+version = "2026.07.15.2"
+min_engine_version = 1
+updated_at = "2026-07-15T00:00:00Z"
+aliases = ["herdr:pi"]
+
+[[rules]]
+id = "paused_footer"
+state = "idle"
+priority = 110
+region = "bottom_lines(10)"
+line_regex = ['^\s*paused — resume:']
+# Pause extension contract line rendered in the tau footer
+# (~/.tau/agent/extensions/pause.ts FOOTER_TEXT). Higher priority than
+# working_footer so an animating spinner can't override the paused state.
+
+[[rules]]
+id = "working_footer"
+state = "working"
+priority = 100
+region = "bottom_lines(10)"
+visible_working = true
+line_regex = ['^\s*[⠀-⣿]?\s*(Working|Thinking)(\.{2,3}|…)?( .*)?$']
