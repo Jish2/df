@@ -34,6 +34,7 @@
     defaultbrowser
     yarn
     gh
+    jq # used by `make plan`
     yadm # TODO: remove once the yadm port completes
     zoxide
     pure-prompt
