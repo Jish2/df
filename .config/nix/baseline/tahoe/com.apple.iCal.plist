@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>BirthdayEventsGenerationAttemptsToResetKey</key>
+	<integer>0</integer>
+	<key>BirthdayEventsGenerationLastLocale</key>
+	<string>en_US</string>
+	<key>CALPrefLastTruthFileMigrationVersion</key>
+	<integer>1</integer>
+	<key>NotificationSourceClientIdentifierVersion</key>
+	<integer>1</integer>
+	<key>NotificationsLastLocale</key>
+	<string>en_US</string>
+	<key>PrefMigrationSeed</key>
+	<integer>6</integer>
+	<key>ReindexAttemptsWithoutProgress</key>
+	<integer>0</integer>
+	<key>defaultCalendarChangedReason</key>
+	<string>Old default ((null)) not valid</string>
+	<key>defaultCalendarChangedTimestamp</key>
+	<integer>808762790</integer>
+	<key>defaultCalendarDatabaseID</key>
+	<integer>0</integer>
+	<key>defaultCalendarStoreUID</key>
+	<integer>1</integer>
+	<key>enableTravelAdvisoriesForAutomaticBehavior</key>
+	<true/>
+	<key>kCalDBLastSpotLightIndexCalendarsVersion</key>
+	<integer>1</integer>
+	<key>kCalDBLastSpotLightIndexVersion</key>
+	<integer>24</integer>
+	<key>migrationAttempts</key>
+	<integer>0</integer>
+</dict>
+</plist>

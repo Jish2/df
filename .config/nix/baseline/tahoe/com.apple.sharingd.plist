@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>HashManager-LastRebuiltDateKey</key>
+	<date>2026-09-05T08:56:29Z</date>
+	<key>HashManager-LastUpdatedDateKey</key>
+	<date>2026-09-05T08:56:29Z</date>
+	<key>HashManager-StoredDatabaseVersionKey</key>
+	<integer>3</integer>
+	<key>OneTimeAirDropReset2</key>
+	<true/>
+</dict>
+</plist>

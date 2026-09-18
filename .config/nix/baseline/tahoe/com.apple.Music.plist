@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>library-url</key>
+	<string>file:///Users/admin/Music/Music/Music%20Library.musiclibrary/</string>
+	<key>media-folder-url</key>
+	<string>file:///Users/admin/Music/Music/Media.localized/</string>
+</dict>
+</plist>

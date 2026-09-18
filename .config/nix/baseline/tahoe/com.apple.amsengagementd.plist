@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>AMSActivityObserverDateLastCheckedIn</key>
+	<real>1789678717.662332</real>
+	<key>CKPerBootTasks</key>
+	<array>
+		<string>CKAccountInfoCacheReset</string>
+	</array>
+	<key>CKStartupTime</key>
+	<integer>1789678702</integer>
+	<key>CloudKitAccountInfoCache</key>
+	<dict/>
+	<key>TreatmentStoreLastSynchronizationDate</key>
+	<string>2026-08-18T16:14:19Z</string>
+	<key>dateAnalyticsJetPackLastModified</key>
+	<string>Tue, 1 Sep 2026 20:02:57 GMT</string>
+	<key>dateEngagementJetPackLastModified</key>
+	<string>Mon, 17 Aug 2026 18:14:18 GMT</string>
+	<key>dateJourneysJetPackLastModified</key>
+	<string>Thu, 6 Aug 2026 15:09:09 GMT</string>
+	<key>engagementSourceURLHashes</key>
+	<dict/>
+	<key>lastSync</key>
+	<dict>
+		<key>analytics</key>
+		<date>2026-09-05T08:56:20Z</date>
+		<key>internal</key>
+		<date>2026-08-18T16:18:50Z</date>
+		<key>journeys</key>
+		<date>2026-08-18T16:18:50Z</date>
+		<key>recommendations</key>
+		<date>2026-08-18T16:18:52Z</date>
+	</dict>
+	<key>lastSyncBuildVersion</key>
+	<string>25G83</string>
+	<key>syncAttempts</key>
+	<dict>
+		<key>analytics</key>
+		<integer>0</integer>
+		<key>internal</key>
+		<integer>0</integer>
+		<key>journeys</key>
+		<integer>0</integer>
+		<key>recommendations</key>
+		<integer>2</integer>
+	</dict>
+</dict>
+</plist>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>ICBackgroundTaskScheduler</key>
+	<dict>
+		<key>scheduled_tasks</key>
+		<dict>
+			<key>com.apple.itunescloud.ICDBackgroundTaskManager.periodic-poll-activity</key>
+			<dict>
+				<key>identifier</key>
+				<string>com.apple.itunescloud.ICDBackgroundTaskManager.periodic-poll-activity</string>
+				<key>interval</key>
+				<real>604800.0</real>
+				<key>is_recurring</key>
+				<true/>
+				<key>time</key>
+				<real>811786436.719325</real>
+			</dict>
+			<key>com.apple.itunescloud.ICInAppMessageManager.periodic_poll</key>
+			<dict>
+				<key>identifier</key>
+				<string>com.apple.itunescloud.ICInAppMessageManager.periodic_poll</string>
+				<key>interval</key>
+				<real>345600.0</real>
+				<key>is_recurring</key>
+				<true/>
+				<key>time</key>
+				<real>811527236.7198</real>
+			</dict>
+			<key>com.apple.itunescloud.subscription_status_refresh</key>
+			<dict>
+				<key>identifier</key>
+				<string>com.apple.itunescloud.subscription_status_refresh</string>
+				<key>interval</key>
+				<real>86400.0</real>
+				<key>is_recurring</key>
+				<true/>
+				<key>time</key>
+				<real>811440836.719525</real>
+			</dict>
+		</dict>
+	</dict>
+</dict>
+</plist>

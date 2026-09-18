@@ -1,3 +1,5 @@
+fleet plan → [`.config/nix/FLEET.md`](.config/nix/FLEET.md)
+
 ### installation steps
 
 1. install nix os

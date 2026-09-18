@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>ICDefaultsKeyLastKnownSubscriptionStatusBaseCacheKey</key>
+	<dict>
+		<key>phoneNumber</key>
+		<string></string>
+		<key>storefrontID</key>
+		<string>143441</string>
+	</dict>
+	<key>ICDefaultsKeyMediaLibraryAccessApplicationIdentifiersWithTCCAcceptanceDates</key>
+	<dict/>
+</dict>
+</plist>

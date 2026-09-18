@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>KnownClients</key>
+	<array>
+		<string>com.apple.WorkflowKit.ShortcutsViewService</string>
+		<string>com.apple.controlcenter</string>
+		<string>com.apple.chronod</string>
+	</array>
+	<key>LastAuthorizationStatusEventDate</key>
+	<date>2026-09-17T20:58:28Z</date>
+</dict>
+</plist>

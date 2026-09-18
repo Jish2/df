@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>ChoiceRequests.Assets</key>
+	<array/>
+	<key>ChoiceRequests.CollectionIdentifiers</key>
+	<array/>
+	<key>ChoiceRequests.ImageFiles</key>
+	<array/>
+	<key>ChoiceRequests.ImageFolders</key>
+	<array/>
+	<key>ChoiceRequests.PersonIdentifiers</key>
+	<array/>
+	<key>DidPerformImagesContainerMigration</key>
+	<true/>
+	<key>DidPerformPhotosContainerMigration</key>
+	<true/>
+	<key>DidPerformPhotosMigration</key>
+	<true/>
+</dict>
+</plist>

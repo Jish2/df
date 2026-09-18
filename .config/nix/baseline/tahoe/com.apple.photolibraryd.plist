@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>PLBackgroundJobServiceBundleRecordsKeyWithShortCodeA</key>
+	<array/>
+	<key>PLBackgroundJobServiceBundleRecordsKeyWithShortCodeC</key>
+	<array>
+		<string>/Users/admin/Pictures/Photos Library.photoslibrary</string>
+	</array>
+	<key>PLBackgroundJobServiceBundleRecordsKeyWithShortCodeCD</key>
+	<array>
+		<string>/Users/admin/Pictures/Photos Library.photoslibrary</string>
+	</array>
+	<key>PLBackgroundJobServiceBundleRecordsKeyWithShortCodeD</key>
+	<array/>
+	<key>PLBackgroundJobServiceBundleRecordsKeyWithShortCodeDD</key>
+	<array/>
+	<key>PLBackgroundJobServiceBundleRecordsKeyWithShortCodeF</key>
+	<array/>
+	<key>PLBackgroundJobServiceBundleRecordsKeyWithShortCodeH</key>
+	<array>
+		<string>/Users/admin/Pictures/Photos Library.photoslibrary</string>
+	</array>
+	<key>PLBackgroundJobServiceBundleRecordsKeyWithShortCodeI</key>
+	<array/>
+	<key>PLBackgroundJobServiceBundleRecordsKeyWithShortCodeJ</key>
+	<array/>
+	<key>PLBackgroundJobServiceBundleRecordsKeyWithShortCodeM</key>
+	<array/>
+	<key>PLBackgroundJobServiceBundleRecordsKeyWithShortCodeN</key>
+	<array/>
+	<key>PLBackgroundJobServiceBundleRecordsKeyWithShortCodeP</key>
+	<array/>
+	<key>PLBackgroundJobServiceBundleRecordsKeyWithShortCodeR</key>
+	<array/>
+	<key>PLBackgroundJobServiceBundleRecordsKeyWithShortCodeS</key>
+	<array>
+		<string>/Users/admin/Pictures/Photos Library.photoslibrary</string>
+	</array>
+	<key>PLBackgroundJobServiceBundleRecordsKeyWithShortCodeSH</key>
+	<array>
+		<string>/Users/admin/Pictures/Photos Library.photoslibrary</string>
+	</array>
+	<key>PLBackgroundJobServiceBundleRecordsKeyWithShortCodeU</key>
+	<array/>
+	<key>PLBackgroundMigrationPaths</key>
+	<dict>
+		<key>/Users/admin/Library/Photos/Libraries/Syndication.photoslibrary</key>
+		<integer>0</integer>
+		<key>/Users/admin/Pictures/Photos Library.photoslibrary</key>
+		<integer>0</integer>
+	</dict>
+	<key>PLDeviceDataFeedbackDate</key>
+	<date>2026-09-05T09:01:13Z</date>
+	<key>PLIncompleteMaintenanceTaskPaths.curatedlibraryprocessing</key>
+	<array/>
+	<key>PLIncompleteMaintenanceTaskPaths.periodicmaintenance</key>
+	<array/>
+	<key>PLLibraryBookmarkManagerBookmarksByPath</key>
+	<dict/>
+	<key>PLSyndicationLastUpdateDate</key>
+	<date>2026-09-17T20:58:35Z</date>
+	<key>com.apple.photolibraryd.purgeNotification.3.purge_markers</key>
+	<dict>
+		<key>A19FE379-BE62-4297-9A39-3934CC88214B</key>
+		<array>
+			<integer>5909698</integer>
+		</array>
+	</dict>
+</dict>
+</plist>

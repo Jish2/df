@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>ATXAppLaunchMonitor_LastLaunchWasHomescreen</key>
+	<false/>
+	<key>ATXEnterLOIUpdateSourceLastRefreshDate</key>
+	<date>2026-08-18T16:14:03Z</date>
+	<key>ATXIntentCache.OSVersion</key>
+	<string>25G83</string>
+	<key>ATXUpdatePredictionsLoggerCountsDictionary-ActionPredictions</key>
+	<dict>
+		<key>TRIGGER_TYPE_APPLAUNCH</key>
+		<integer>1</integer>
+		<key>TRIGGER_TYPE_OTHER</key>
+		<integer>3</integer>
+		<key>TRIGGER_TYPE_TOTAL</key>
+		<integer>4</integer>
+	</dict>
+	<key>NotificationNextAppLaunchRecorder-AppLaunchTimestamp</key>
+	<real>809686873.444292</real>
+	<key>biomeNotificationPurgeComplete_174515357</key>
+	<true/>
+	<key>lastMajorOSUpgradeApproximateTimestamp</key>
+	<real>808762432.726307</real>
+	<key>lastMajorOSUpgradeMajorVersion</key>
+	<integer>26</integer>
+	<key>lastMinorOSUpgradeApproximateTimestamp</key>
+	<real>808762432.725078</real>
+	<key>lastMinorOSUpgradeMinorVersion</key>
+	<integer>6</integer>
+	<key>luckMigration</key>
+	<true/>
+	<key>modeAppSessionPipelineLastKnownModeKey</key>
+	<integer>14</integer>
+	<key>modeAppSessionPipelineLastRunTimestampKey</key>
+	<real>808763043.293446</real>
+	<key>modeDeviceUsagePipelineLastKnownModeKey</key>
+	<integer>14</integer>
+	<key>modeDeviceUsagePipelineLastRunTimestampKey</key>
+	<real>808762197.04343</real>
+	<key>modeScoreFilesUpgradeTimeKey</key>
+	<real>808762465.779603</real>
+	<key>notificationTelemetryLoggingTimestampKey</key>
+	<real>809686873.42306</real>
+	<key>showInSearchToSuggestOnHomeScreenMigration</key>
+	<true/>
+	<key>suggestionsMetricsTimestamp</key>
+	<real>0.0</real>
+</dict>
+</plist>
