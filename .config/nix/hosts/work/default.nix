@@ -111,6 +111,9 @@
       "container"
       # --- tap formulae -------------------------------------------------------
       "aserto-dev/tap/topaz"
+      # tart: NOT declared via brew — the cirruslabs tap formula is broken on
+      # modern brew; capture-baseline.sh installs the signed release binary
+      # to ~/.local/bin as a workaround
       "opcr-io/tap/policy"
       "steipete/tap/remindctl"
       "supabase/tap/supabase"

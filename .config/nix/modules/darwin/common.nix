@@ -8,6 +8,12 @@
   ...
 }:
 {
+  imports = [
+    # bulk snapshot of this mac's non-default settings (regenerate with
+    # scripts/export-defaults.py; rebuilds re-assert these values)
+    ./imported-defaults.nix
+  ];
+
   system.primaryUser = user;
   users.users.${user}.home = "/Users/${user}";
 
@@ -55,29 +61,25 @@
       ApplePressAndHoldEnabled = false; # hold-to-repeat keys, no accent popup
       KeyRepeat = 2;
       InitialKeyRepeat = 15;
-      "com.apple.swipescrolldirection" = true; # natural scrolling
       "com.apple.mouse.scaling" = 0.6875; # mouse tracking speed (scroll speed is system default)
+      # natural scrolling omitted on purpose — ON is the factory default
     };
 
     dock = {
-      autohide = true;
+      autohide = true; # (factory: false)
       tilesize = 47;
-      magnification = false;
-      show-recents = false;
+      show-recents = false; # (factory: true)
+      # magnification omitted — off is the factory default
     };
 
     trackpad = {
-      Clicking = true; # tap to click
-      TrackpadThreeFingerDrag = true;
-      FirstClickThreshold = 1;
-      SecondClickThreshold = 1;
+      Clicking = true; # tap to click (factory: off)
+      TrackpadThreeFingerDrag = true; # (factory: off)
+      # FirstClickThreshold / SecondClickThreshold omitted — 1 is the factory default
     };
 
-    menuExtraClock = {
-      ShowAMPM = true;
-      ShowDate = 2; # only when space allows
-      ShowDayOfWeek = false;
-    };
+    # menuExtraClock omitted entirely — your clock (AM/PM, date when space
+    # allows, no weekday) is the factory configuration
 
     CustomUserPreferences = {
       # menu bar: battery hidden, wifi/sound/nowplaying/focus shown.
