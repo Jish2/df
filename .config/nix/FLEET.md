@@ -51,6 +51,7 @@ the repo root once yadm is retired; commands below assume that final shape.
 ```sh
 make work        # darwin-rebuild switch --flake ~/.config/nix#work   (macs; HM rides along)
 make pc          # home-manager switch --flake ~/.config/nix#pc       (linux)
+make plan HOST=work   # dry-run: build + brew drift report, changes nothing
 ```
 
 ## Bootstrap (post-yadm)
@@ -67,9 +68,9 @@ startup script so rebuilds re-apply. TODO: confirm arch + home persistence.
 
 1. `brew bundle dump` → reconcile into `hosts/<name>/default.nix`.
    Removal is opt-in: cleanup defaults to `"none"` fleet-wide, so a rebuild
-   only ever ADDS. After eyeballing the import on the machine
-   (diff fresh `brew bundle dump` output vs the host's declared lists), enable
-   `homebrew.onActivation.cleanup = "zap";` in the host module.
+   only ever ADDS. Review with `make plan HOST=<name>` on the host (builds
+   without activating + reports brew/cask drift); when the 'would be REMOVED'
+   list is empty, enable `homebrew.onActivation.cleanup = "zap";` there.
 2. defaults: nothing to do — the mac inherits work's `imported-defaults.nix`.
    Diverge only deliberately: `scripts/fetch-baseline.sh` once, then
    `export-defaults.py --baseline baseline/tahoe modules/darwin/imported-defaults-<name>.nix`
