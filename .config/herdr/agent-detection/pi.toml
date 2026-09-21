@@ -7,12 +7,23 @@
 #   2. whole_recent (~5KB scrollback) keeps matching old transcript content
 #      (including any chat about "Working...") long after the pane idles.
 #
-# Fix: match the live status line itself, anchored per line, restricted to the
-# bottom of the screen where pi/tau renders the spinner/status area.
+# History:
+# 2026-07-15.2  Match the live status line itself, anchored per line,
+#   restricted to the bottom of the screen.
+# 2026-09-21.1  Panes got stuck "working" after the turn ended: pi 0.85+
+#   moved the working indicator from a standalone row into the editor's top
+#   border (tau's solid-block editor renders it as " ⠴ Working"), and the
+#   transcript is full of static italic "Thinking..." labels (hideThinkingBlock).
+#   Short final answers leave a "Thinking..." label inside bottom_lines(10),
+#   which matched the old (Working|Thinking) regex forever. Fix: require a
+#   braille spinner frame, so only the LIVE indicator can match; transcript
+#   text never contains braille. Also cover retry/compaction/branch-summary
+#   spinners (same row, different verb) and the stock border form
+#   "── ⠦ Working ──" in case a theme renders ruled borders.
 id = "pi"
-version = "2026.07.15.2"
+version = "2026.09.21.1"
 min_engine_version = 1
-updated_at = "2026-07-15T00:00:00Z"
+updated_at = "2026-09-21T00:00:00Z"
 aliases = ["herdr:pi"]
 
 [[rules]]
@@ -31,4 +42,4 @@ state = "working"
 priority = 100
 region = "bottom_lines(10)"
 visible_working = true
-line_regex = ['^\s*[⠀-⣿]?\s*(Working|Thinking)(\.{2,3}|…)?( .*)?$']
+line_regex = ['^[─\s]*[⠀-⣿]+\s*(Working|Retrying|Compacting|Auto-compacting|Summarizing)\b']
