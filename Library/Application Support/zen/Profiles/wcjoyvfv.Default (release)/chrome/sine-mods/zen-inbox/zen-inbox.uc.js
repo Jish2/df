@@ -23,7 +23,7 @@
       // Zen 1.22.3b / Firefox 156+ packaging
       "moz-src:///browser/components/sessionstore/SessionStore.sys.mjs",
       // pre-FF156 packaging
-      "resource:///modules/sessionstore/SessionStore.sys.mjs",
+      "resource:///modules/sessionstore/SessionStore.sys.mjs", // smd-optional (legacy fallback)
     ];
     let lastError;
     for (const url of urls) {
