@@ -10,10 +10,10 @@ HOST ?= work
 # homebrew drift both directions. nothing changes on the machine.
 # iterate until 'remove' is empty before switching a host to zap.
 plan:
-	@darwin-rebuild build --flake $(FLAKE)#$(HOST) 
-	  || nix run --extra-experimental-features 'nix-command flakes' nix-darwin -- build --flake $(FLAKE)#$(HOST)
+	@darwin-rebuild build --flake $(FLAKE)#$(HOST) || \
+	  nix run --extra-experimental-features 'nix-command flakes' nix-darwin -- build --flake $(FLAKE)#$(HOST)
 	@echo "build ok (eval+build only, nothing activated)"
-	@nix eval --extra-experimental-features 'nix-command flakes' --json --apply 'x: map (b: if builtins.isAttrs b then b.name else b) x' 
+	@nix eval --extra-experimental-features 'nix-command flakes' --json --apply 'x: map (b: if builtins.isAttrs b then b.name else b) x' \
 	  '$(FLAKE)#darwinConfigurations.$(HOST).config.homebrew.brews' | jq -r '.[]' | sed 's|.*/||' | sort -u > /tmp/plan-decl-brews
 	@nix eval --extra-experimental-features 'nix-command flakes' --json '$(FLAKE)#darwinConfigurations.$(HOST).config.homebrew.casks' | jq -r '.[]' | sed 's|.*/||' | sort -u > /tmp/plan-decl-casks
 	@brew leaves | sort -u > /tmp/plan-inst-brews
