@@ -46,23 +46,20 @@
 
   nix.settings.experimental-features = "nix-command flakes";
 
-  # imported from this machine's actual state (`defaults read`), see FLEET.md.
-  # NOTE: previously this flake said autohide=false/tilesize=40 — that had
-  # drifted; the machine is actually autohide=true/tilesize=47.
+  # hand-curated from this machine's actual state (`defaults read` +
+  # scripts/export-defaults.py report), see FLEET.md.
   system.defaults = {
     NSGlobalDomain = {
       AppleInterfaceStyle = "Dark";
       ApplePressAndHoldEnabled = false; # hold-to-repeat keys, no accent popup
       KeyRepeat = 2;
       InitialKeyRepeat = 15;
-      "com.apple.swipescrolldirection" = true; # natural scrolling
       "com.apple.mouse.scaling" = 0.6875; # mouse tracking speed
     };
 
     dock = {
       autohide = true;
       tilesize = 47;
-      magnification = false;
       show-recents = false;
       largesize = 16; # magnification size, if ever enabled
       mru-spaces = false; # don't reorder spaces by recency
@@ -73,14 +70,6 @@
     trackpad = {
       Clicking = true; # tap to click
       TrackpadThreeFingerDrag = true;
-      FirstClickThreshold = 1;
-      SecondClickThreshold = 1;
-    };
-
-    menuExtraClock = {
-      ShowAMPM = true;
-      ShowDate = 2; # only when space allows
-      ShowDayOfWeek = false;
     };
 
     CustomUserPreferences = {

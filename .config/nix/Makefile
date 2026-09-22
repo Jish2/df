@@ -25,12 +25,14 @@ plan:
 	@echo '== ok: present and declared =='
 	@comm -12 /tmp/plan-decl-brews /tmp/plan-inst-brews | wc -l | tr -d ' '; comm -12 /tmp/plan-decl-casks /tmp/plan-inst-casks | wc -l | tr -d ' '
 
+NIXFLAGS = --extra-experimental-features 'nix-command flakes'
+
 work personal mini:
-	darwin-rebuild switch --flake $(FLAKE)#$@ || nix run nix-darwin -- switch --flake $(FLAKE)#$@
+	darwin-rebuild switch --flake $(FLAKE)#$@ || nix run $(NIXFLAGS) nix-darwin -- switch --flake $(FLAKE)#$@
 	# @$(MAKE) extensions   # disabled for now — vscode manages extensions itself
 
 pc devspace:
-	home-manager switch --flake $(FLAKE)#$@ || nix run home-manager -- switch --flake $(FLAKE)#$@
+	home-manager switch --flake $(FLAKE)#$@ || nix run $(NIXFLAGS) home-manager -- switch --flake $(FLAKE)#$@
 
 # not wired into the mac targets for now; run manually if wanted
 extensions:
