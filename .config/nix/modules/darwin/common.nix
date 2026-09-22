@@ -63,7 +63,6 @@
       largesize = 16; # magnification size, if ever enabled
       mru-spaces = false; # don't reorder spaces by recency
       wvous-br-corner = 4; # bottom-right hot corner → Desktop
-      wvous-br-modifier = 0;
     };
 
     trackpad = {
