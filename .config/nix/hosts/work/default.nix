@@ -27,7 +27,7 @@
   # ported from the brew bundle go:/cargo: directives
   environment.systemPackages = with pkgs; [
     gopls
-    staticcheck
+    go-tools # honnef.co/go/tools, provides staticcheck
     delve
     protoc-gen-go
     protoc-gen-go-grpc
