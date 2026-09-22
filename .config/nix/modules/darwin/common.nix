@@ -23,19 +23,13 @@
   # (some of these duplicate brew formulae for now — the brew→nix port wave
   # in FLEET.md settles PATH precedence when entries move)
   environment.systemPackages = with pkgs; [
-    neovim
     nixfmt-rfc-style
     defaultbrowser
     yarn
-    gh
-    jq # used by `make plan`
-    yadm # TODO: remove once the yadm port completes
-    zoxide
+    jq # `make plan` and friends
     pure-prompt
     mkalias
     sqlfluff
-    ripgrep
-    delta
     zsh-syntax-highlighting
     zsh-autosuggestions
   ];
@@ -234,6 +228,9 @@
     # import on a machine (diff fresh `brew bundle dump` output vs
     # the host's declared lists), opt in per-host with "zap" so drift self-cleans.
     onActivation.cleanup = "none";
+
+    # darwin side of the shared CLI manifest
+    brews = map (t: t.brew) (import ../tools.nix);
   };
 
   programs.zsh = {
