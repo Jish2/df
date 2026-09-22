@@ -54,7 +54,6 @@
       ApplePressAndHoldEnabled = false; # hold-to-repeat keys, no accent popup
       KeyRepeat = 2;
       InitialKeyRepeat = 15;
-      "com.apple.mouse.scaling" = 0.6875; # mouse tracking speed
     };
 
     dock = {
@@ -73,6 +72,7 @@
     };
 
     CustomUserPreferences = {
+      "NSGlobalDomain" = { "com.apple.mouse.scaling" = "0.6875"; };
       # menu bar: battery hidden, wifi/sound/nowplaying/focus shown.
       # keys written verbatim from a Tahoe dump — nix-darwin's first-class
       # controlcenter options predate Tahoe's VisibleCC rename.
