@@ -1,4 +1,4 @@
-FLAKE ?= ~/.config/nix
+FLAKE ?= $(HOME)/.config/nix
 
 # fallback `nix run` covers first bootstraps where the CLI isn't installed yet
 
