@@ -49,6 +49,7 @@
 
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
+              home-manager.backupFileExtension = "bak";
               home-manager.extraSpecialArgs = { user = defaultUser; };
               home-manager.users.${defaultUser}.imports = [
                 ./modules/home/common.nix
@@ -71,6 +72,7 @@
             ./modules/home/common.nix
             ./modules/home/linux.nix
             ./hosts/${host}
+            { home-manager.backupFileExtension = "bak"; }
           ];
         };
     in
