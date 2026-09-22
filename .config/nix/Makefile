@@ -15,7 +15,8 @@ plan:
 	@echo "build ok (eval+build only, nothing activated)"
 	@nix eval --extra-experimental-features 'nix-command flakes' --json --apply 'x: map (b: if builtins.isAttrs b then b.name else b) x' \
 	  '$(FLAKE)#darwinConfigurations.$(HOST).config.homebrew.brews' | jq -r '.[]' | sed 's|.*/||' | sort -u > /tmp/plan-decl-brews
-	@nix eval --extra-experimental-features 'nix-command flakes' --json '$(FLAKE)#darwinConfigurations.$(HOST).config.homebrew.casks' | jq -r '.[]' | sed 's|.*/||' | sort -u > /tmp/plan-decl-casks
+	@nix eval --extra-experimental-features 'nix-command flakes' --json --apply 'x: map (b: if builtins.isAttrs b then b.name else b) x' \
+	  '$(FLAKE)#darwinConfigurations.$(HOST).config.homebrew.casks' | jq -r '.[]' | sed 's|.*/||' | sort -u > /tmp/plan-decl-casks
 	@brew leaves | sort -u > /tmp/plan-inst-brews
 	@brew list --cask | sort -u > /tmp/plan-inst-casks
 	@echo; echo '== will be INSTALLED (declared, missing) =='
