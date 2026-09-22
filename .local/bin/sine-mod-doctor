@@ -1,0 +1,186 @@
+#!/bin/bash
+# sine-mod-doctor — verify local Sine mods still survive the installed build.
+#
+# What it checks, per enabled mod with scripts:
+#   1. script file exists on disk
+#   2. parses cleanly (node --check, if node is available)
+#   3. every module URL it references actually resolves:
+#        resource:///modules/X   -> omni.ja: modules/X
+#        resource://gre/modules/X -> omni.ja: modules/X
+#        moz-src:///X            -> omni.ja: moz-src/X
+#        chrome://sine/content/P -> <profile>/chrome/sine-mods/P
+#        chrome://userscripts/content/P -> <profile>/chrome/JS/P
+#        unknown chrome:// URLs  -> reported as "unverified" (non-fatal)
+#   4. the app-side Sine bootstrap is present (config.js + config-prefs.js)
+#
+# Usage: sine-mod-doctor [--selftest] [--app /path/App.app] [--profile /path/to/profile]
+# Exit: 0 = all good, 1 = something failed. Wire into the Satori build script
+# after install to catch platform breakage at ship time instead of weeks later.
+
+set -u
+
+APP=""
+PROFILE=""
+SELFTEST=0
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --app) APP="$2"; shift 2 ;;
+    --profile) PROFILE="$2"; shift 2 ;;
+    --selftest) SELFTEST=1; shift ;;
+    -h|--help) sed -n '2,20p' "$0"; exit 0 ;;
+    *) echo "unknown arg: $1" >&2; exit 2 ;;
+  esac
+done
+
+# --- locate app ------------------------------------------------------------
+if [ -z "$APP" ]; then
+  for cand in /Applications/Satori.app /Applications/Zen.app; do
+    [ -d "$cand" ] && { APP="$cand"; break; }
+  done
+fi
+[ -z "$APP" ] && { echo "no Zen/Satori app found in /Applications" >&2; exit 1; }
+RES="$APP/Contents/Resources"
+OMNI="$RES/omni.ja"
+
+# --- locate profile ----------------------------------------------------------
+ZEN_DATA="$HOME/Library/Application Support/zen/Profiles"
+if [ -z "$PROFILE" ]; then
+  for p in "$ZEN_DATA"/*/; do
+    [ -f "$p/chrome/sine-mods/mods.json" ] && { PROFILE="$p"; break; }
+  done
+fi
+[ -z "$PROFILE" ] && { echo "no profile with chrome/sine-mods/mods.json found" >&2; exit 1; }
+PROFILE="${PROFILE%/}"
+
+fail=0
+note() { printf '%s\n' "$1"; }
+bad()  { note "   x $1"; fail=1; }
+good() { note "   ✓ $1"; }
+
+# --- omni.ja listing cache (only if omni exists) ------------------------------
+OMNI_LIST=""
+if [ -f "$OMNI" ]; then
+  OMNI_LIST="$(mktemp -t sine-mod-doctor)"
+  unzip -l "$OMNI" 2>/dev/null | awk 'NF >= 4 && $4 != "Name" {print $4}' > "$OMNI_LIST"
+  trap 'rm -f "$OMNI_LIST"' EXIT
+fi
+
+in_omni() { # $1 = omni path
+  [ -n "$OMNI_LIST" ] || return 0  # cannot verify without omni; don't fail
+  grep -qFx "$1" "$OMNI_LIST"
+}
+
+# resolve_url <url> -> sets R_STATUS (ok|dead|unverified) and R_WHERE
+resolve_url() {
+  local url="$1" path=""
+  case "$url" in
+    resource:///modules/*)   path="modules/${url#resource:///modules/}" ;;
+    resource://gre/modules/*) path="modules/${url#resource://gre/modules/}" ;;
+    moz-src:///*)            path="moz-src/${url#moz-src:///}" ;;
+    chrome://sine/content/*)        path="$PROFILE/chrome/sine-mods/${url#chrome://sine/content/}" ;;
+    chrome://userscripts/content/*) path="$PROFILE/chrome/JS/${url#chrome://userscripts/content/}" ;;
+    chrome://userchromejs/content/*) path="$PROFILE/chrome/utils/${url#chrome://userchromejs/content/}" ;;
+    *) R_STATUS="unverified"; R_WHERE="$url"; return ;;
+  esac
+  R_WHERE="$path"
+  case "$url" in
+    chrome://*) [ -f "$path" ] && R_STATUS="ok" || R_STATUS="dead" ;;
+    *) in_omni "$path" && R_STATUS="ok" || R_STATUS="dead" ;;
+  esac
+}
+
+# checks run in the main shell (no pipeline subshells) so `fail` propagates.
+# A URL on a line containing "smd-optional" is a deliberate fallback: dead ->
+# warning instead of failure.
+check_urls() { # $1 = file, $2 = label
+  local f="$1" modname="$2" line url status seen=""
+  grep -nE '"(resource|moz-src|chrome)://[^"]+"' "$f" 2>/dev/null > /tmp/smd-lines.$$ || true
+  while IFS= read -r line; do
+    case "$line" in
+      *smd-optional*) opt=1 ;; *) opt=0 ;;
+    esac
+    for url in $(printf '%s\n' "$line" | grep -oE '"(resource|moz-src|chrome)://[^"]+"' | tr -d '"'); do
+      case " $seen " in *" $url $opt "*) continue ;; esac
+      seen="$seen $url $opt"
+      resolve_url "$url"
+      if [ "$opt" -eq 1 ]; then
+        [ "$R_STATUS" = "dead" ] && note "   ~ $modname: optional fallback dead (tolerated): $url"
+        continue
+      fi
+      case "$R_STATUS" in
+        ok)         good "$modname: $url" ;;
+        dead)       bad  "$modname: DEAD URL $url (looked for: $R_WHERE)
+      hint: unzip -l \"\$OMNI\" | grep -i $(basename "$url")" ;;
+        unverified) note "   ~ $modname: unverified $url" ;;
+      esac
+    done
+  done < /tmp/smd-lines.$$
+  rm -f /tmp/smd-lines.$$
+}
+
+# --- selftest -----------------------------------------------------------------
+if [ "$SELFTEST" -eq 1 ]; then
+  echo "selftest against $APP"
+  resolve_url "moz-src:///browser/components/sessionstore/SessionStore.sys.mjs"
+  [ "$R_STATUS" = "ok" ]   && good "moz-src sessionstore resolves" || bad "selftest: moz-src sessionstore should resolve on FF156+"
+  resolve_url "resource:///modules/sessionstore/SessionStore.sys.mjs"
+  [ "$R_STATUS" = "dead" ] && good "legacy resource:// sessionstore correctly reported dead" || bad "selftest: legacy URL should be dead on FF156+"
+  resolve_url "chrome://sine/content/zen-inbox/zen-inbox.uc.js"
+  [ "$R_STATUS" = "ok" ]   && good "chrome://sine mapping resolves" || bad "selftest: zen-inbox.uc.js should exist"
+  exit "$fail"
+fi
+
+# --- main ---------------------------------------------------------------------
+note "sine-mod-doctor"
+note "app:     $APP"
+note "profile: $PROFILE"
+note ""
+
+# app-side bootstrap (rebuild historically clobbered this)
+if [ -f "$RES/config.js" ] && [ -f "$RES/defaults/pref/config-prefs.js" ]; then
+  good "app bootstraps Sine (config.js + config-prefs.js)"
+else
+  bad "app missing Sine bootstrap: $RES/config.js or defaults/pref/config-prefs.js (reinstall Sine into the app)"
+fi
+[ -f "$OMNI" ] && good "omni.ja readable ($(wc -l < "$OMNI_LIST" | tr -d ' ') entries)" || bad "omni.ja missing at $OMNI"
+note ""
+
+# per-mod check
+python3 - "$PROFILE" > /tmp/smd-mods.$$ <<'PYEOF'
+import json, os, sys
+zp = sys.argv[1]
+d = json.load(open(os.path.join(zp, "chrome/sine-mods/mods.json")))
+mods = d.get("mods", d)
+for mid, m in mods.items():
+    if not m.get("enabled", True):
+        continue
+    scripts = m.get("scripts") or {}
+    mdir = os.path.join(zp, "chrome/sine-mods", mid)
+    files = list(scripts.keys())
+    if not files and os.path.isdir(mdir):
+        files = [f for f in os.listdir(mdir) if f.endswith((".uc.js", ".uc.mjs"))]
+    for f in files:
+        print("%s\t%s" % (mid, os.path.join(mdir, f)))
+PYEOF
+
+while IFS="$(printf '\t')" read -r modid script; do
+  note "[$modid]"
+  if [ ! -f "$script" ]; then
+    bad "script missing: $script"
+    continue
+  fi
+  if command -v node >/dev/null 2>&1; then
+    node --check "$script" >/dev/null 2>&1 && good "parses: $(basename "$script")" || bad "syntax error in $script"
+    # parse-only check: browser globals don't matter; .mjs is parsed as a module
+  fi
+  check_urls "$script" "$modid"
+done < /tmp/smd-mods.$$
+rm -f /tmp/smd-mods.$$
+
+note ""
+if [ "$fail" -eq 0 ]; then
+  note "ALL GOOD — every enabled script mod is loadable against this build."
+else
+  note "FAILURES ABOVE — fix the dead URLs before trusting these mods."
+fi
+exit "$fail"
