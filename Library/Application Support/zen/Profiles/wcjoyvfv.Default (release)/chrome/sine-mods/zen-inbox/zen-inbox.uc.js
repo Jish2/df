@@ -18,9 +18,23 @@
     return;
   }
 
-  const { SessionStore } = ChromeUtils.importESModule(
-    "resource:///modules/sessionstore/SessionStore.sys.mjs",
-  );
+  const { SessionStore } = (() => {
+    const urls = [
+      // Zen 1.22.3b / Firefox 156+ packaging
+      "moz-src:///browser/components/sessionstore/SessionStore.sys.mjs",
+      // pre-FF156 packaging
+      "resource:///modules/sessionstore/SessionStore.sys.mjs",
+    ];
+    let lastError;
+    for (const url of urls) {
+      try {
+        return ChromeUtils.importESModule(url);
+      } catch (error) {
+        lastError = error;
+      }
+    }
+    throw lastError;
+  })();
 
   const TAB_STATE_KEY = "zen-inbox-state";
   const INBOX_ATTRIBUTE = "zen-inbox";
