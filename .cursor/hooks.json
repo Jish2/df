@@ -16,6 +16,18 @@
     "stop": [
       {
         "command": "bash '/Users/jgoon/.cursor/herdr-tab-from-cursor-title.sh'"
+      },
+      {
+        "command": "'/Users/jgoon/.local/share/vite-plus/js_runtime/node/24.20.0/bin/node' '/Users/jgoon/.t3/dev/cursor-live-sync/cursor-live-sync-hook.mjs' --t3-cursor-live-sync-v1",
+        "timeout": 2,
+        "failClosed": false
+      }
+    ],
+    "beforeSubmitPrompt": [
+      {
+        "command": "'/Users/jgoon/.local/share/vite-plus/js_runtime/node/24.20.0/bin/node' '/Users/jgoon/.t3/dev/cursor-live-sync/cursor-live-sync-hook.mjs' --t3-cursor-live-sync-v1",
+        "timeout": 2,
+        "failClosed": false
       }
     ]
   },

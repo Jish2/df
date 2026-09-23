@@ -1,0 +1,35 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
+/*
+ * The script adds the artwork image as a sibling of the native media card
+ * content. Keep the native layout unchanged when no artwork is available.
+ */
+.zen-media-card[zen-media-artwork-visible="true"] {
+  align-items: center;
+  display: flex;
+}
+
+.zen-media-card[zen-media-artwork-visible="true"]
+  > .zen-media-artwork-mod {
+  background-color: var(--zen-toolbar-element-bg);
+  border-radius: var(--border-radius-small);
+  flex: 0 0 40px;
+  height: 40px;
+  margin-inline-end: 8px;
+  min-height: 40px;
+  min-width: 40px;
+  object-fit: cover;
+  overflow: hidden;
+  width: 40px;
+}
+
+.zen-media-card[zen-media-artwork-visible="true"]
+  > .zen-media-main-vbox {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
+}

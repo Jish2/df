@@ -1,1 +1,4 @@
 .DS_Store
+# Codex config — managed locally, not tracked
+.codex/config.toml
+.pi/tasks

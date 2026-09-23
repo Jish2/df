@@ -1,0 +1,40 @@
+/* zen-duplicate-tabs — highlight + count badge for tabs duplicating the
+ * selected tab's URL. Flattened (no CSS nesting) for fx-autoconfig compat. */
+
+#tabbrowser-tabs {
+  --zen-duplicate-tab-color: light-dark(
+    var(--color-red-70),
+    var(--color-red-30)
+  );
+}
+
+#tabbrowser-tabs .tabbrowser-tab[zen-duplicate-tab] > .tab-stack > .tab-background {
+  outline: 1px solid var(--zen-duplicate-tab-color);
+  outline-offset: -1px;
+  box-shadow:
+    inset 0 0 0 100vmax
+      color-mix(in srgb, var(--zen-duplicate-tab-color) 12%, transparent),
+    var(--tab-box-shadow-selected, none) !important;
+}
+
+#tabbrowser-tabs .tabbrowser-tab[zen-duplicate-count]::after {
+  align-items: center;
+  background: var(--zen-duplicate-tab-color);
+  border: 1px solid light-dark(white, black);
+  border-radius: 999px;
+  color: light-dark(white, black);
+  content: attr(zen-duplicate-count);
+  display: flex;
+  font-size: 8px;
+  font-weight: 700;
+  height: 12px;
+  justify-content: center;
+  line-height: 1;
+  min-width: 12px;
+  padding-inline: 2px;
+  pointer-events: none;
+  position: absolute;
+  right: -2px;
+  top: -2px;
+  z-index: 2;
+}

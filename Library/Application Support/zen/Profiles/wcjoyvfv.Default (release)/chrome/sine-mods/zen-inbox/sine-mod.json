@@ -1,0 +1,22 @@
+{
+  "zen-inbox": {
+    "id": "zen-inbox",
+    "name": "Zen Inbox",
+    "description": "A per-workspace, age-sorted lane for temporary tabs.",
+    "author": "local",
+    "version": "0.1.0",
+    "tags": ["tabs", "productivity", "workflow"],
+    "preferences": "preferences.json",
+    "style": {
+      "chrome": "chrome.css"
+    },
+    "scripts": {
+      "zen-inbox.uc.js": {
+        "include": ["chrome://browser/content/browser.xhtml"]
+      }
+    },
+    "readme": "README.md",
+    "origin": "local",
+    "enabled": true
+  }
+}

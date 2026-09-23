@@ -1,0 +1,476 @@
+#!/usr/bin/env python3
+"""sine-mod-doctor — verify local Sine mods still survive the installed build.
+
+Per enabled mod (from chrome/sine-mods/mods.json):
+
+  Stage 1  scripts exist on disk; parse cleanly (node --check, if present)
+  Stage 2  every module URL they reference resolves against THIS build:
+               resource:///modules/X    -> omni.ja: modules/X
+               resource://gre/modules/X -> omni.ja: modules/X
+               moz-src:///X             -> omni.ja: moz-src/X
+               chrome://sine/content/P  -> <profile>/chrome/sine-mods/P
+               chrome://userscripts/content/P    -> <profile>/chrome/JS/P
+               chrome://userchromejs/content/P   -> <profile>/chrome/utils/P
+           other chrome:// / resource:// custom prefixes -> "unverified" (non-fatal)
+  Stage 3  imported names ({ SessionStore } = importESModule(...),
+           ChromeUtils.defineESModuleGetters, ESM `import {..} from`)
+           are actually exported by the resolved module source
+  Stage 4  platform contracts the mod touches still exist in the packaged
+           sources inside omni.ja: zen-* class/attribute names,
+           window.gZen* globals, _privateMethod() calls
+
+Tolerancing:
+  - a URL on a line containing "smd-optional" is a deliberate fallback:
+    dead -> warning, never failure
+  - <moddir>/.smdignore lists contract tokens (prefix match) to skip —
+    use for names the mod itself defines or pulls from another Sine mod
+
+Usage: sine-mod-doctor [--selftest] [--app /path/App.app] [--profile DIR]
+Exit:  0 = all good, 1 = failures. Run after any rebuild (the Satori build
+        pipeline already calls this during ship).
+"""
+
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+import zipfile
+
+APP = None
+PROFILE = None
+SELFTEST = False
+args = sys.argv[1:]
+i = 0
+while i < len(args):
+    if args[i] == "--app":
+        APP = args[i + 1]; i += 2
+    elif args[i] == "--profile":
+        PROFILE = args[i + 1]; i += 2
+    elif args[i] == "--selftest":
+        SELFTEST = True; i += 1
+    elif args[i] in ("-h", "--help"):
+        print(__doc__); sys.exit(0)
+    else:
+        print(f"unknown arg: {args[i]}", file=sys.stderr); sys.exit(2)
+
+FAILURES = []
+
+
+def ok(msg):    print(f"   ✓ {msg}")
+def warn(msg):  print(f"   ~ {msg}")
+def bad(msg):   print(f"   ✗ {msg}"); FAILURES.append(msg)
+def head(msg):  print(msg)
+
+
+# ---------------------------------------------------------------- locate
+def find_app():
+    if APP: return APP
+    for c in ("/Applications/Satori.app", "/Applications/Zen.app"):
+        if os.path.isdir(c): return c
+    return None
+
+
+def find_profile():
+    if PROFILE: return PROFILE.rstrip("/")
+    base = os.path.expanduser("~/Library/Application Support/zen/Profiles")
+    if os.path.isdir(base):
+        for name in sorted(os.listdir(base)):
+            p = os.path.join(base, name)
+            if os.path.isfile(os.path.join(p, "chrome/sine-mods/mods.json")):
+                return p
+    return None
+
+
+# ---------------------------------------------------------------- omni.ja
+# Firefox ships TWO archives: Resources/omni.ja (toolkit; also holds
+# moz-src/browser/...) and Resources/browser/omni.ja (app; holds Zen as
+# modules/zen/...). A moz-src:///zen/X URL packages as modules/zen/X in the
+# app archive, while moz-src:///browser/X packages as moz-src/browser/X in
+# the toolkit archive. So: scout all omnis, try both candidate layouts.
+class Omni:
+    def __init__(self, paths):
+        self.archives = []
+        self._corpus = None
+        for path in paths:
+            if path and os.path.isfile(path):
+                try:
+                    self.archives.append(zipfile.ZipFile(path))
+                except Exception as e:
+                    warn(f"omni unreadable: {path}: {e}")
+
+    @property
+    def ok(self):
+        return bool(self.archives)
+
+    def count(self):
+        return sum(len(z.namelist()) for z in self.archives)
+
+    def has(self, member):
+        return any(member in z.namelist() for z in self.archives)
+
+    def read_text(self, member):
+        for z in self.archives:
+            try:
+                return z.read(member).decode("utf-8", "replace")
+            except KeyError:
+                continue
+            except Exception:
+                return None
+        return None
+
+    def corpus(self):
+        """All packaged JS/CSS/XUL-ish sources joined into one bytes blob."""
+        if self._corpus is None:
+            exts = (".sys.mjs", ".mjs", ".js", ".css", ".xhtml", ".inc", ".xml")
+            tmp = tempfile.NamedTemporaryFile(prefix="smd-corpus-", delete=False)
+            with open(tmp.name, "wb") as out:
+                for z in self.archives:
+                    for n in z.namelist():
+                        if n.endswith(exts):
+                            try:
+                                out.write(z.read(n))
+                                out.write(b"\n")
+                            except Exception:
+                                pass
+            self._corpus = tmp.name
+        return self._corpus
+
+    def contract_exists(self, token):
+        try:
+            data = open(self.corpus(), "rb").read()
+            return token.encode() in data
+        except Exception:
+            return True  # cannot verify -> don't fail
+
+
+# ---------------------------------------------------------------- URL rules
+def resolve_url(url, profile, omni):
+    """returns (status, where) with status in ok|dead|unverified"""
+    if url.startswith("resource:///modules/"):
+        where = "modules/" + url[len("resource:///modules/"):]
+    elif url.startswith("resource://gre/modules/"):
+        where = "modules/" + url[len("resource://gre/modules/"):]
+    elif url.startswith("moz-src:///"):
+        tail = url[len("moz-src:///"):]
+        candidates = ["moz-src/" + tail]
+        if tail.startswith("zen/"):
+            candidates.append("modules/" + tail)
+        if not omni.ok:
+            return "unverified", candidates[0]
+        for c in candidates:
+            if omni.has(c):
+                return "ok", c
+        return "dead", " or ".join(candidates)
+    elif url.startswith("chrome://sine/content/"):
+        where = os.path.join(profile, "chrome/sine-mods", url[len("chrome://sine/content/"):])
+        return ("ok" if os.path.isfile(where) else "dead"), where
+    elif url.startswith("chrome://userscripts/content/"):
+        where = os.path.join(profile, "chrome/JS", url[len("chrome://userscripts/content/"):])
+        return ("ok" if os.path.isfile(where) else "dead"), where
+    elif url.startswith("chrome://userchromejs/content/"):
+        where = os.path.join(profile, "chrome/utils", url[len("chrome://userchromejs/content/"):])
+        return ("ok" if os.path.isfile(where) else "dead"), where
+    else:
+        return "unverified", url
+    if not omni.ok:
+        return "unverified", where
+    return ("ok" if omni.has(where) else "dead"), where
+
+
+def module_text(where, omni):
+    """Source text of a resolved module (omni member or local file)."""
+    if where.startswith("/"):
+        try:
+            return open(where, encoding="utf-8", errors="replace").read()
+        except Exception:
+            return None
+    return omni.read_text(where)
+
+
+# ---------------------------------------------------------------- parsing
+URL_RE = re.compile(r'["\']((?:resource|moz-src|chrome)://[^"\']+)["\']')
+DESTRUCT_ESMODULE = re.compile(
+    r'[{({]\s*([^})]+?)\s*[})]\s*=\s*(?:await\s+)?ChromeUtils\.importESModule\(\s*["\']([^"\']+)["\']')
+ESM_FROM = re.compile(r'^\s*import\s*\{([^}]*)\}\s*from\s*["\']([^"\']+)["\']', re.M)
+GETTER_SIMPLE = re.compile(r'(\w+)\s*:\s*["\']((?:resource|moz-src|chrome)://[^"\']+)["\']')
+GETTER_BLOCK_NAME = re.compile(r'^\s*(\w+)\s*:\s*\{\s*$')
+GETTER_BLOCK_URL = re.compile(r'^\s*(?:url|fallback)\s*:\s*["\']((?:resource|moz-src|chrome)://[^"\']+)["\']')
+
+DOM_ZEN_TOKEN = re.compile(r'\bzen-[a-z0-9][a-z0-9-]{2,}\b')
+DOM_GZEN = re.compile(r'\bwindow\.(gZen[A-Za-z0-9_]+)')
+DOM_PRIV = re.compile(r'\b(_[a-z][A-Za-z0-9_]{5,})\s*\(')
+# the mod's own definitions are not platform contracts. Note bundled/minified
+# mods keep `function _foo(` at zero indent, so don't require leading space.
+DEF_CLASS_METHOD = re.compile(r'(?m)^\s*(?:export\s+)?(?:static\s+)?(?:async\s+)?(?:function\s+)?(_[a-z][A-Za-z0-9_]{5,})\s*\(')
+DEF_PROP = re.compile(r'\b(_[a-z][A-Za-z0-9_]{5,})\s*[:=]\s*(?:async\s*)?(?:function\b|[(\w{])')
+WRITE_CTX = [
+    re.compile(r'classList\.(?:add|toggle)\(\s*["\']([^"\']+)["\']'),
+    re.compile(r'setAttribute\(\s*["\']([^"\']+)["\']'),          # attr NAME is a write
+    re.compile(r'setAttribute\(\s*["\'](?:class|id)["\']\s*,\s*["\']([^"\']+)["\']'),
+    re.compile(r'\.(?:id|className)\s*=\s*["\']([^"\']+)["\']'),
+]
+
+
+def binding_names(chunk):
+    """'{ SessionStore, columns: cols }' -> ['SessionStore', 'columns']"""
+    names = []
+    for part in chunk.split(","):
+        part = part.strip()
+        if not part or part.startswith("//"):
+            continue
+        part = re.split(r'\s+as\s+|:', part)[0].strip()
+        if re.fullmatch(r'[A-Za-z_$][\w$]*', part):
+            names.append(part)
+    return names
+
+
+def find_import_bindings(text):
+    """-> list of (url, [imported names], line_is_optional)"""
+    out = []
+    lines = text.splitlines()
+    for m in DESTRUCT_ESMODULE.finditer(text):
+        ln = text[:m.start()].count("\n")
+        out.append((m.group(2), binding_names(m.group(1)), "smd-optional" in lines[ln] if ln < len(lines) else False))
+    for m in ESM_FROM.finditer(text):
+        ln = text[:m.start()].count("\n")
+        out.append((m.group(2), binding_names(m.group(1)), False))
+    # defineESModuleGetters(lazy, { A: "url", B: { url: "...", fallback } })
+    i = 0
+    while i < len(lines):
+        if "defineESModuleGetters" in lines[i]:
+            j = i
+            while j < len(lines) and not (j > i and re.match(r'^\s*\}\);?\s*$', lines[j])):
+                s = GETTER_SIMPLE.search(lines[j])
+                if s and "resource" in lines[j] or s and "moz-src" in lines[j] or (s and "chrome://" in lines[j]):
+                    out.append((s.group(2), [s.group(1)], "smd-optional" in lines[j]))
+                b = GETTER_BLOCK_NAME.match(lines[j])
+                if b and j + 1 < len(lines):
+                    u = GETTER_BLOCK_URL.match(lines[j + 1])
+                    if u:
+                        out.append((u.group(1), [b.group(1)], "smd-optional" in lines[j + 1]))
+                j += 1
+            i = j
+        i += 1
+    return out
+
+
+EXPORT_DECL = lambda name: re.compile(
+    r'export\s+(?:async\s+)?(?:var|let|const|class|function\*?)\s+' + re.escape(name) + r'\b')
+EXPORT_LIST = lambda name: re.compile(r'export\s*\{[^}]*\b' + re.escape(name) + r'\b')
+
+
+def is_exported(src, name):
+    return bool(EXPORT_DECL(name).search(src) or EXPORT_LIST(name).search(src))
+
+
+def dom_tokens(text, own_prefixes, ignore_prefixes, own_defs, own_written):
+    """-> dict token -> lineno, pre-filtered for the mod's own vocabulary"""
+    tokens = {}
+    htmlish_zen = set()
+    for ln, line in enumerate(text.splitlines(), 1):
+        if "://" in line:            # URL lines belong to stage 2
+            continue
+        if "<" in line and "\"" in line:   # innerHTML/built markup: creation context
+            htmlish_zen.update(DOM_ZEN_TOKEN.findall(line))
+        if "${" in line:                    # template-interpolated ids: assembled by the mod
+            htmlish_zen.update(DOM_ZEN_TOKEN.findall(line))
+        for rx in WRITE_CTX:
+            for m in rx.finditer(line):
+                htmlish_zen.update(DOM_ZEN_TOKEN.findall(m.group(1)))
+        found = [t for t in DOM_ZEN_TOKEN.findall(line)]
+        found += DOM_GZEN.findall(line)
+        found += DOM_PRIV.findall(line)
+        for t in found:
+            if any(t.startswith(p) for p in own_prefixes):
+                continue
+            if any(t.startswith(p) for p in ignore_prefixes):
+                continue
+            if t in own_defs or t in own_written or t in htmlish_zen:
+                continue
+            tokens.setdefault(t, ln)
+    return tokens
+
+
+def own_method_defs(text):
+    return set(DEF_CLASS_METHOD.findall(text)) | set(DEF_PROP.findall(text))
+
+
+def own_prefixes_for(modid):
+    parts = modid.split("-")
+    prefs = {modid}
+    if len(parts) >= 3:
+        prefs.add("-".join(parts[:-1]))
+    # ids that are raw uuids (sine store installs) own nothing
+    return [p for p in prefs if re.search(r'[a-z]', p)]
+
+
+def load_ignore(moddir):
+    f = os.path.join(moddir, ".smdignore")
+    out = []
+    if os.path.isfile(f):
+        for ln in open(f):
+            ln = ln.strip()
+            if ln and not ln.startswith("#"):
+                out.append(ln)
+    return out
+
+
+# ---------------------------------------------------------------- main run
+def check_mod(modid, moddir, scripts, styles, profile, omni):
+    head(f"\n[{modid}]")
+    own = own_prefixes_for(modid)
+    ignore = load_ignore(moddir)
+    _ = own  # own prefixes used inside stage 4
+
+    # stage 1: existence + parse (scripts)
+    for rel in scripts:
+        f = os.path.join(moddir, rel)
+        base = os.path.basename(f)
+        if not os.path.isfile(f):
+            bad(f"script missing: {f}")
+            continue
+        if shutil.which("node"):
+            r = subprocess.run(["node", "--check", f], capture_output=True, text=True)
+            if r.returncode == 0:
+                ok(f"parses: {base}")
+            else:
+                bad(f"syntax error: {base}: {r.stderr.splitlines()[0] if r.stderr else '?'}")
+
+    seen_url = set()
+    for rel in scripts + styles:
+        f = os.path.join(moddir, rel)
+        if not os.path.isfile(f):
+            continue
+        text = open(f, encoding="utf-8", errors="replace").read()
+
+        # stage 2: URLs (scripts only make sense, but cheap to scan all)
+        if rel in scripts:
+            for ln, line in enumerate(text.splitlines(), 1):
+                optional = "smd-optional" in line
+                for m in URL_RE.finditer(line):
+                    url = m.group(1)
+                    if (url, optional) in seen_url:
+                        continue
+                    seen_url.add((url, optional))
+                    status, where = resolve_url(url, profile, omni)
+                    if optional:
+                        if status == "dead":
+                            warn(f"optional fallback dead (tolerated): {url}")
+                        continue
+                    if status == "ok":
+                        ok(url)
+                    elif status == "dead":
+                        hint = f'grep -i {os.path.basename(url)} <(unzip -l "$APP_OMNI")' if not where.startswith("/") else where
+                        bad(f"DEAD URL {url}\n      (looked for: {where}; hint: {hint})")
+                    else:
+                        warn(f"unverified {url}")
+
+            # stage 3: imported names exist in module source
+            for url, names, optional in find_import_bindings(text):
+                if not names:
+                    continue
+                status, where = resolve_url(url, profile, omni)
+                if status != "ok":
+                    continue  # stage 2 already reported/warned
+                src = module_text(where, omni)
+                if src is None:
+                    continue
+                for n in names:
+                    if is_exported(src, n):
+                        ok(f"export `{n}` from {os.path.basename(where)}")
+                    elif optional:
+                        warn(f"optional import `{n}` not exported by {os.path.basename(where)} (tolerated)")
+                    else:
+                        bad(f"`{n}` NOT exported by {os.path.basename(where)} ({url})")
+
+        # stage 4: DOM/platform contracts (scripts + css). A token is the
+        # mod's own if it: matches the mod id prefixes, appears in .smdignore,
+        # is _defined_ or _written_ by the mod's code, or is styled by the
+        # mod's own CSS. Otherwise it must exist in the packaged sources.
+        own = own_prefixes_for(modid)                  # refreshed closure vars
+        css_zen = set()
+        mod_files = []
+        for r2 in scripts + styles:
+            p2 = os.path.join(moddir, r2)
+            if os.path.isfile(p2):
+                mod_files.append(p2)
+                if r2.endswith(".css"):
+                    css_zen.update(DOM_ZEN_TOKEN.findall(open(p2, errors="replace").read()))
+        for tok, ln in dom_tokens(text, own, ignore,
+                                  own_method_defs(text) if rel in scripts else set(),
+                                  css_zen).items():
+            if not omni.contract_exists(tok):
+                bad(f"contract missing: `{tok}` ({rel}:{ln}) not found in packaged sources "
+                    f"(add to .smdignore if it is your own)")
+    # (stage 4 summary intentionally quiet on success)
+
+
+def selftest(profile, omni):
+    head("selftest")
+    st, _ = resolve_url("moz-src:///browser/components/sessionstore/SessionStore.sys.mjs", profile, omni)
+    (ok if st == "ok" else bad)("moz-src sessionstore resolves")
+    st, _ = resolve_url("resource:///modules/sessionstore/SessionStore.sys.mjs", profile, omni)
+    (ok if st == "dead" else bad)("legacy resource:// sessionstore correctly dead on FF156+")
+    st, _ = resolve_url("chrome://sine/content/zen-inbox/zen-inbox.uc.js", profile, omni)
+    (ok if st == "ok" else bad)("chrome://sine mapping resolves")
+    src = module_text("moz-src/browser/components/sessionstore/SessionStore.sys.mjs", omni)
+    (ok if src and is_exported(src, "SessionStore") else bad)("SessionStore export detected in packaged module")
+    (ok if omni.contract_exists("zen-workspace-pinned-tabs-section") else bad)("corpus contains zen workspace contract")
+    (ok if not omni.contract_exists("zen-smd-selftest-nope-zzz") else bad)("corpus correctly lacks bogus token")
+
+
+def main():
+    app = find_app()
+    if not app:
+        print("no Zen/Satori app found in /Applications", file=sys.stderr); sys.exit(1)
+    profile = find_profile()
+    if not profile:
+        print("no profile with chrome/sine-mods/mods.json found", file=sys.stderr); sys.exit(1)
+    res = os.path.join(app, "Contents", "Resources")
+    omni = Omni([os.path.join(res, "omni.ja"), os.path.join(res, "browser", "omni.ja")])
+
+    if SELFTEST:
+        selftest(profile, omni)
+        sys.exit(1 if FAILURES else 0)
+
+    head("sine-mod-doctor")
+    head(f"app:     {app}")
+    head(f"profile: {profile}\n")
+    cfg = os.path.join(res, "config.js")
+    cpref = os.path.join(res, "defaults/pref/config-prefs.js")
+    (ok if os.path.isfile(cfg) and os.path.isfile(cpref)
+     else bad)("app bootstraps Sine (config.js + config-prefs.js)")
+    (ok if omni.ok else bad)(f"omni archives readable ({omni.count()} entries)")
+
+    modsfile = os.path.join(profile, "chrome/sine-mods/mods.json")
+    mods = json.load(open(modsfile))
+    mods = mods.get("mods", mods)
+    for mid, m in mods.items():
+        if not m.get("enabled", True):
+            continue
+        moddir = os.path.join(profile, "chrome/sine-mods", mid)
+        scripts = list((m.get("scripts") or {}).keys())
+        if not scripts and os.path.isdir(moddir):
+            scripts = [f for f in os.listdir(moddir) if f.endswith((".uc.js", ".uc.mjs"))]
+        styles = []
+        st = m.get("style") or {}
+        styles += [v for v in st.values()] if isinstance(st, dict) else []
+        if os.path.isdir(moddir):
+            styles += [f for f in os.listdir(moddir) if f.endswith(".css") and f not in styles]
+        if not scripts and not styles:
+            continue
+        check_mod(mid, moddir, scripts, styles, profile, omni)
+
+    head("")
+    if FAILURES:
+        head(f"FAILURES: {len(FAILURES)} — fix before trusting these mods on this build.")
+        sys.exit(1)
+    head("ALL GOOD — mods load cleanly against this build.")
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main()

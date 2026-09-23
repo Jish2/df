@@ -1,15 +1,13 @@
-autoload -Uz compinit
-compinit
+# compinit + bashcompinit run in nix-darwin's /etc/zshrc before this
+# file lands; no need to duplicate them here anymore
+
 # some configs are replicated in ~/.config/nix/flake.nix
 
-# zsh-syntax-highlighting
-source $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+# plugins (zsh-autosuggestions, zsh-syntax-highlighting, pure) are wired by
+# nix-darwin into /etc/zshenv + /etc/zshrc — no brew paths here
 
 # syntax-highlighting-theme
 source ~/.config/zsh/themes/catppuccin_mocha-zsh-syntax-highlighting.zsh
-
-# zsh-autosuggestions
-source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 # aliases
 source $HOME/.aliases
@@ -41,8 +39,7 @@ treehouse_prompt_precmd() {
 add-zsh-hook precmd treehouse_prompt_precmd
 prompt_newline=' %(21V.%F{green}%21v%f.)'$'\n%{\r%}'
 
-# terraform
-autoload -U +X bashcompinit && bashcompinit
+# terraform (bashcompinit already ran in /etc/zshrc)
 complete -o nospace -C /opt/homebrew/bin/terraform terraform
 
 # pyenv (interactive shell function setup; PATH is set in .zprofile)
@@ -111,3 +108,12 @@ export PATH="$HOME/.local/bin:$PATH"
 # fi
 
 export PATH="/opt/homebrew/opt/rustup/bin:$PATH"
+
+# Vite+ bin (https://viteplus.dev)
+. "$HOME/.config/vite-plus/env"
+
+# sessions: semantic search via local Ollama embeddings
+export SESSIONS_OLLAMA_MODEL=qwen3-embedding:4b
+
+# cd into ~/github repos from anywhere (e.g. `cd pi`)
+cdpath=("$HOME/github" $cdpath)

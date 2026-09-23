@@ -1,0 +1,108 @@
+{
+  "NSGlobalDomain": {
+    "ApplePressAndHoldEnabled": true,
+    "AppleShowAllExtensions": false,
+    "AppleSpacesSwitchOnActivate": true,
+    "NSCloseAlwaysConfirmsChanges": true,
+    "NSDocumentSaveNewDocumentsToCloud": true,
+    "NSQuitAlwaysKeepsWindows": true,
+    "NSTableViewDefaultSizeMode": 2,
+    "NSToolbarTitleViewRolloverDelay": 0.5
+  },
+  "com.apple.ActivityMonitor": {
+    "IconType": 0,
+    "UpdatePeriod": 5
+  },
+  "com.apple.AppleMultitouchTrackpad": {
+    "DragLock": false,
+    "Dragging": false,
+    "FirstClickThreshold": 1,
+    "TrackpadThreeFingerDrag": false
+  },
+  "com.apple.CloudSubscriptionFeatures.optIn": {
+    "545129924": true
+  },
+  "com.apple.LaunchServices": {
+    "LSQuarantine": true
+  },
+  "com.apple.MobileSMS": {
+    "MMSShowSubject": false
+  },
+  "com.apple.Music": {
+    "userWantsPlaybackNotifications": true
+  },
+  "com.apple.Safari": {
+    "ShowFullURLInSmartSearchField": false
+  },
+  "com.apple.Terminal": {
+    "FocusFollowsMouse": false
+  },
+  "com.apple.TextEdit": {
+    "RichText": true,
+    "SmartQuotes": true
+  },
+  "com.apple.TimeMachine": {
+    "DoNotOfferNewDisksForBackup": false
+  },
+  "com.apple.appleseed.FeedbackAssistant": {
+    "Autogather": true
+  },
+  "com.apple.dock": {
+    "autohide": false,
+    "autohide-delay": 0.2,
+    "autohide-time-modifier": 0.5,
+    "enable-spring-load-actions-on-all-items": false,
+    "expose-group-apps": false,
+    "mineffect": "genie",
+    "mru-spaces": true,
+    "orientation": "bottom",
+    "scroll-to-open": false,
+    "show-recents": true,
+    "static-only": false,
+    "tilesize": 48
+  },
+  "com.apple.dt.Xcode": {
+    "ShowBuildOperationDuration": false
+  },
+  "com.apple.finder": {
+    "AppleShowAllFiles": false,
+    "CreateDesktop": true,
+    "FXDefaultSearchScope": "SCev",
+    "FXEnableExtensionChangeWarning": true,
+    "FXPreferredViewStyle": "icnv",
+    "FXRemoveOldTrashItems": false,
+    "FinderSpawnTab": true,
+    "QuitMenuItem": false,
+    "ShowExternalHardDrivesOnDesktop": true,
+    "ShowHardDrivesOnDesktop": false,
+    "ShowMountedServersOnDesktop": false,
+    "ShowPathbar": false,
+    "ShowRemovableMediaOnDesktop": true,
+    "ShowStatusBar": false,
+    "_FXEnableColumnAutoSizing": false,
+    "_FXSortFoldersFirst": false,
+    "_FXSortFoldersFirstOnDesktop": false
+  },
+  "com.apple.helpviewer": {
+    "DevMode": false
+  },
+  "com.apple.iphonesimulator": {
+    "ScreenShotSaveLocation": "~/Pictures/Screenshots"
+  },
+  "com.apple.menuextra.clock": {
+    "FlashDateSeparators": false
+  },
+  "com.apple.screencapture": {
+    "disable-shadow": false,
+    "include-date": true,
+    "location": "~/Desktop",
+    "show-thumbnail": true,
+    "type": "png"
+  },
+  "com.apple.spaces": {
+    "spans-displays": false
+  },
+  "com.apple.universalaccess": {
+    "showWindowTitlebarIcons": false
+  }
+}

@@ -57,7 +57,6 @@ mouse_scroll_lines = 2
 agent_panel_sort = "priority"
 # tmux-style shared dividers (default true leaves a gap between pane borders)
 pane_gaps = false
-navigator_start_in_search = true
 
 [ui.toast]
 delivery = "system"
