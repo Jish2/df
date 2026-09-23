@@ -25,10 +25,18 @@
     let
       defaultUser = "jgoon";
 
+      # explicit-zap host variant: identical config, but the brew bundle run
+      # during activation also removes undeclared formulae/casks
+      # (--zap --force-cleanup). `make <host>-zap` opts in for one switch;
+      # plain `make <host>` never removes anything.
+      zapModule =
+        { lib, ... }:
+        { homebrew.onActivation.cleanup = lib.mkForce "zap"; };
+
       # macs: nix-darwin + home-manager (HM as a darwin module, so one
       # `darwin-rebuild` rebuilds system and user together)
       mkDarwin =
-        host:
+        host: extraModules:
         nix-darwin.lib.darwinSystem {
           specialArgs = {
             inherit inputs self;
@@ -56,7 +64,7 @@
                 ./modules/home/darwin.nix
               ];
             }
-          ];
+          ] ++ extraModules;
         };
 
       # linux: standalone home-manager (pc stays Omarchy; devspace is ephemeral)
@@ -78,9 +86,12 @@
     in
     {
       darwinConfigurations = {
-        work = mkDarwin "work"; # MBP M4 Max
-        personal = mkDarwin "personal"; # MBP M3 Pro
-        mini = mkDarwin "mini"; # M1 Mac Mini, always on
+        work = mkDarwin "work" [ ]; # MBP M4 Max
+        work-zap = mkDarwin "work" [ zapModule ];
+        personal = mkDarwin "personal" [ ]; # MBP M3 Pro
+        personal-zap = mkDarwin "personal" [ zapModule ];
+        mini = mkDarwin "mini" [ ]; # M1 Mac Mini, always on
+        mini-zap = mkDarwin "mini" [ zapModule ];
       };
 
       homeConfigurations = {

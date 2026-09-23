@@ -4,7 +4,7 @@ FLAKE ?= $(HOME)/.config/nix
 
 HOST ?= work
 
-.PHONY: work personal mini pc devspace extensions plan
+.PHONY: work personal mini work-zap personal-zap mini-zap pc devspace extensions plan
 
 # dry-run: builds the darwin generation WITHOUT activating, then reports
 # homebrew drift both directions. nothing changes on the machine.
@@ -34,7 +34,10 @@ plan:
 
 NIXFLAGS = --extra-experimental-features 'nix-command flakes'
 
-work personal mini:
+# plain targets install only. `-zap` variants switch the same host with
+# homebrew.onActivation.cleanup = "zap" for one explicit cleanup activation —
+# run the plain target afterwards to be back on the non-cleaning generation.
+work personal mini work-zap personal-zap mini-zap:
 	sudo darwin-rebuild switch --flake $(FLAKE)#$@ || sudo nix run $(NIXFLAGS) nix-darwin -- switch --flake $(FLAKE)#$@
 	# @$(MAKE) extensions   # disabled for now — vscode manages extensions itself
 

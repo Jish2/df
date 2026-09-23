@@ -166,8 +166,9 @@
     ];
   };
 
-  # after verifying this import on the machine, go self-cleaning:
-  # homebrew.onActivation.cleanup = "zap";
+  # self-cleaning stays opt-in per switch: `make work-zap` runs this host
+  # with homebrew.onActivation.cleanup = "zap" for one activation (see
+  # flake.nix); plain `make work` never removes anything.
 
   # not ported (imperative package managers, left as-is for now):
   #   krew plugins: modify-secret, resource-capacity, view-utilization
