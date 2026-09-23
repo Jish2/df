@@ -7,7 +7,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash '/Users/jgoon/.codex/herdr-tab-from-codex-title.sh'",
+            "command": "bash \"$HOME/.codex/herdr-tab-from-codex-title.sh\"",
             "timeout": 5
           }
         ]
@@ -18,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash '/Users/jgoon/.codex/herdr-tab-from-codex-title.sh'",
+            "command": "bash \"$HOME/.codex/herdr-tab-from-codex-title.sh\"",
             "timeout": 5
           }
         ]
