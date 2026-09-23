@@ -1,0 +1,31 @@
+#!/bin/sh
+# karabiner-fmt — format Karabiner-Elements JSON (stdin -> stdout) so the
+# result is byte-identical to what the Karabiner-Elements GUI writes via
+# json_writer / pqrs::json::pqrs_formatter.
+#
+# This is prettier + ./prettier-plugin-karabiner.mjs (which reproduces the
+# pqrs_formatter layout rules exactly), minus prettier's mandatory trailing
+# newline, which Karabiner's writer never emits. $(...) captures strip the
+# trailing newline; printf %s re-emits without one.
+#
+# Usage:
+#   karabiner-fmt < karabiner.json > out.json       # stdin mode
+#   karabiner-fmt path/to/file.json < file.json     # optional path arg helps
+#                                                     prettier find its config
+set -eu
+
+file=${1:-}
+case "$file" in
+  "$HOME"/.config/karabiner/*.json) ;;
+  *) file="$HOME/.config/karabiner/karabiner.json" ;;
+esac
+
+if command -v prettier >/dev/null 2>&1; then
+  out=$(prettier --stdin-filepath "$file")
+elif npx --no-install prettier --version >/dev/null 2>&1; then
+  out=$(npx --no-install prettier --stdin-filepath "$file")
+else
+  out=$(npx --yes prettier@3 --stdin-filepath "$file")
+fi
+
+printf %s "$out"
