@@ -97,11 +97,11 @@
       }
       "container"
       # --- tap formulae -------------------------------------------------------
-      "aserto-dev/tap/topaz"
+      # topaz and policy moved formula→cask upstream (GoReleaser casks);
+      # declared in casks below
       # tart: NOT declared via brew — the cirruslabs tap formula is broken on
       # modern brew; capture-baseline.sh installs the signed release binary
       # to ~/.local/bin as a workaround
-      "opcr-io/tap/policy"
       "steipete/tap/remindctl"
       {
         name = "tfenv";
@@ -130,6 +130,9 @@
       "headlamp"
       "session-manager-plugin"
       "vanchonlee/tap/krust"
+      # --- tap casks (moved formula→cask upstream) -----------------------------
+      "aserto-dev/tap/topaz"
+      "opcr-io/tap/policy"
       # --- apps ---------------------------------------------------------------
       "1password-cli"
       "aldente"
