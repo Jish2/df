@@ -43,7 +43,6 @@
       "cloudflare/cloudflare"
       "opcr-io/tap"
       "steipete/tap"
-      "supabase/tap"
       "vanchonlee/tap"
     ];
 
@@ -104,7 +103,6 @@
       # to ~/.local/bin as a workaround
       "opcr-io/tap/policy"
       "steipete/tap/remindctl"
-      "supabase/tap/supabase"
       {
         name = "tfenv";
         link = false;
