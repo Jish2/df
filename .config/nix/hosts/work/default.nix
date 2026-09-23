@@ -35,6 +35,14 @@
     cargo-nextest
   ];
 
+  # nix-darwin's set-environment (/etc/zshenv) replaces PATH wholesale, so
+  # non-interactive zsh — e.g. the corp git wrapper (#safe-git-push) — loses
+  # brew and /opt/rbx. Append them back for every zsh; login shells still get
+  # the full PATH from ~/.zprofile.
+  programs.zsh.shellInit = ''
+    export PATH="$PATH:/opt/homebrew/bin:/opt/rbx/infosec/safe-git-push"
+  '';
+
   homebrew = {
     taps = [
       "ankitpokhrel/jira-cli"
