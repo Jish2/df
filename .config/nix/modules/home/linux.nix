@@ -1,6 +1,12 @@
 # HM extras for linux hosts (standalone HM on Omarchy / Coder)
-{ user, ... }:
+{ pkgs, user, ... }:
+let
+  tools = import ../tools.nix;
+  nameOrAttr = t: t.nix;
+in
 {
+  home.packages = map (t: pkgs.${t.nix}) tools;
+
   home.homeDirectory = "/home/${user}";
 
   # non-NixOS glue: wires nix profile into XDG paths / session. If it ever

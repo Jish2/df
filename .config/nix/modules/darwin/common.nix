@@ -23,19 +23,13 @@
   # (some of these duplicate brew formulae for now — the brew→nix port wave
   # in FLEET.md settles PATH precedence when entries move)
   environment.systemPackages = with pkgs; [
-    neovim
     nixfmt-rfc-style
     defaultbrowser
     yarn
-    gh
-    jq # used by `make plan`
-    yadm # TODO: remove once the yadm port completes
-    zoxide
+    jq # `make plan` and friends
     pure-prompt
     mkalias
     sqlfluff
-    ripgrep
-    delta
     zsh-syntax-highlighting
     zsh-autosuggestions
   ];
@@ -54,7 +48,6 @@
       ApplePressAndHoldEnabled = false; # hold-to-repeat keys, no accent popup
       KeyRepeat = 2;
       InitialKeyRepeat = 15;
-      "com.apple.mouse.scaling" = 0.6875; # mouse tracking speed
     };
 
     dock = {
@@ -64,7 +57,6 @@
       largesize = 16; # magnification size, if ever enabled
       mru-spaces = false; # don't reorder spaces by recency
       wvous-br-corner = 4; # bottom-right hot corner → Desktop
-      wvous-br-modifier = 0;
     };
 
     trackpad = {
@@ -73,6 +65,7 @@
     };
 
     CustomUserPreferences = {
+      "NSGlobalDomain" = { "com.apple.mouse.scaling" = "0.6875"; };
       # menu bar: battery hidden, wifi/sound/nowplaying/focus shown.
       # keys written verbatim from a Tahoe dump — nix-darwin's first-class
       # controlcenter options predate Tahoe's VisibleCC rename.
@@ -235,6 +228,9 @@
     # import on a machine (diff fresh `brew bundle dump` output vs
     # the host's declared lists), opt in per-host with "zap" so drift self-cleans.
     onActivation.cleanup = "none";
+
+    # darwin side of the shared CLI manifest
+    brews = map (t: t.brew) (import ../tools.nix);
   };
 
   programs.zsh = {
@@ -260,7 +256,7 @@
       env = pkgs.buildEnv {
         name = "system-applications";
         paths = config.environment.systemPackages;
-        pathsToLink = "/Applications";
+        pathsToLink = [ "/Applications" ];
       };
     in
     pkgs.lib.mkForce ''

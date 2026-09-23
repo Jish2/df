@@ -27,13 +27,21 @@
   # ported from the brew bundle go:/cargo: directives
   environment.systemPackages = with pkgs; [
     gopls
-    staticcheck
+    go-tools # honnef.co/go/tools, provides staticcheck
     delve
     protoc-gen-go
     protoc-gen-go-grpc
     cargo-audit
     cargo-nextest
   ];
+
+  # nix-darwin's set-environment (/etc/zshenv) replaces PATH wholesale, so
+  # non-interactive zsh — e.g. the corp git wrapper (#safe-git-push) — loses
+  # brew and /opt/rbx. Append them back for every zsh; login shells still get
+  # the full PATH from ~/.zprofile.
+  programs.zsh.shellInit = ''
+    export PATH="$PATH:/opt/homebrew/bin:/opt/rbx/infosec/safe-git-push"
+  '';
 
   homebrew = {
     taps = [
@@ -43,7 +51,6 @@
       "cloudflare/cloudflare"
       "opcr-io/tap"
       "steipete/tap"
-      "supabase/tap"
       "vanchonlee/tap"
     ];
 
@@ -51,7 +58,6 @@
       # --- k8s / infra -------------------------------------------------------
       "argocd"
       "helm"
-      "kubernetes-cli"
       "krew"
       "popeye"
       "awscli"
@@ -72,33 +78,22 @@
       # --- cli ---------------------------------------------------------------
       "act"
       "atlas"
-      "btop"
-      "fd"
       "ffmpeg"
-      "fzf"
-      "git"
       "git-filter-repo"
       "git-lfs"
       "gnu-tar"
       "googleworkspace-cli"
       "herdr"
       "jira-cli"
-      "just"
-      "lazygit"
       "lcov"
       "markdownlint-cli"
       "md-tui"
-      "mosh"
       "pandoc"
       "pipx"
       "sshpass"
       "terminal-notifier"
-      "tmux"
       "tree-sitter-cli"
       "vercel"
-      "watch"
-      "wget"
-      "yq"
       # --- services ----------------------------------------------------------
       {
         name = "ollama";
@@ -110,13 +105,12 @@
       }
       "container"
       # --- tap formulae -------------------------------------------------------
-      "aserto-dev/tap/topaz"
+      # topaz and policy moved formula→cask upstream (GoReleaser casks);
+      # declared in casks below
       # tart: NOT declared via brew — the cirruslabs tap formula is broken on
       # modern brew; capture-baseline.sh installs the signed release binary
       # to ~/.local/bin as a workaround
-      "opcr-io/tap/policy"
       "steipete/tap/remindctl"
-      "supabase/tap/supabase"
       {
         name = "tfenv";
         link = false;
@@ -144,6 +138,9 @@
       "headlamp"
       "session-manager-plugin"
       "vanchonlee/tap/krust"
+      # --- tap casks (moved formula→cask upstream) -----------------------------
+      "aserto-dev/tap/topaz"
+      "opcr-io/tap/policy"
       # --- apps ---------------------------------------------------------------
       "1password-cli"
       "aldente"
@@ -169,8 +166,9 @@
     ];
   };
 
-  # after verifying this import on the machine, go self-cleaning:
-  # homebrew.onActivation.cleanup = "zap";
+  # self-cleaning stays opt-in per switch: `make work-zap` runs this host
+  # with homebrew.onActivation.cleanup = "zap" for one activation (see
+  # flake.nix); plain `make work` never removes anything.
 
   # not ported (imperative package managers, left as-is for now):
   #   krew plugins: modify-secret, resource-capacity, view-utilization
