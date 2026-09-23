@@ -29,7 +29,7 @@ plan:
 NIXFLAGS = --extra-experimental-features 'nix-command flakes'
 
 work personal mini:
-	darwin-rebuild switch --flake $(FLAKE)#$@ || nix run $(NIXFLAGS) nix-darwin -- switch --flake $(FLAKE)#$@
+	sudo darwin-rebuild switch --flake $(FLAKE)#$@ || sudo nix run $(NIXFLAGS) nix-darwin -- switch --flake $(FLAKE)#$@
 	# @$(MAKE) extensions   # disabled for now — vscode manages extensions itself
 
 pc devspace:
