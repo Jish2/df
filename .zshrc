@@ -1,5 +1,6 @@
-autoload -Uz compinit
-compinit
+# compinit + bashcompinit run in nix-darwin's /etc/zshrc before this
+# file lands; no need to duplicate them here anymore
+
 # some configs are replicated in ~/.config/nix/flake.nix
 
 # plugins (zsh-autosuggestions, zsh-syntax-highlighting, pure) are wired by
@@ -38,8 +39,7 @@ treehouse_prompt_precmd() {
 add-zsh-hook precmd treehouse_prompt_precmd
 prompt_newline=' %(21V.%F{green}%21v%f.)'$'\n%{\r%}'
 
-# terraform
-autoload -U +X bashcompinit && bashcompinit
+# terraform (bashcompinit already ran in /etc/zshrc)
 complete -o nospace -C /opt/homebrew/bin/terraform terraform
 
 # pyenv (interactive shell function setup; PATH is set in .zprofile)
