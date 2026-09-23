@@ -13,7 +13,7 @@ directory = "~/github/herdr-worktrees"
 
 [theme]
 name = "catppuccin"
-auto_switch = true
+auto_switch = false
 light_name = "catppuccin-latte"
 dark_name = "catppuccin"
 
