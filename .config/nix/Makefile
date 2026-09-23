@@ -17,12 +17,18 @@ plan:
 	  '$(FLAKE)#darwinConfigurations.$(HOST).config.homebrew.brews' | jq -r '.[]' | sed 's|.*/||' | sort -u > /tmp/plan-decl-brews
 	@nix eval --extra-experimental-features 'nix-command flakes' --json --apply 'x: map (b: if builtins.isAttrs b then b.name else b) x' \
 	  '$(FLAKE)#darwinConfigurations.$(HOST).config.homebrew.casks' | jq -r '.[]' | sed 's|.*/||' | sort -u > /tmp/plan-decl-casks
-	@brew leaves | sed 's|.*/||' | sort -u > /tmp/plan-inst-brews
+	@brew list --formula | sed 's|.*/||' | sort -u > /tmp/plan-inst-brews
+	@brew leaves | sed 's|.*/||' | sort -u > /tmp/plan-inst-leaves
 	@brew list --cask | sed 's|.*/||' | sort -u > /tmp/plan-inst-casks
+	@# install side uses `brew list` (the same check `brew bundle` makes — a
+	@# formula present as a dependency is not "missing"); the remove side uses
+	@# leaves, because zap only takes top-level formulae. modern brew's `leaves`
+	@# also lists casks, so strip the cask set out of it first.
+	@comm -23 /tmp/plan-inst-leaves /tmp/plan-inst-casks > /tmp/plan-inst-leaf-brews
 	@echo; echo '== will be INSTALLED (declared, missing) =='
 	@comm -23 /tmp/plan-decl-brews /tmp/plan-inst-brews; comm -23 /tmp/plan-decl-casks /tmp/plan-inst-casks
 	@echo '== would be REMOVED by zap (installed, undeclared) =='
-	@comm -13 /tmp/plan-decl-brews /tmp/plan-inst-brews; comm -13 /tmp/plan-decl-casks /tmp/plan-inst-casks
+	@comm -13 /tmp/plan-decl-brews /tmp/plan-inst-leaf-brews; comm -13 /tmp/plan-decl-casks /tmp/plan-inst-casks
 	@echo '== ok: present and declared =='
 	@comm -12 /tmp/plan-decl-brews /tmp/plan-inst-brews | wc -l | tr -d ' '; comm -12 /tmp/plan-decl-casks /tmp/plan-inst-casks | wc -l | tr -d ' '
 
