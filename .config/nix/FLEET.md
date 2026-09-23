@@ -8,7 +8,7 @@ module imports in the flake, not filename tricks.
 |---|---|---|---|---|---|---|
 | `work` | MBP M4 Max | macOS 26 | aarch64-darwin | nix-darwin + HM | `HQ-KP2HJMHQ7R` | `jgoon` |
 | `personal` | MBP M3 Pro | macOS | aarch64-darwin | nix-darwin + HM | TODO | TODO |
-| `mini` | M1 Mac Mini (always on) | macOS | aarch64-darwin | nix-darwin + HM, server profile | TODO | TODO |
+| `mini` | M1 Mac Mini (always on) | macOS 26.6 | aarch64-darwin | nix-darwin + HM, server profile | `Joshuas-Mac-mini` | `jgoon` |
 | `pc` | desktop, dual-boots Windows (gaming) | Omarchy (Arch) | x86_64-linux | HM standalone | TODO | TODO |
 | `devspace` | Coder VM | Linux | TODO | HM standalone | n/a (ephemeral) | TODO |
 
@@ -106,8 +106,15 @@ yadm stays live until the last file moves. Port in waves:
 
 ## Open questions
 
-- [ ] hostnames + users for personal / mini / pc / devspace
+- [ ] hostnames + users for personal / pc / devspace
 - [ ] devspace arch and home persistence
-- [ ] what services does mini run (tailscale? plex? homebridge?)
-- [ ] which work-only tools live only on `work` vs all macs
+- [x] what services does mini run → tailscaled (system daemon, NOT brew
+  services — ssh depends on it), postgresql@14 (brew service), plus a fleet
+  of hand-rolled launchagents: cloudflared tunnels, BlueBubbles, headscale,
+  hub-mac-control, agent-device proxy, t3code, openpoker sim… none
+  nix-managed yet (see the comment block in hosts/mini/default.nix); no
+  plex/homebridge
+- [ ] which work-only tools live only on `work` vs all macs (mini's brew
+  import shows heavy overlap with work — argocd/helm/awscli/etc. — so
+  consider promoting a shared `modules/darwin/devtools` brew set)
 - [ ] secrets strategy (currently out of band; sops-nix later if desired)
