@@ -2,14 +2,11 @@ autoload -Uz compinit
 compinit
 # some configs are replicated in ~/.config/nix/flake.nix
 
-# zsh-syntax-highlighting
-source $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+# plugins (zsh-autosuggestions, zsh-syntax-highlighting, pure) are wired by
+# nix-darwin into /etc/zshenv + /etc/zshrc — no brew paths here
 
 # syntax-highlighting-theme
 source ~/.config/zsh/themes/catppuccin_mocha-zsh-syntax-highlighting.zsh
-
-# zsh-autosuggestions
-source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 # aliases
 source $HOME/.aliases
@@ -111,3 +108,12 @@ export PATH="$HOME/.local/bin:$PATH"
 # fi
 
 export PATH="/opt/homebrew/opt/rustup/bin:$PATH"
+
+# Vite+ bin (https://viteplus.dev)
+. "$HOME/.config/vite-plus/env"
+
+# sessions: semantic search via local Ollama embeddings
+export SESSIONS_OLLAMA_MODEL=qwen3-embedding:4b
+
+# cd into ~/github repos from anywhere (e.g. `cd pi`)
+cdpath=("$HOME/github" $cdpath)

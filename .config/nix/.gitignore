@@ -1,0 +1,9 @@
+# build input, fetched on demand via scripts/fetch-baseline.sh
+baseline/
+
+# discovery report, generated locally by scripts/export-defaults.py —
+# browsed, hand-picked into common.nix, then discarded. never imported.
+modules/darwin/imported-defaults*.nix
+
+# local pre-migration safety copy, never committed
+pre-nix-snapshot/
