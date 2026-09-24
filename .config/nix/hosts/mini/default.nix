@@ -75,6 +75,7 @@
       "pure"
       "ripgrep"
       "tmux"
+      "vercel"
       "wget"
       "yadm"
       "yarn"

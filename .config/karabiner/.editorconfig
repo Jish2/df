@@ -1,0 +1,8 @@
+# Karabiner-Elements' json_writer emits no trailing newline.
+# Keep editors from adding one so bytes stay identical between
+# app saves and editor/formatter saves.
+root = true
+
+[*.json]
+insert_final_newline = false
+end_of_line = lf

@@ -1,4 +1,9 @@
 {
-  "printWidth": 1,
-  "tabWidth": 2
+  "plugins": ["./prettier-plugin-karabiner.mjs"],
+  "overrides": [
+    {
+      "files": ["*.json", "assets/**/*.json"],
+      "options": { "parser": "karabiner-json" }
+    }
+  ]
 }
