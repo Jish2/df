@@ -1,6 +1,11 @@
 FLAKE ?= $(HOME)/.config/nix
 
-# fallback `nix run` covers first bootstraps where the CLI isn't installed yet
+# fallback `nix run` covers first bootstraps where darwin-rebuild isn't on
+# PATH yet. NIX resolves robustly: a first bootstrap can run right after
+# /etc/zshrc was renamed aside for nix-darwin's /etc guard (the nix
+# installer's PATH snippet lives in that file), which drops nix from new
+# shells — so fall back to the multi-user daemon profile's absolute path.
+NIX := $(shell command -v nix 2>/dev/null || echo /nix/var/nix/profiles/default/bin/nix)
 
 # infer the flake attr from this machine's name so `make here`, `make here-zap`,
 # and plain `make plan` work on any machine in the fleet. macs use
@@ -24,7 +29,7 @@ HOST ?= $(INFERRED)
 # iterate until 'remove' is empty before switching a host to zap.
 plan:
 	@darwin-rebuild build --flake $(FLAKE)#$(HOST) || \
-	  nix run --extra-experimental-features 'nix-command flakes' nix-darwin -- build --flake $(FLAKE)#$(HOST)
+	  $(NIX) run $(NIXFLAGS) nix-darwin -- build --flake $(FLAKE)#$(HOST)
 	@echo "build ok (eval+build only, nothing activated)"
 	@nix eval --extra-experimental-features 'nix-command flakes' --json --apply 'x: map (b: if builtins.isAttrs b then b.name else b) x' \
 	  '$(FLAKE)#darwinConfigurations.$(HOST).config.homebrew.brews' | jq -r '.[]' | sed 's|.*/||' | sort -u > /tmp/plan-decl-brews
@@ -51,7 +56,7 @@ NIXFLAGS = --extra-experimental-features 'nix-command flakes'
 # homebrew.onActivation.cleanup = "zap" for one explicit cleanup activation —
 # run the plain target afterwards to be back on the non-cleaning generation.
 work personal mini work-zap personal-zap mini-zap:
-	sudo darwin-rebuild switch --flake $(FLAKE)#$@ || sudo nix run $(NIXFLAGS) nix-darwin -- switch --flake $(FLAKE)#$@
+	sudo darwin-rebuild switch --flake $(FLAKE)#$@ || sudo $(NIX) run $(NIXFLAGS) nix-darwin -- switch --flake $(FLAKE)#$@
 	# @$(MAKE) extensions   # disabled for now — vscode manages extensions itself
 
 pc devspace:
