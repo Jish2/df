@@ -1,0 +1,30 @@
+{
+  "id": "pr-merged-indicator",
+  "name": "PR Merged Indicator",
+  "description": "Marks GitHub pull-request tabs whose PR has been merged: purple outline + favicon dot so you know the tab is safe to close. State is read from the PR page itself - no API calls, no tokens.",
+  "author": "Jish2",
+  "version": "1.4.2",
+  "homepage": "https://github.com/Jish2/pr-merged-indicator",
+  "tags": [
+    "github",
+    "pull-requests",
+    "tabs",
+    "productivity"
+  ],
+  "fork": [
+    "zen",
+    "firefox"
+  ],
+  "js": true,
+  "style": {
+    "chrome": "userChrome.css"
+  },
+  "supportsUnload": true,
+  "scripts": {
+    "pr-merged-indicator.uc.js": {
+      "include": [
+        "chrome://browser/content/browser.xhtml"
+      ]
+    }
+  }
+}

@@ -1,0 +1,8 @@
+/* PR Merged Indicator — no CSS needed.
+ *
+ * Since v1.4.0 the badge is applied natively: the chrome script replaces the
+ * tab favicon via gBrowser.setIcon(tab, <svg data URI>). That renders in the
+ * exact favicon position (no overlay/centering issues), adapts to light/dark
+ * via a media query inside the SVG, and works on pending (unloaded) tabs.
+ * This file is kept only because theme.json references it.
+ */
