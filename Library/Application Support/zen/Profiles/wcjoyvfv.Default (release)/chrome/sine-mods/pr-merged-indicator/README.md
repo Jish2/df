@@ -10,20 +10,28 @@ merge icon over the favicon, so you know the tab is safe to close.
 - A userChrome JS script watches every tab whose URL matches
   `github.com/<owner>/<repo>/pull/<n>` and injects a **frame script** into the
   content process (required under Fission — chrome JS cannot read remote page
-  DOM via `browser.contentDocument`).
+  DOM via `browser.contentDocument`). Probes are keyed **per window**: under
+  Fission every github.com tab shares one content process, so a single
+  process-wide probe would read whichever tab loaded first and never mark
+  the rest (the v1.4.2 bug).
 - Merge state is read from the PR page itself — **no API calls, no tokens**:
   1. `"state":"MERGED"` inside GitHub's React app embedded JSON (`<script type="application/json">`)
   2. classic Primer badge `.State--merged` / `title="Status: Merged"`
   3. any State/Badge/Label-classed element whose text is exactly "Merged"
 - On detection it sets `data-pr-merged="true"` on the `.tabbrowser-tab`
-  element; `userChrome.css` overlays GitHub's git-merge glyph (in merged
-  purple) on top of the favicon.
+  element and **replaces the favicon** with a purple git-merge badge via
+  `gBrowser.setIcon()` (survives browser restarts — session store persists
+  the tab image; an attribute watcher re-asserts it if the favicon pipeline
+  clobbers it).
 - **Pending (session-restored, unloaded) tabs** are handled without loading
   them: the PR page is fetched from chrome with your github.com session
   cookies (same technique as Zen's GitHub live folder) and checked with the
   same layered detection, re-checked every 30 min so PRs merged elsewhere
   eventually mark tabs you never opened. Touching a lazy tab's message
-  manager would defeat lazy session restore, hence the HTTP path.
+  manager would defeat lazy session restore, hence the HTTP path. The
+  SessionStore import tries `moz-src:///browser/components/sessionstore/…`
+  first and falls back to `resource:///modules/sessionstore/…` — the module
+  moved between builds (the wrong path silently disables this whole path).
 - Checks run on tab navigation (tabs progress listener), on tab select
   (covers lazily restored sessions), and via a bounded ~9 s retry loop while
   GitHub's React header hydrates. Once marked, the flag is sticky until the
@@ -83,13 +91,13 @@ use the GitHub-repo install route above, which is the supported path.)
 - **Icon size/placement**: `userChrome.css` covers the whole favicon by
   default; a snippet at the bottom shows how to shrink it to a corner badge.
 - **Sensitivity**: `RETRY_MS` / `RETRY_MAX` constants at the top of
-  `pr-merged-indicator.uc.js` control how long it waits for hydration.
+  `frame.js` control how long it waits for hydration.
 
 ## Files
 
 | File | Purpose |
 |---|---|
 | `theme.json` | Sine manifest |
-| `pr-merged-indicator.uc.js` | chrome-side: injects frame script, sets tab attribute |
-| `frame.js` | content-side: layered merge detection (injected via message manager) |
+| `pr-merged-indicator.uc.js` | chrome-side: injects frame script, badges the favicon via gBrowser.setIcon |
+| `frame.js` | content-side: per-window layered merge detection (injected via message manager) |
 | `userChrome.css` | purple outline + favicon dot styling |

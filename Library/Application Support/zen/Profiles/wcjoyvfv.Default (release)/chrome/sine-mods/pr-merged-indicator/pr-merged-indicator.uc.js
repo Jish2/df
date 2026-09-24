@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           PR Merged Indicator
 // @description    Marks GitHub pull-request tabs whose PR has been merged: replaces the favicon with GitHub's purple merged badge so you know the tab is safe to close.
-// @version        1.4.2
+// @version        1.5.0
 // ==/UserScript==
 
 /**
@@ -100,11 +100,22 @@
       "resource://gre/modules/NetUtil.sys.mjs"
     ).NetUtil;
   } catch (e) {}
-  try {
-    SessionStore = ChromeUtils.importESModule(
-      "resource:///modules/sessionstore/SessionStore.sys.mjs"
-    ).SessionStore;
-  } catch (e) {}
+  // SessionStore's module URL moved between builds: current mozilla-central
+  // (and Satori) exposes it under moz-src:///, older stock Zen under
+  // resource:///modules/sessionstore/. Try both in order — v1.4.2 imported
+  // only the old path, which silently killed the pending-tab HTTP path on
+  // Satori builds (merged PR tabs sat unbadged for hours while pending).
+  for (const url of [
+    "moz-src:///browser/components/sessionstore/SessionStore.sys.mjs",
+    "resource:///modules/sessionstore/SessionStore.sys.mjs",
+  ]) {
+    try {
+      SessionStore = ChromeUtils.importESModule(url).SessionStore;
+      if (SessionStore) {
+        break;
+      }
+    } catch (e) {}
+  }
 
   // browser -> { mm, listeners: [fn], loaded }. The mm identity is tracked
   // because a remoteness change or tab restore recreates the message manager;
@@ -241,11 +252,12 @@
         rec.loaded = true;
       }
 
-      // (Re-)inject on every navigation. First execution installs the frame
-      // singleton; re-execution hits frame.js's globalThis guard, which
-      // disposes the previous per-document instance and wires fresh
-      // DOMContentLoaded/load listeners on the new document (they die with
-      // each document, so this re-wiring is what keeps probes running).
+      // (Re-)inject on every navigation. Each execution runs frame.js in the
+      // scope of THIS browser's message manager and probes that browser's
+      // own documents (under Fission all github.com tabs share one content
+      // process, so a process-wide probe would read whichever tab loaded
+      // first — the v1.4.2 bug). Stale listeners from previous documents
+      // self-unregister once their window is gone.
       mm.loadFrameScript(FRAME_SCRIPT_URL, false);
 
       // Ask for a fresh probe of the current document. On the content
