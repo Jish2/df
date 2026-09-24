@@ -1,5 +1,8 @@
 {
-    "global": { "show_in_menu_bar": false },
+    "global": {
+        "show_in_menu_bar": false,
+        "enable_cgeventtap_fallback": true
+    },
     "profiles": [
         {
             "complex_modifications": {
@@ -2051,6 +2054,18 @@
                                 "type": "basic"
                             }
                         ]
+                    },
+                    {
+                        "description": "EarPods: tap = toggle Handy dictation, hold ≥250ms = play/pause music (fires mid-press)",
+                        "manipulators": [
+                            {
+                                "type": "basic",
+                                "from": { "consumer_key_code": "play_or_pause" },
+                                "to_after_key_up": [{ "shell_command": "/Users/jgoon/.config/karabiner/scripts/earpods-release.sh" }],
+                                "to_if_held_down": [{ "shell_command": "/Users/jgoon/.config/karabiner/scripts/earpods-music-toggle.sh" }],
+                                "parameters": { "basic.to_if_held_down_threshold_milliseconds": 250 }
+                            }
+                        ]
                     }
                 ]
             },
@@ -2070,6 +2085,14 @@
                         "is_pointing_device": true,
                         "product_id": 866,
                         "vendor_id": 10730
+                    },
+                    "ignore": false
+                },
+                {
+                    "identifiers": {
+                        "is_consumer": true,
+                        "product_id": 4363,
+                        "vendor_id": 1452
                     },
                     "ignore": false
                 }
