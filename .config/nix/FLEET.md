@@ -56,7 +56,11 @@ make plan HOST=work   # dry-run: build + brew drift report, changes nothing
 
 ## Bootstrap (post-yadm)
 
-**mac:** install nix → `git clone` → `nix run nix-darwin -- switch --flake ~/github/df#work`
+**mac:** install nix → `yadm pull` (delivers `~/.config/nix`) → rename the
+nix installer's snippets aside so nix-darwin's /etc guard passes
+(`sudo mv /etc/zshrc /etc/zshrc.before-nix-darwin`, same for `/etc/bashrc`)
+→ `make here`. the Makefile fallback uses the daemon-profile nix path, so
+the switch still works after the rename drops nix from new shells.
 
 **pc:** `sudo pacman -S nix` → clone → `make pc`
 (first run uses the `nix run home-manager` fallback in the Makefile)
