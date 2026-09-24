@@ -116,7 +116,8 @@ yadm stays live until the last file moves. Port in waves:
   hub-mac-control, agent-device proxy, t3code, openpoker sim… none
   nix-managed yet (see the comment block in hosts/mini/default.nix); no
   plex/homebridge
-- [ ] which work-only tools live only on `work` vs all macs (mini's brew
-  import shows heavy overlap with work — argocd/helm/awscli/etc. — so
-  consider promoting a shared `modules/darwin/devtools` brew set)
+- [ ] which work-only tools live only on `work` vs all macs — deferred
+  until `personal` onboards; then curate the every-machine set from three
+  imports (mini keeps its pure status-quo import per the 2026-09-23
+  decision; its overlap with work is the seed of a shared devtools set)
 - [ ] secrets strategy (currently out of band; sops-nix later if desired)
