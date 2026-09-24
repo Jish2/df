@@ -109,8 +109,8 @@ export PATH="$HOME/.local/bin:$PATH"
 
 export PATH="/opt/homebrew/opt/rustup/bin:$PATH"
 
-# Vite+ bin (https://viteplus.dev)
-. "$HOME/.config/vite-plus/env"
+# Vite+ bin (https://viteplus.dev) — optional, not installed on every machine
+[ -r "$HOME/.config/vite-plus/env" ] && . "$HOME/.config/vite-plus/env"
 
 # sessions: semantic search via local Ollama embeddings
 export SESSIONS_OLLAMA_MODEL=qwen3-embedding:4b
