@@ -153,7 +153,20 @@
   #   net.headscale.headscale (+ com.cloudflare.cloudflared.headscale)
   #   com.bluebubbles.server
   #
-  # after verifying this import on the machine (`make plan HOST=mini`),
-  # go self-cleaning:
-  # homebrew.onActivation.cleanup = "zap";
+  # import verified on the machine (`make plan HOST=mini`, 2026-09-23):
+  # 49 brews + 25 casks declared = installed. first-switch deltas accepted:
+  # the shared tools.nix manifest installs (btop, eza, fd, mosh, sqlfluff,
+  # watch), topaz/policy arrive as casks (upstream deleted the formulae —
+  # the stale formula copies stay until an explicit cleanup), and the
+  # hand-curated defaults apply per fleet policy.
+  #
+  # self-cleaning stays opt-in per switch: `make mini-zap` (or `make
+  # here-zap`) runs this host with cleanup = "zap" for one activation —
+  # plain `make mini` never removes anything.
+  #
+  # post-switch triage mirrors work: pure + zsh-autosuggestions/
+  # zsh-syntax-highlighting are declared as brews (status quo) while
+  # nix-darwin also provides them via /etc wiring — drop the brew copies
+  # once the nix versions are confirmed, and uninstall the stale
+  # topaz/policy formulae.
 }

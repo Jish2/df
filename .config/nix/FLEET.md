@@ -77,13 +77,15 @@ startup script so rebuilds re-apply. TODO: confirm arch + home persistence.
   hand-curated keys in modules/darwin/common.nix — change or delete them
   there. macs never inherit a bulk snapshot (see below).
 
-## Per-mac onboarding (work is done; do this ON each new mac)
+## Per-mac onboarding (work: done · mini: import verified, first switch pending)
 
 1. `brew bundle dump` → reconcile into `hosts/<name>/default.nix`.
    Removal is opt-in: cleanup defaults to `"none"` fleet-wide, so a rebuild
    only ever ADDS. Review with `make plan HOST=<name>` on the host (builds
    without activating + reports brew/cask drift); when the 'would be REMOVED'
-   list is empty, enable `homebrew.onActivation.cleanup = "zap";` there.
+   list is empty the host is zap-ready — `make <host>-zap` (or `make
+   here-zap`) runs one explicit self-cleaning switch, and plain switches
+   never remove anything.
 2. defaults: the mac inherits the hand-curated set in
    `modules/darwin/common.nix`. To hunt for more: `scripts/fetch-baseline.sh`
    once, then `scripts/export-defaults.py --baseline baseline/tahoe
