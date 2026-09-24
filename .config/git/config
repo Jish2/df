@@ -34,3 +34,9 @@
 # Include machine-specific config, yadm will symlink the config.local##...
 [include]
 	path = ~/.config/git/config.local
+[credential "https://github.com"]
+	helper = 
+	helper = !/opt/homebrew/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/opt/homebrew/bin/gh auth git-credential

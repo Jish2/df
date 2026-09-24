@@ -2,9 +2,22 @@ FLAKE ?= $(HOME)/.config/nix
 
 # fallback `nix run` covers first bootstraps where the CLI isn't installed yet
 
-HOST ?= work
+# infer the flake attr from this machine's name so `make here`, `make here-zap`,
+# and plain `make plan` work on any machine in the fleet. macs use
+# LocalHostName; the linux fallback is the short hostname. add new hosts to
+# this map as they land (personal is TODO until its hostname is known).
+MACHINE := $(shell scutil --get LocalHostName 2>/dev/null || hostname -s)
+ifeq ($(MACHINE),HQ-KP2HJMHQ7R)
+  INFERRED := work
+else ifeq ($(MACHINE),Joshuas-Mac-mini)
+  INFERRED := mini
+else
+  INFERRED := unknown
+endif
 
-.PHONY: work personal mini work-zap personal-zap mini-zap pc devspace extensions plan
+HOST ?= $(INFERRED)
+
+.PHONY: work personal mini work-zap personal-zap mini-zap pc devspace extensions plan here here-zap
 
 # dry-run: builds the darwin generation WITHOUT activating, then reports
 # homebrew drift both directions. nothing changes on the machine.
@@ -47,3 +60,16 @@ pc devspace:
 # not wired into the mac targets for now; run manually if wanted
 extensions:
 	@sh vscode/install-extensions.sh
+
+# switch whatever machine you're on — the host map above picks the attr
+here:
+	@if [ "$(INFERRED)" = unknown ]; then \
+	  echo "machine '$(MACHINE)' has no flake attr mapped — add it to the host map in this Makefile"; exit 1; \
+	fi
+	$(MAKE) $(INFERRED)
+
+here-zap:
+	@if [ "$(INFERRED)" = unknown ]; then \
+	  echo "machine '$(MACHINE)' has no flake attr mapped — add it to the host map in this Makefile"; exit 1; \
+	fi
+	$(MAKE) $(INFERRED)-zap
