@@ -9,8 +9,8 @@ module imports in the flake, not filename tricks.
 | `work` | MBP M4 Max | macOS 26 | aarch64-darwin | nix-darwin + HM | `HQ-KP2HJMHQ7R` | `jgoon` |
 | `personal` | MBP M3 Pro | macOS | aarch64-darwin | nix-darwin + HM | TODO | TODO |
 | `mini` | M1 Mac Mini (always on) | macOS 26.6 | aarch64-darwin | nix-darwin + HM, server profile | `Joshuas-Mac-mini` | `jgoon` |
-| `pc` | desktop, dual-boots Windows (gaming) | Omarchy (Arch) | x86_64-linux | HM standalone | TODO | TODO |
-| `devspace` | Coder VM | Linux | TODO | HM standalone | n/a (ephemeral) | TODO |
+| `pc` | desktop, dual-boots Windows (gaming) | NixOS (see `/etc/nixos`; standalone) | x86_64-linux | out-of-band NixOS | `pc` | `jgoon` |
+| `devspace` | Coder VM | Linux | x86_64 | HM standalone | n/a (ephemeral) | TODO |
 
 Decisions:
 
@@ -45,6 +45,29 @@ the repo root once yadm is retired; commands below assume that final shape.
 ├── vscode/
 └── Makefile                     # make work | personal | mini | pc | devspace
 ```
+
+## Tailnet (headscale)
+
+One join mechanism everywhere: the **tailnet-join wizard**
+(`~/.agents/skills/tailnet-join/`, shipped to every box by yadm). It
+handles every variant — App Store app, standalone pkg, brew formula,
+NixOS system CLI — mints a fresh 30d reusable pre-auth key over SSM
+(never written to disk, never displayed), runs `tailscale up
+--login-server https://headscale.jgoon.com --accept-dns=false`, and
+verifies the node on the control plane. Join state persists on disk, so
+it runs exactly once per box.
+
+What nix still owns: the aws cli on every box (`tools.nix`) so the
+wizard can mint locally; the tailscale daemon/CLI themselves are
+bootstrapped however each host gets them (cask, App Store, brew, NixOS
+system — the wizard probes all variants). pc (out-of-band NixOS at
+`/etc/nixos`, not managed by this flake) gets the same wizard; its
+config deliberately does NOT adopt `services.tailscale.authKeyFile` —
+that would be a second join mechanism.
+
+Private facts (control-plane instance ID) live in
+`~/.config/nix/secrets/` (gitignored); the repo is public. All joins use
+`--accept-dns=false` (company VPN DNS conflict).
 
 ## Apply
 

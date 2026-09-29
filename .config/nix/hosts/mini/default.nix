@@ -13,7 +13,10 @@
   # always-on server power settings (nix-darwin has no pmset module).
   # matches the machine's current `pmset -g`: never sleeps, wakes for
   # network, restarts after power loss.
-  system.activationScripts.pmset.text = ''
+  # (postActivation, not a custom attr: nix-darwin only runs its fixed
+  # activation script list — system.activationScripts.<name> entries are
+  # silently never executed)
+  system.activationScripts.postActivation.text = ''
     pmset -a sleep 0 displaysleep 0 disksleep 0 standby 0 powernap 1 womp 1 autorestart 1
   '';
 
@@ -41,7 +44,6 @@
       "argocd"
       "helm"
       "krew"
-      "awscli"
       "cloudflared" # several tunnels run as com.jgoon.cloudflared.* launchagents
       "grpcurl"
       # --- languages / toolchains -------------------------------------------
