@@ -26,12 +26,31 @@
 //     drops itself once the window it was wired for is gone — this is what
 //     keeps the listener lists from accumulating across navigations.
 //
-// Detection is deliberately layered (GitHub's React DOM is not a contract):
-//   1. Embedded JSON payload of GitHub's React app: look for the PR record and
-//      "state":"MERGED" inside <script type="application/json"> blocks.
-//   2. Classic Primer state badge: .State--merged.
-//   3. Badge elements whose title or exact text is "Merged" (State/Badge/Label
-//      classes, title="Status: Merged").
+// Detection (v1.6.0) reads ONLY the page's own PR state, never the state of
+// other PRs referenced in the timeline. GitHub's PR conversation timeline
+// cross-references related PRs with their own merged/open badges — a draft
+// PR that cross-references a merged one (e.g. sibling PRs for the same
+// ticket) renders a fully-styled merged badge on its page, which made every
+// document-global "is there a merged badge anywhere?" check (v1.5.0 and
+// earlier) false-positive. The layers, in order:
+//   1. Embedded react-app JSON payload: the PR record whose number matches
+//      the URL's PR number carries "state":"MERGED"/"OPEN"/"DRAFT". Number
+//      matching is required because any document-global match can pick up
+//      records for other PRs (cross-references).
+//   2. Header StateLabel (React era, server-rendered): the PR's own badge is
+//      a [data-component="StateLabel"] with data-status="pullMerged" (or
+//      draft / pullOpened / pullClosed). Cross-referenced PR cards render
+//      legacy .State spans, never StateLabel, and StateLabels inside
+//      ref-pullrequest containers are excluded, so this can only be the
+//      page's own state — any answer here is authoritative.
+//   3. Legacy Primer badge fallback: a big (non-small) .State--merged /
+//      title="Status: Merged" badge NOT inside a cross-reference container.
+//      Cross-ref badges always carry State--small and sit next to
+//      [id^="ref-pullrequest-"]; the page header's own badge does not.
+//
+// Each layer returns one of: 'merged', 'open' (authoritative NOT merged —
+// also used to heal badges applied by an older false positive), or 'unknown'
+// (give no answer; keep retrying while the budget lasts).
 
 (() => {
   'use strict';
@@ -41,6 +60,116 @@
   const TEARDOWN_MESSAGE_NAME = 'pr-merged-indicator:teardown';
   const RETRY_MS = 750;  // retry cadence while GitHub's React header hydrates
   const RETRY_MAX = 12;  // ~9s of bounded retries, then give up (stays unmarked)
+
+  const PR_RE = /^https?:\/\/github\.com\/([^/\s]+)\/([^/\s]+)\/pull\/(\d+)/i;
+
+  function isPrUrl(url) {
+    return PR_RE.test(url || '');
+  }
+
+  function prNumber(url) {
+    const m = PR_RE.exec(url || '');
+    return m ? m[3] : null;
+  }
+
+  // The PR's own state from the react-app embedded JSON payload, matched by
+  // PR number. data is a parsed <script type="application/json"> block.
+  // Returns the state string ('MERGED'/'OPEN'/'DRAFT'/...) or null when this
+  // block doesn't carry a number-matching PR record.
+  function prStateFromPayload(data, number) {
+    if (!data || typeof data !== 'object') return null;
+    const root = (data && typeof data.payload === 'object' && data.payload) || data;
+
+    // Canonical routes first — the page's own PR record.
+    const routes = [
+      'pullRequestsLayoutRoute',
+      'pullRequestsChangesRoute',
+      'pullRequestsConversationsRoute',
+      'pullRequestsFilesRoute',
+      'pullRequestsCommitsRoute',
+    ];
+    for (const r of routes) {
+      const pr = root && root[r] && root[r].pullRequest;
+      if (
+        pr &&
+        typeof pr === 'object' &&
+        number !== null &&
+        String(pr.number) === String(number) &&
+        typeof pr.state === 'string'
+      ) {
+        return pr.state;
+      }
+    }
+
+    // Fallback: any pullRequest record with a matching number (guards
+    // against cross-referenced PR records, which carry other numbers).
+    let found = null;
+    (function walk(o) {
+      if (found || !o || typeof o !== 'object') return;
+      if (
+        o.pullRequest &&
+        typeof o.pullRequest === 'object' &&
+        number !== null &&
+        String(o.pullRequest.number) === String(number) &&
+        typeof o.pullRequest.state === 'string'
+      ) {
+        found = o.pullRequest.state;
+        return;
+      }
+      for (const k of Object.keys(o)) walk(o[k]);
+    })(data);
+    return found;
+  }
+
+  /**
+   * Layered own-state detection against the PR page document.
+   * Returns 'merged', 'open' (authoritative not-merged), or 'unknown'.
+   */
+  function detectState(doc, number) {
+    // 1) Embedded react-app JSON payload, matched by PR number. The number
+    //    match is the identity anchor: it can never speak for another PR.
+    const jsonScripts = doc.querySelectorAll('script[type="application/json"]');
+    for (const el of jsonScripts) {
+      let data;
+      try {
+        data = JSON.parse(el.textContent || '');
+      } catch (e) {
+        continue;
+      }
+      const state = prStateFromPayload(data, number);
+      if (state === 'MERGED') return 'merged';
+      if (state) return 'open'; // DRAFT/OPEN/CLOSED...: authoritative
+    }
+
+    // 2) React-era header StateLabel (server-rendered). Cross-referenced PR
+    //    cards in the timeline use legacy .State spans, never StateLabel, so
+    //    a StateLabel is normally the page's own badge; one inside a
+    //    ref-pullrequest container (if GitHub ever renders them there) is
+    //    excluded so it can never speak for the page itself.
+    for (const label of doc.querySelectorAll('[data-component="StateLabel"][data-status]')) {
+      if (label.closest && label.closest('[id^="ref-pullrequest-"]')) continue;
+      const status = label.getAttribute('data-status') || '';
+      if (status === 'pullMerged' || status === 'merged') return 'merged';
+      if (status === 'draft' || status === 'pullOpened' || status === 'pullClosed' || status === 'closed') {
+        return 'open';
+      }
+      // Unknown status value: fall through to the legacy layer instead of
+      // guessing.
+    }
+
+    // 3) Legacy Primer badge fallback — only the page header's own badge.
+    //    Cross-referenced PR cards render their badges as siblings of the
+    //    [id^="ref-pullrequest-"] container with the State--small modifier;
+    //    either marker disqualifies a badge from being the page's own.
+    const badge = doc.querySelector('.State--merged, [title="Status: Merged"]');
+    if (badge) {
+      if (badge.closest && badge.closest('[id^="ref-pullrequest-"]')) return 'unknown';
+      if (badge.classList && badge.classList.contains('State--small')) return 'unknown';
+      return 'merged';
+    }
+
+    return 'unknown';
+  }
 
   // This execution's bindings. `win` is the browser's current document at
   // execution time; `content` (read dynamically below) follows the browser's
@@ -54,53 +183,6 @@
   const registry =
     globalThis.__prMergedIndicatorRegistry ||
     (globalThis.__prMergedIndicatorRegistry = new WeakMap());
-
-  function isPrUrl(url) {
-    return /^https?:\/\/github\.com\/([^/\s]+)\/([^/\s]+)\/pull\/(\d+)/i.test(url || '');
-  }
-
-  /**
-   * Layered merge detection against the PR page document. Best effort: GitHub
-   * may restructure its markup at any time, so multiple independent signals are
-   * probed before giving up.
-   */
-  function isMerged(doc) {
-    // 1) Embedded JSON payload of GitHub's React app. The PR record carries
-    //    "state": "MERGED". Requiring a pullRequest-ish key in the same script
-    //    avoids matching unrelated JSON blobs.
-    const jsonScripts = doc.querySelectorAll('script[type="application/json"]');
-    for (const el of jsonScripts) {
-      const text = el.textContent || '';
-      if (
-        (text.indexOf('"pullRequest"') !== -1 ||
-          text.indexOf('"pull_request"') !== -1) &&
-        /"state"\s*:\s*"MERGED"/.test(text)
-      ) {
-        return true;
-      }
-    }
-
-    // 2) Classic Primer state badge.
-    if (doc.querySelector('.State--merged')) {
-      return true;
-    }
-
-    // 3) Badge elements whose title or exact text is "Merged".
-    if (doc.querySelector('[title="Status: Merged"]')) {
-      return true;
-    }
-
-    const badges = doc.querySelectorAll(
-      '[class*="State" i],[class*="Badge" i],[class*="Label" i]'
-    );
-    for (const el of badges) {
-      if ((el.textContent || '').trim() === 'Merged') {
-        return true;
-      }
-    }
-
-    return false;
-  }
 
   // False once this execution's window has been destroyed — a cross-document
   // navigation turns it into a dead wrapper, and property access throws.
@@ -133,11 +215,12 @@
     try { registry.delete(w); } catch (e) {}
   }
 
-  function report(merged, href) {
+  function report(merged, authoritative, href) {
     try {
       sendAsyncMessage(RESULT_MESSAGE_NAME, {
         href,
         merged,
+        authoritative: !!authoritative,
       });
     } catch (e) {
       try { console.error('[pr-merged-indicator frame] report failed:', e); } catch {}
@@ -161,9 +244,20 @@
       if (!doc) return;
       url = w.location.href;
       if (!isPrUrl(url)) return; // not (yet) a PR document — e.g. about:blank
-      if (doc.readyState === 'complete' && isMerged(doc)) {
-        report(true, url); // merged is sticky; stop probing
-        return;
+      if (doc.readyState === 'complete') {
+        const state = detectState(doc, prNumber(url));
+        if (state === 'merged') {
+          report(true, true, url); // own state: authoritative merged
+          return;
+        }
+        if (state === 'open') {
+          // Authoritative not-merged: heals badges applied by the v1.5.0
+          // cross-reference false positive (sticky marks only survive real
+          // merges). Never sent for a state we merely failed to read.
+          report(false, true, url);
+          return;
+        }
+        // 'unknown': fall through to the bounded retry loop.
       }
     } catch (e) {
       // Dead wrapper (navigated away) or torn-down document: stop quietly.
@@ -171,7 +265,7 @@
       return;
     }
 
-    // Still loading, or header not hydrated yet: retry (bounded).
+    // Still loading, or state not readable yet: retry (bounded).
     s.attempts += 1;
     if (s.attempts > RETRY_MAX) return;
     try {
