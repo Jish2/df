@@ -14,10 +14,24 @@ merge icon over the favicon, so you know the tab is safe to close.
   Fission every github.com tab shares one content process, so a single
   process-wide probe would read whichever tab loaded first and never mark
   the rest (the v1.4.2 bug).
-- Merge state is read from the PR page itself — **no API calls, no tokens**:
-  1. `"state":"MERGED"` inside GitHub's React app embedded JSON (`<script type="application/json">`)
-  2. classic Primer badge `.State--merged` / `title="Status: Merged"`
-  3. any State/Badge/Label-classed element whose text is exactly "Merged"
+- Merge state is read from the PR page itself — **no API calls, no tokens** —
+  and always the PR's **own** state, never the state of other PRs the page
+  references. Layers (in order):
+  1. GitHub's React app embedded JSON: the PR record whose **number matches
+     the URL's PR number** carries `"state":"MERGED"` / `"OPEN"` / `"DRAFT"`
+  2. the own-header state label (`[data-component="StateLabel"]` with
+     `data-status="pullMerged"` / `draft` / `pullOpened` / `pullClosed`)
+  3. a legacy big merged badge (`State--merged` / `title="Status: Merged"`)
+     that is **not** a cross-reference card badge (those render `State--small`
+     next to `id="ref-pullrequest-…"` containers)
+
+  > ⚠️ The number-match and badge-scoping rules are what keep sibling PRs
+  > from cross-marking each other: a draft PR whose timeline cross-references
+  > a merged sibling (same ticket) renders that sibling's merged badge, and a
+  > document-global "any merged badge?" match marks the draft as merged —
+  > exactly the v1.5.0 false positive fixed in v1.6.0. Authoritative
+  > not-merged reports also **heal** stale badges (including ones persisted
+  > into the session store by the buggy version).
 - On detection it sets `data-pr-merged="true"` on the `.tabbrowser-tab`
   element and **replaces the favicon** with a purple git-merge badge via
   `gBrowser.setIcon()` (survives browser restarts — session store persists

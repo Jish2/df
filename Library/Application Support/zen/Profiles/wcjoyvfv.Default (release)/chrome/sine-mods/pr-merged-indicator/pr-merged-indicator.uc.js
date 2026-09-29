@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           PR Merged Indicator
 // @description    Marks GitHub pull-request tabs whose PR has been merged: replaces the favicon with GitHub's purple merged badge so you know the tab is safe to close.
-// @version        1.5.0
+// @version        1.6.0
 // ==/UserScript==
 
 /**
@@ -32,8 +32,13 @@
  *    live folder) and run string-level detection on the HTML. Re-checked on an
  *    interval so PRs merged elsewhere eventually mark their never-loaded tabs.
  *
- * A merged PR can never un-merge, so once detected the flag is sticky until
- * the tab navigates to a different document.
+ * A merged PR can never un-merge, so a MERGED detection is sticky until the
+ * tab navigates to a different document. An authoritative NOT-merged report
+ * (own PR state read as DRAFT/OPEN/CLOSED) removes a stale mark — that is
+ * what heals badges that older versions applied from cross-referenced PR
+ * timelines (v1.5.0 false positive: a draft PR cross-referencing a merged
+ * sibling PR rendered that sibling's merged badge, and document-global
+ * badge matching marked the draft as merged).
  */
 
 (() => {
@@ -189,13 +194,22 @@
         if (!reported || reported !== current) {
           return;
         }
-        // Only mark on merged:true. Never unmark from a negative probe — a
-        // merged PR can't un-merge; an unmarked tab just stays unmarked.
+        const tab = tabFor(browser);
         if (data.merged) {
-          const tab = tabFor(browser);
+          // Only reached for the tab's own PR state (frame.js v1.6.0 matches
+          // the PR number), so this is a real merged mark.
           setMerged(tab, true);
           if (tab) pendingChecks.delete(tab);
+        } else if (data.authoritative) {
+          // Authoritative NOT-merged (own state is DRAFT/OPEN/CLOSED): drop
+          // any stale mark. This heals badges that v1.5.0 applied from a
+          // cross-referenced merged PR in the timeline (false positive on
+          // draft PRs like ros#14194). A PR that is genuinely not merged can
+          // later merge — future probes re-mark it then.
+          if (tab) setMerged(tab, false);
         }
+        // Non-authoritative negatives are never sent: an unread state is
+        // silence, not an answer.
       } catch (e) {
         // ignore malformed messages
       }
@@ -360,24 +374,130 @@
     });
   }
 
-  // String-level version of frame.js's layered detection, applied to raw HTML.
-  function isMergedHtml(html) {
-    return (
-      html.indexOf("State--merged") !== -1 ||
-      html.indexOf("Status: Merged") !== -1 ||
-      /"state"\s*:\s*"MERGED"/.test(html)
-    );
+  // Own-state detection on raw PR-page HTML, string-level twin of frame.js
+  // v1.6.0's detectState. Returns 'merged', 'open' (authoritative
+  // not-merged), or 'unknown'. Never matches cross-referenced PRs in the
+  // timeline: their merged badges (class="State State--merged State--small",
+  // inside/near [id^="ref-pullrequest-"] containers) are what produced the
+  // v1.5.0 false positive on draft PRs whose sibling PR was already merged.
+  function htmlDetectState(html, prNumber) {
+    // 1) React-era own-header StateLabel (server-rendered): the page's own
+    //    badge is a StateLabel with data-status; cross-ref cards render
+    //    legacy .State spans, never StateLabel.
+    const labelRe = /<[^>]*data-component="StateLabel"[^>]*data-status="([a-zA-Z]+)"/g;
+    let labelStatus = null;
+    let m;
+    while ((m = labelRe.exec(html)) !== null) {
+      labelStatus = m[1]; // last one wins; header renders the same status
+      if (m[1] === "pullMerged" || m[1] === "merged") return "merged";
+    }
+    if (
+      labelStatus === "draft" ||
+      labelStatus === "pullOpened" ||
+      labelStatus === "pullClosed" ||
+      labelStatus === "closed"
+    ) {
+      return "open";
+    }
+
+    // 2) Embedded JSON payloads: the PR record matching THIS tab's PR
+    //    number carries the own state. Number matching is the identity
+    //    anchor — cross-referenced PR records carry other numbers.
+    if (prNumber) {
+      const scriptRe = /<script[^>]*type="application\/json"[^>]*>([\s\S]*?)<\/script>/g;
+      while ((m = scriptRe.exec(html)) !== null) {
+        const body = m[1];
+        if (body.indexOf('"pullRequest"') === -1) continue;
+        let data;
+        try {
+          data = JSON.parse(body);
+        } catch (e) {
+          continue;
+        }
+        const state = payloadPrState(data, prNumber);
+        if (state) return state === "MERGED" ? "merged" : "open";
+      }
+    }
+
+    // 3) Legacy own-badge fallback: a big (non-small) merged State badge not
+    //    inside an open cross-reference container. Cross-ref badges always
+    //    render with State--small next to their ref-pullrequest container.
+    const badgeRe = /<span[^>]*class="([^"]*State--merged[^"]*)"[^>]*>/g;
+    while ((m = badgeRe.exec(html)) !== null) {
+      if (m[1].indexOf("State--small") !== -1) continue; // cross-ref card badge
+      // Reject when an unclosed ref-pullrequest container wraps this badge.
+      const before = html.slice(Math.max(0, m.index - 3000), m.index);
+      const refOpen = before.lastIndexOf('id="ref-pullrequest-');
+      if (refOpen !== -1 && before.indexOf("</div>", refOpen) === -1) {
+        continue;
+      }
+      return "merged";
+    }
+
+    return "unknown";
+  }
+
+  // PR state from a parsed application/json block, matched by PR number.
+  // Mirrors frame.js's prStateFromPayload (canonical routes first, then a
+  // number-matched walk).
+  function payloadPrState(data, prNumber) {
+    if (!data || typeof data !== "object") return null;
+    const root =
+      data && typeof data.payload === "object" && data.payload ? data.payload : data;
+    const routes = [
+      "pullRequestsLayoutRoute",
+      "pullRequestsChangesRoute",
+      "pullRequestsConversationsRoute",
+      "pullRequestsFilesRoute",
+      "pullRequestsCommitsRoute",
+    ];
+    for (const r of routes) {
+      const pr = root && root[r] && root[r].pullRequest;
+      if (
+        pr &&
+        typeof pr === "object" &&
+        String(pr.number) === String(prNumber) &&
+        typeof pr.state === "string"
+      ) {
+        return pr.state;
+      }
+    }
+    let found = null;
+    (function walk(o) {
+      if (found || !o || typeof o !== "object") return;
+      if (
+        o.pullRequest &&
+        typeof o.pullRequest === "object" &&
+        String(o.pullRequest.number) === String(prNumber) &&
+        typeof o.pullRequest.state === "string"
+      ) {
+        found = o.pullRequest.state;
+        return;
+      }
+      for (const k of Object.keys(o)) walk(o[k]);
+    })(data);
+    return found;
   }
 
   async function httpCheckTab(tab, url) {
     try {
       const { status, text } = await httpFetch(url);
-      if (status === 200 && isMergedHtml(text)) {
+      if (status !== 200) return;
+      const number = (PR_RE.exec(url) || [])[3] || null;
+      const state = htmlDetectState(text, number);
+      if (state === "merged") {
         setMerged(tab, true);
         pendingChecks.delete(tab);
+      } else if (state === "open") {
+        // Authoritative not-merged (own state is DRAFT/OPEN/CLOSED): heal a
+        // stale badge this tab may have been restored with (v1.5.0 session
+        // store persists the icon). Keep the tab queued — it may merge later.
+        if (tab.hasAttribute && tab.hasAttribute(ATTR)) {
+          setMerged(tab, false);
+        }
       }
-      // Not merged (or fetch failed): leave in pendingChecks for the next
-      // re-check interval — the PR may merge later.
+      // 'unknown' (unreadable page — e.g. logged-out fetch): retry on the
+      // next interval like before.
     } catch (e) {
       // Network error; retried on the next interval.
     }
@@ -483,13 +603,18 @@
   // frame path; pending PR tabs are queued for the HTTP path (touching
   // .messageManager on a lazy browser instantiates it, which defeats lazy
   // session restore). Tabs restored with our badge icon (session store
-  // persists it) get their sticky marker re-armed without a re-check.
+  // persists it) keep the mark provisionally but are queued for verification:
+  // the badge may be a v1.5.0 false positive (cross-referenced merged PR in
+  // the timeline), and an authoritative own-state probe now clears those.
   try {
     for (const tab of window.gBrowser.tabs) {
       try {
-        if (isBadgeImageAttr(tab.getAttribute("image"))) {
-          // Restored with our badge from a previous session: re-arm the
-          // sticky marker (merged PRs never un-merge).
+        const restoredBadge = isBadgeImageAttr(tab.getAttribute("image"));
+        if (restoredBadge) {
+          // Restored with our badge from a previous session: keep the marker
+          // (merged PRs never un-merge) but schedule verification — pending
+          // tabs through the HTTP path below, loaded ones get an immediate
+          // frame probe, and an authoritative not-merged report heals it.
           tab.setAttribute(ATTR, "true");
         } else if (tab.hasAttribute(ATTR) && !tab.zenStaticIcon) {
           // Marked earlier this session but the icon was clobbered while this
@@ -500,6 +625,9 @@
       } catch (e) {}
 
       if (isPendingTab(tab)) {
+        // pendingTabUrl also filters to PR URLs — restored-badge pending PR
+        // tabs re-verify through the HTTP path (keeps the heal working for
+        // tabs restored with a possibly-false badge).
         if (pendingTabUrl(tab)) {
           pendingChecks.add(tab);
         }
