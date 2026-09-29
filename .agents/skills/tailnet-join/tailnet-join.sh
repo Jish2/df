@@ -283,7 +283,7 @@ stage "AWS SSO — credentials"
 say "Minting the join key runs headscale commands on the EC2 box via SSM."
 if [[ -z "$HS_INSTANCE" ]]; then
   warn "no control-plane instance ID — expected it in $_secrets"
-  note "echo 'i-…' > ""$_secrets""   (chmod 600; gitignored — same file hs-mint uses)"
+  note "echo 'i-…' > ""$_secrets""   (chmod 600; gitignored — `make hs-nodes` reads the same file)"
   note "or export HS_INSTANCE=… and re-run"
   exit 1
 fi

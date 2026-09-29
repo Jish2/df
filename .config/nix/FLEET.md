@@ -48,20 +48,27 @@ the repo root once yadm is retired; commands below assume that final shape.
 
 ## Tailnet (headscale)
 
-Every mac auto-joins the personal headscale (`modules/darwin/tailscale.nix`):
-the `tailscale-app` cask (standalone macsys pkg: system daemon + menu bar
-app + CLI at /usr/local/bin/tailscale) plus an idempotent activation joiner
-reading a gitignored pre-auth key (`make hs-mint` mints a reusable 365d
-key via SSM; `make hs-nodes` lists the tailnet). mini opts out of the cask
-(its daemon is out-of-band; ssh to mini depends on it). pc is out-of-band
-NixOS with `services.tailscale` — its joiner is native:
-`authKeyFile = "/etc/tailscale-authkey"` (root-only, imperatively placed;
-same key as the macs) + `extraUpFlags` for the login server, driven by
-systemd `tailscaled-autoconnect`. work moves off the App Store app onto
-the same macsys variant as mini (menu bar icon kept). All joins use
-`--accept-dns=false` (company VPN DNS conflict). pc keeps out-of-band
-NixOS config at `/etc/nixos` (git-inited on first apply) — not managed by
-this flake.
+One join mechanism everywhere: the **tailnet-join wizard**
+(`~/.agents/skills/tailnet-join/`, shipped to every box by yadm). It
+handles every variant — App Store app, standalone pkg, brew formula,
+NixOS system CLI — mints a fresh 30d reusable pre-auth key over SSM
+(never written to disk, never displayed), runs `tailscale up
+--login-server https://headscale.jgoon.com --accept-dns=false`, and
+verifies the node on the control plane. Join state persists on disk, so
+it runs exactly once per box.
+
+What nix still owns: guaranteeing the daemon + CLI exist on a fresh
+bootstrapped mac (`modules/darwin/tailscale.nix` — the `tailscale-app`
+cask, opt-out per host: mini's daemon is out-of-band, work is
+SNI-blocked from *.tailscale.com and keeps the App Store variant), and
+`make hs-nodes` for a standing check. pc (out-of-band NixOS at
+`/etc/nixos`, git-inited, not managed by this flake) gets the same
+wizard; if its config ever adopts `services.tailscale.authKeyFile`, that
+would be a second mechanism — deliberately not done.
+
+Private facts (control-plane instance ID) live in
+`~/.config/nix/secrets/` (gitignored); the repo is public. All joins use
+`--accept-dns=false` (company VPN DNS conflict).
 
 ## Apply
 

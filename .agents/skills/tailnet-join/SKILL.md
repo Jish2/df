@@ -1,6 +1,6 @@
 ---
 name: tailnet-join
-description: Onboard a machine onto the personal headscale tailnet (SSO → SSM mint → tailscale up → verify). Run by hand when a new box needs joining.
+description: Join a machine onto the personal headscale tailnet via the interactive wizard (SSO → SSM mint → tailscale up → verify). The fleet's single join mechanism — run by hand whenever a box needs joining.
 disable-model-invocation: true
 ---
 
@@ -44,22 +44,22 @@ system path; the wizard probes all of them.
 ## Preconditions
 
 - control-plane instance ID in `~/.config/nix/secrets/headscale-instance`
-  (gitignored, 600 — same file hs-mint expects as `HS_INSTANCE`) or in the
-  environment as `HS_INSTANCE`; without it the wizard stops at Stage 2
+  (gitignored, 600 — `make hs-nodes` reads it as `HS_INSTANCE` too) or in
+  the environment as `HS_INSTANCE`; without it the wizard stops at Stage 2
   with the exact fix
 - this box: `aws` cli with the `dev-admin` profile (`~/.aws/config`, not
   dotfiles-managed), ssh reachability to the target
 - target: any tailscale CLI present (app, pkg, brew, or system)
+
 ## Notes
 
 - Key policy: minted fresh per run, 30d, reusable — a leaked key ages out
   in a month, no rotation bookkeeping. The vault note "headscale cloudflare
-  tunnel" forbids storing keys in dotfiles; this repo stays secret-free.
-- `make hs-mint` / `make hs-nodes` in the flake Makefile are the same SSM
-  calls in thinner form; this script wraps the full flow.
-- The nix flake keeps its own independent joiner (darwin postActivation on
-  macs, systemd tailscaled-autoconnect on pc) for fresh bootstraps — this
-  script is for ad-hoc joins of already-bootstrapped boxes.
+  tunnel" forbids storing keys in dotfiles; the key is never written to
+  disk at all (mac targets stage to /tmp 600, deleted immediately after).
+- This wizard is the fleet's ONLY join mechanism (FLEET.md "Tailnet"):
+  the nix side just guarantees the daemon + CLI exist (the tailscale-app
+  cask, opt-out per host). `make hs-nodes` remains for a standing check.
 - Machine words containing the magic t-word trigger a local process killer
   on the work box (intermittent SIGKILL on matching argv). The wizard
   splits the word inside remote heredocs where possible; if a command dies

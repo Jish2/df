@@ -22,7 +22,7 @@ endif
 
 HOST ?= $(INFERRED)
 
-.PHONY: work personal mini work-zap personal-zap mini-zap pc devspace extensions plan here here-zap hs-mint hs-nodes
+.PHONY: work personal mini work-zap personal-zap mini-zap pc devspace extensions plan here here-zap hs-nodes
 
 # dry-run: builds the darwin generation WITHOUT activating, then reports
 # homebrew drift both directions. nothing changes on the machine.
@@ -66,39 +66,18 @@ pc devspace:
 extensions:
 	@sh vscode/install-extensions.sh
 
-# Mint a reusable (365d) headscale pre-auth key via SSM on the control
-# plane instance and write it to the local gitignored key file. Run this
-# once per machine you're onboarding (or once when the key expires).
-# Requires: aws cli with the dev-admin profile; HS_INSTANCE/HS_REGION
-# exported in your environment (the instance ID is a private fact — kept
-# out of this public repo on purpose; the tailnet-join skill ships with
-# them baked in).
+# Tailnet standing: nodes registered on the control plane. Joins go
+# through the tailnet-join wizard (~/.agents/skills/tailnet-join — it
+# mints its own fresh key and never writes one to disk), so there's no
+# mint target here anymore.
+# Requires: aws cli + dev-admin profile; HS_INSTANCE exported (the
+# instance ID is a private fact — kept out of this public repo; the
+# wizard reads it from ~/.config/nix/secrets/headscale-instance).
 HS_INSTANCE ?= $(shell printenv HS_INSTANCE)
 HS_REGION ?= us-west-1
-HS_USER_ID ?= 1
 
-hs-mint:
-	@if [ -z "$(HS_INSTANCE)" ]; then echo "HS_INSTANCE not set — export it (see the tailnet-join skill)"; exit 1; fi
-	@if [ ! -d "$(FLAKE)/secrets" ]; then mkdir -m 700 -p "$(FLAKE)/secrets"; fi
-	@CID=$$(aws ssm send-command --profile dev-admin --region $(HS_REGION) \
-	  --instance-ids $(HS_INSTANCE) \
-	  --document-name "AWS-RunShellScript" \
-	  --comment "mint fleet join key" \
-	  --parameters 'commands=["docker exec headscale headscale preauthkeys create -u $(HS_USER_ID) --reusable --expiration 365d"]' \
-	  --output text --query "Command.CommandId"); \
-	sleep 6; \
-	KEY=$$(aws ssm get-command-invocation --profile dev-admin --region $(HS_REGION) \
-	  --command-id "$$CID" --instance-id $(HS_INSTANCE) \
-	  --query StandardOutputContent --output text | grep -m1 -E '^(hskey|tskey)'); \
-	if [ -z "$$KEY" ]; then echo "no key returned — check AWS profile/permissions"; exit 1; fi; \
-	printf '%s\n' "$$KEY" > "$(FLAKE)/secrets/tailscale-authkey"; \
-	chmod 600 "$(FLAKE)/secrets/tailscale-authkey"; \
-	echo "key written to $(FLAKE)/secrets/tailscale-authkey (gitignored, 365d, reusable)"; \
-	echo "re-run 'make here' to join this machine"
-
-# Standing of the tailnet: nodes registered on the control plane
 hs-nodes:
-	@if [ -z "$(HS_INSTANCE)" ]; then echo "HS_INSTANCE not set — export it (see the tailnet-join skill)"; exit 1; fi
+	@if [ -z "$(HS_INSTANCE)" ]; then echo "HS_INSTANCE not set — export it, or read it from ~/.config/nix/secrets/headscale-instance"; exit 1; fi
 	@CID=$$(aws ssm send-command --profile dev-admin --region $(HS_REGION) \
 	  --instance-ids $(HS_INSTANCE) \
 	  --document-name "AWS-RunShellScript" \

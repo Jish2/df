@@ -146,13 +146,9 @@
   #   CuaDriver.app   — c/ua computer-use driver
   #   Xcode-16.2.0.app / Xcode-26.6.0.app — versioned, via Xcodes
   #
-  # tailscale: the shared module (modules/darwin/tailscale.nix) skips the
-  # tailscale-app cask here — this box's tailscaled is out-of-band (installed
-  # from the standalone pkg at /usr/local/bin/tailscaled, root daemon at
-  # /Library/LaunchDaemons/com.tailscale.tailscaled.plist; ssh access to this
-  # box depends on it — porting it is a deliberate separate job). The CLI
-  # stays via brew "tailscale" above. The joiner still runs and is a no-op
-  # (this box is already joined).
+  # tailscale: shared module declares only the cask — off here (daemon
+  # out-of-band from the standalone pkg; the wizard's CLI probe finds the
+  # brew CLI declared above). See modules/darwin/tailscale.nix.
   fleet.tailscale.enableCask = false;
 
   # custom services NOT nix-managed yet (~/Library/LaunchAgents); porting any

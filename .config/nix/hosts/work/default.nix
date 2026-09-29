@@ -3,14 +3,10 @@
 # description for the kept/dropped triage.
 { pkgs, ... }:
 {
-  # tailscale: keep the App Store variant on this box for now. The cask
-  # (tailscale-app) can't install from this network: *.tailscale.com is
-  # TLS-reset upstream (SNI block) — verified from both this Mac and mini
-  # on 2026-09-29; brew fails at the pkg download. There is also a separate
-  # nix-homebrew curl-shim breakage (brew 7 "Failed to get curl path"), so
-  # even on an open network the cask path needs work. Flip to true (default)
-  # when both are fixed — see modules/darwin/tailscale.nix for migration
-  # notes. The App Store variant runs against headscale unchanged.
+  # tailscale: App Store variant — out of the flake's reach (not a cask,
+  # and *.tailscale.com is SNI-blocked on this network so the cask's pkg
+  # download fails anyway). The tailnet-join wizard joins this box like
+  # any other. See modules/darwin/tailscale.nix for the design.
   fleet.tailscale.enableCask = false;
 
   networking.hostName = "HQ-KP2HJMHQ7R";

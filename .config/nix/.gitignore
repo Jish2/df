@@ -11,6 +11,7 @@ pre-nix-snapshot/
 # nix build symlink in the repo root (make plan / darwin-rebuild outputs)
 result
 
-# one reusable headscale pre-auth key for auto-join (make hs-mint writes
-# here; 600). never committed — the repo is public.
+# fleet private facts (e.g. the headscale control-plane instance ID the
+# tailnet-join wizard and `make hs-nodes` read). never committed — the
+# repo is public.
 secrets/
