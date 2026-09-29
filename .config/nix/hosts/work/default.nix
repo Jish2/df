@@ -60,7 +60,6 @@
       "helm"
       "krew"
       "popeye"
-      "awscli"
       "cloudflared"
       "grpcurl"
       # --- languages / toolchains -------------------------------------------
