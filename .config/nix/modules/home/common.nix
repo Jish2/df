@@ -1,9 +1,14 @@
 # HM baseline for all five machines.
-{ user, ... }:
+{
+  user,
+  ...
+}:
 {
   home.username = user;
   home.stateVersion = "25.05";
   programs.home-manager.enable = true;
+
+  imports = [ ./ssh-aliases.nix ];
 
   # NOTE: backupFileExtension ("bak") is declared by the flake itself in the
   # darwin HM block (system-level) — can't live here; this file is a user
