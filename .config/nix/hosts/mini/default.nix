@@ -13,7 +13,10 @@
   # always-on server power settings (nix-darwin has no pmset module).
   # matches the machine's current `pmset -g`: never sleeps, wakes for
   # network, restarts after power loss.
-  system.activationScripts.pmset.text = ''
+  # (moved to postActivation — custom attr names under
+  # system.activationScripts are never run; see modules/darwin/tailscale.nix
+  # note for why)
+  system.activationScripts.postActivation.text = ''
     pmset -a sleep 0 displaysleep 0 disksleep 0 standby 0 powernap 1 womp 1 autorestart 1
   '';
 
@@ -143,6 +146,15 @@
   #   CuaDriver.app   — c/ua computer-use driver
   #   Xcode-16.2.0.app / Xcode-26.6.0.app — versioned, via Xcodes
   #
+  # tailscale: the shared module (modules/darwin/tailscale.nix) skips the
+  # tailscale-app cask here — this box's tailscaled is out-of-band (installed
+  # from the standalone pkg at /usr/local/bin/tailscaled, root daemon at
+  # /Library/LaunchDaemons/com.tailscale.tailscaled.plist; ssh access to this
+  # box depends on it — porting it is a deliberate separate job). The CLI
+  # stays via brew "tailscale" above. The joiner still runs and is a no-op
+  # (this box is already joined).
+  fleet.tailscale.enableCask = false;
+
   # custom services NOT nix-managed yet (~/Library/LaunchAgents); porting any
   # of these into nix-darwin launchd.agents is a deliberate per-service job:
   #   com.jgoon.cloudflared.{t3code,sure,agent-device,webhooks*}  tunnels

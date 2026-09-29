@@ -22,7 +22,7 @@ endif
 
 HOST ?= $(INFERRED)
 
-.PHONY: work personal mini work-zap personal-zap mini-zap pc devspace extensions plan here here-zap
+.PHONY: work personal mini work-zap personal-zap mini-zap pc devspace extensions plan here here-zap hs-mint hs-nodes
 
 # dry-run: builds the darwin generation WITHOUT activating, then reports
 # homebrew drift both directions. nothing changes on the machine.
@@ -65,6 +65,45 @@ pc devspace:
 # not wired into the mac targets for now; run manually if wanted
 extensions:
 	@sh vscode/install-extensions.sh
+
+# Mint a reusable (365d) headscale pre-auth key via SSM on the control
+# plane instance and write it to the local gitignored key file. Run this
+# once per machine you're onboarding (or once when the key expires).
+# Requires: aws cli with the dev-admin profile.
+HS_INSTANCE := i-04013ad3adc217213
+HS_REGION := us-west-1
+HS_USER_ID := 1
+
+hs-mint:
+	@if [ ! -d "$(FLAKE)/secrets" ]; then mkdir -m 700 -p "$(FLAKE)/secrets"; fi
+	@CID=$$(aws ssm send-command --profile dev-admin --region $(HS_REGION) \
+	  --instance-ids $(HS_INSTANCE) \
+	  --document-name "AWS-RunShellScript" \
+	  --comment "mint fleet join key" \
+	  --parameters 'commands=["docker exec headscale headscale preauthkeys create -u $(HS_USER_ID) --reusable --expiration 365d"]' \
+	  --output text --query "Command.CommandId"); \
+	sleep 6; \
+	KEY=$$(aws ssm get-command-invocation --profile dev-admin --region $(HS_REGION) \
+	  --command-id "$$CID" --instance-id $(HS_INSTANCE) \
+	  --query StandardOutputContent --output text | tail -1); \
+	if [ -z "$$KEY" ]; then echo "no key returned — check AWS profile/permissions"; exit 1; fi; \
+	printf '%s\n' "$$KEY" > "$(FLAKE)/secrets/tailscale-authkey"; \
+	chmod 600 "$(FLAKE)/secrets/tailscale-authkey"; \
+	echo "key written to $(FLAKE)/secrets/tailscale-authkey (gitignored, 365d, reusable)"; \
+	echo "re-run 'make here' to join this machine"
+
+# Standing of the tailnet: nodes registered on the control plane
+hs-nodes:
+	@CID=$$(aws ssm send-command --profile dev-admin --region $(HS_REGION) \
+	  --instance-ids $(HS_INSTANCE) \
+	  --document-name "AWS-RunShellScript" \
+	  --comment "list headscale nodes" \
+	  --parameters 'commands=["docker exec headscale headscale nodes list"]' \
+	  --output text --query "Command.CommandId"); \
+	sleep 6; \
+	aws ssm get-command-invocation --profile dev-admin --region $(HS_REGION) \
+	  --command-id "$$CID" --instance-id $(HS_INSTANCE) \
+	  --query StandardOutputContent --output text
 
 # switch whatever machine you're on — the host map above picks the attr
 here:

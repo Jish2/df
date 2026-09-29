@@ -9,8 +9,8 @@ module imports in the flake, not filename tricks.
 | `work` | MBP M4 Max | macOS 26 | aarch64-darwin | nix-darwin + HM | `HQ-KP2HJMHQ7R` | `jgoon` |
 | `personal` | MBP M3 Pro | macOS | aarch64-darwin | nix-darwin + HM | TODO | TODO |
 | `mini` | M1 Mac Mini (always on) | macOS 26.6 | aarch64-darwin | nix-darwin + HM, server profile | `Joshuas-Mac-mini` | `jgoon` |
-| `pc` | desktop, dual-boots Windows (gaming) | Omarchy (Arch) | x86_64-linux | HM standalone | TODO | TODO |
-| `devspace` | Coder VM | Linux | TODO | HM standalone | n/a (ephemeral) | TODO |
+| `pc` | desktop, dual-boots Windows (gaming) | NixOS (see `/etc/nixos`; standalone) | x86_64-linux | out-of-band NixOS | `pc` | `jgoon` |
+| `devspace` | Coder VM | Linux | x86_64 | HM standalone | n/a (ephemeral) | TODO |
 
 Decisions:
 
@@ -45,6 +45,19 @@ the repo root once yadm is retired; commands below assume that final shape.
 ├── vscode/
 └── Makefile                     # make work | personal | mini | pc | devspace
 ```
+
+## Tailnet (headscale)
+
+Every mac auto-joins the personal headscale (`modules/darwin/tailscale.nix`):
+the `tailscale-app` cask (standalone macsys pkg: system daemon + menu bar
+app + CLI at /usr/local/bin/tailscale) plus an idempotent activation joiner
+reading a gitignored pre-auth key (`make hs-mint` mints a reusable 365d
+key via SSM; `make hs-nodes` lists the tailnet). mini opts out of the cask
+(its daemon is out-of-band; ssh to mini depends on it). pc is out-of-band
+NixOS with `services.tailscale.enable`. work moves off the App Store app
+onto the same macsys variant as mini (menu bar icon kept). All joins use
+`--accept-dns=false` (company VPN DNS conflict). pc keeps out-of-band
+NixOS config at `/etc/nixos` — not managed by this flake.
 
 ## Apply
 

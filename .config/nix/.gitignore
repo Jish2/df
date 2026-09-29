@@ -7,3 +7,7 @@ modules/darwin/imported-defaults*.nix
 
 # local pre-migration safety copy, never committed
 pre-nix-snapshot/
+
+# one reusable headscale pre-auth key for auto-join (make hs-mint writes
+# here; 600). never committed — the repo is public.
+secrets/

@@ -44,6 +44,7 @@
           };
           modules = [
             ./modules/darwin/common.nix
+            ./modules/darwin/tailscale.nix # fleet-wide headscale auto-join
             ./hosts/${host}
             home-manager.darwinModules.home-manager
             nix-homebrew.darwinModules.nix-homebrew

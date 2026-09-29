@@ -170,6 +170,20 @@
   # with homebrew.onActivation.cleanup = "zap" for one activation (see
   # flake.nix); plain `make work` never removes anything.
 
+  # tailscale: the shared module (modules/darwin/tailscale.nix) declares the
+  # tailscale-app cask and the auto-join activation. This box previously ran
+  # the App Store variant (io.tailscale.ipn.macos, net extension). Remove the
+  # App Store app before/after the first switch with the cask — the macsys
+  # variant takes over the same socket (/var/run/tailscaled.socket). The
+  # container io.tailscale.ipn.macos* can be deleted by hand (zap trash:
+  # ~/Library/Containers/io.tailscale.ipn.macos*).
+
+  # tailscale: the shared module (modules/darwin/tailscale.nix) auto-joins
+  # this box to headscale. This host previously ran the App Store variant
+  # (io.tailscale.ipn.macos, net extension); the cask's macsys pkg takes over
+  # the same socket. Remove the App Store app before the first switch
+  # (zap trash: ~/Library/Containers/io.tailscale.ipn.macos*).
+
   # not ported (imperative package managers, left as-is for now):
   #   krew plugins: modify-secret, resource-capacity, view-utilization
   #   npm globals:  corepack, pi-acp (volta/corepack manage these)
