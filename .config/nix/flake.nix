@@ -58,7 +58,10 @@
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
               home-manager.backupFileExtension = "bak";
-              home-manager.extraSpecialArgs = { user = defaultUser; };
+              home-manager.extraSpecialArgs = {
+                user = defaultUser;
+                selfAttr = host;
+              };
               home-manager.users.${defaultUser}.imports = [
                 ./modules/home/common.nix
                 ./modules/home/darwin.nix
@@ -75,12 +78,14 @@
           extraSpecialArgs = {
             inherit inputs;
             user = defaultUser;
+            selfAttr = host;
           };
           modules = [
             ./modules/home/common.nix
             ./modules/home/linux.nix
             ./hosts/${host}
-            { home-manager.backupFileExtension = "bak"; }
+            # backupFileExtension is darwin-integration-only; standalone
+            # HM takes -b bak on the CLI (make pc/devspace)
           ];
         };
     in
