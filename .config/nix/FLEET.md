@@ -54,10 +54,14 @@ app + CLI at /usr/local/bin/tailscale) plus an idempotent activation joiner
 reading a gitignored pre-auth key (`make hs-mint` mints a reusable 365d
 key via SSM; `make hs-nodes` lists the tailnet). mini opts out of the cask
 (its daemon is out-of-band; ssh to mini depends on it). pc is out-of-band
-NixOS with `services.tailscale.enable`. work moves off the App Store app
-onto the same macsys variant as mini (menu bar icon kept). All joins use
+NixOS with `services.tailscale` — its joiner is native:
+`authKeyFile = "/etc/tailscale-authkey"` (root-only, imperatively placed;
+same key as the macs) + `extraUpFlags` for the login server, driven by
+systemd `tailscaled-autoconnect`. work moves off the App Store app onto
+the same macsys variant as mini (menu bar icon kept). All joins use
 `--accept-dns=false` (company VPN DNS conflict). pc keeps out-of-band
-NixOS config at `/etc/nixos` — not managed by this flake.
+NixOS config at `/etc/nixos` (git-inited on first apply) — not managed by
+this flake.
 
 ## Apply
 
