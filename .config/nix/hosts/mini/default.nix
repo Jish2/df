@@ -44,7 +44,6 @@
       "argocd"
       "helm"
       "krew"
-      "awscli"
       "cloudflared" # several tunnels run as com.jgoon.cloudflared.* launchagents
       "grpcurl"
       # --- languages / toolchains -------------------------------------------

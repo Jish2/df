@@ -30,6 +30,7 @@
   { brew = "mosh"; nix = "mosh"; }
   { brew = "yadm"; nix = "yadm"; } # TODO: remove once the yadm port completes
   { brew = "kubernetes-cli"; nix = "kubectl"; }
+  { brew = "awscli"; nix = "awscli"; } # tailnet-join wizard mints the join key via SSM
   { brew = "sqlfluff"; nix = "sqlfluff"; }
   { brew = "watch"; nix = "watch"; }
   { brew = "wget"; nix = "wget"; }
