@@ -8,6 +8,9 @@ modules/darwin/imported-defaults*.nix
 # local pre-migration safety copy, never committed
 pre-nix-snapshot/
 
+# nix build symlink in the repo root (make plan / darwin-rebuild outputs)
+result
+
 # one reusable headscale pre-auth key for auto-join (make hs-mint writes
 # here; 600). never committed — the repo is public.
 secrets/
