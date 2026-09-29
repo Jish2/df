@@ -60,7 +60,7 @@ work personal mini work-zap personal-zap mini-zap:
 	# @$(MAKE) extensions   # disabled for now — vscode manages extensions itself
 
 pc devspace:
-	home-manager switch --flake $(FLAKE)#$@ || nix run $(NIXFLAGS) home-manager -- switch --flake $(FLAKE)#$@
+	home-manager switch -b bak --flake $(FLAKE)#$@ || nix run $(NIXFLAGS) home-manager -- switch -b bak --flake $(FLAKE)#$@
 
 # not wired into the mac targets for now; run manually if wanted
 extensions:
@@ -69,12 +69,16 @@ extensions:
 # Mint a reusable (365d) headscale pre-auth key via SSM on the control
 # plane instance and write it to the local gitignored key file. Run this
 # once per machine you're onboarding (or once when the key expires).
-# Requires: aws cli with the dev-admin profile.
-HS_INSTANCE := i-04013ad3adc217213
-HS_REGION := us-west-1
-HS_USER_ID := 1
+# Requires: aws cli with the dev-admin profile; HS_INSTANCE/HS_REGION
+# exported in your environment (the instance ID is a private fact — kept
+# out of this public repo on purpose; the tailnet-join skill ships with
+# them baked in).
+HS_INSTANCE ?= $(shell printenv HS_INSTANCE)
+HS_REGION ?= us-west-1
+HS_USER_ID ?= 1
 
 hs-mint:
+	@if [ -z "$(HS_INSTANCE)" ]; then echo "HS_INSTANCE not set — export it (see the tailnet-join skill)"; exit 1; fi
 	@if [ ! -d "$(FLAKE)/secrets" ]; then mkdir -m 700 -p "$(FLAKE)/secrets"; fi
 	@CID=$$(aws ssm send-command --profile dev-admin --region $(HS_REGION) \
 	  --instance-ids $(HS_INSTANCE) \
@@ -85,7 +89,7 @@ hs-mint:
 	sleep 6; \
 	KEY=$$(aws ssm get-command-invocation --profile dev-admin --region $(HS_REGION) \
 	  --command-id "$$CID" --instance-id $(HS_INSTANCE) \
-	  --query StandardOutputContent --output text | tail -1); \
+	  --query StandardOutputContent --output text | grep -m1 -E '^(hskey|tskey)'); \
 	if [ -z "$$KEY" ]; then echo "no key returned — check AWS profile/permissions"; exit 1; fi; \
 	printf '%s\n' "$$KEY" > "$(FLAKE)/secrets/tailscale-authkey"; \
 	chmod 600 "$(FLAKE)/secrets/tailscale-authkey"; \
@@ -94,6 +98,7 @@ hs-mint:
 
 # Standing of the tailnet: nodes registered on the control plane
 hs-nodes:
+	@if [ -z "$(HS_INSTANCE)" ]; then echo "HS_INSTANCE not set — export it (see the tailnet-join skill)"; exit 1; fi
 	@CID=$$(aws ssm send-command --profile dev-admin --region $(HS_REGION) \
 	  --instance-ids $(HS_INSTANCE) \
 	  --document-name "AWS-RunShellScript" \
