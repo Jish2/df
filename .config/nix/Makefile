@@ -60,7 +60,7 @@ work personal mini work-zap personal-zap mini-zap:
 	# @$(MAKE) extensions   # disabled for now — vscode manages extensions itself
 
 pc devspace:
-	home-manager switch --flake $(FLAKE)#$@ || nix run $(NIXFLAGS) home-manager -- switch --flake $(FLAKE)#$@
+	home-manager switch -b bak --flake $(FLAKE)#$@ || nix run $(NIXFLAGS) home-manager -- switch -b bak --flake $(FLAKE)#$@
 
 # not wired into the mac targets for now; run manually if wanted
 extensions:
