@@ -80,6 +80,7 @@
             inherit inputs;
             user = defaultUser;
             selfAttr = host;
+            hostKind = "standalone";
           };
           modules = [
             ./modules/home/common.nix
@@ -87,6 +88,34 @@
             ./hosts/${host}
             # backupFileExtension is darwin-integration-only; standalone
             # HM takes -b bak on the CLI (make pc/devspace)
+          ];
+        };
+
+      mkNixos =
+        host:
+        nixpkgs.lib.nixosSystem {
+          specialArgs = {
+            inherit inputs self;
+            user = defaultUser;
+          };
+          modules = [
+            ./hosts/${host}/configuration.nix
+            ./hosts/${host}/hardware-configuration.nix
+            home-manager.nixosModules.home-manager
+            {
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+              home-manager.backupFileExtension = "bak";
+              home-manager.extraSpecialArgs = {
+                user = defaultUser;
+                selfAttr = host;
+                hostKind = "nixos";
+              };
+              home-manager.users.${defaultUser}.imports = [
+                ./modules/home/common.nix
+                ./modules/home/linux.nix
+                ./hosts/${host}              ];
+            }
           ];
         };
     in
@@ -99,6 +128,8 @@
         mini = mkDarwin "mini" [ ]; # M1 Mac Mini, always on
         mini-zap = mkDarwin "mini" [ zapModule ];
       };
+
+      nixosConfigurations.pc = mkNixos "pc";
 
       homeConfigurations = {
         pc = mkHome { host = "pc"; system = "x86_64-linux"; };

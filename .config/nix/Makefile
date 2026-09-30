@@ -24,8 +24,11 @@ else
   INFERRED := unknown
 endif
 
-# linux hosts use standalone home-manager instead of darwin-rebuild
-LINUX_HOSTS = pc devspace
+# linux hosts split two ways: NIXOS_HOSTS rebuild system+user via
+# nixos-rebuild (HM rides along as a NixOS module); LINUX_HOSTS (non-NixOS
+# linux) get standalone home-manager only
+NIXOS_HOSTS = pc
+LINUX_HOSTS = devspace
 
 HOST ?= $(INFERRED)
 NIXFLAGS = --extra-experimental-features 'nix-command flakes'
@@ -69,7 +72,9 @@ here:
 	@if [ "$(INFERRED)" = unknown ]; then \
 	  echo "machine '$(MACHINE)' has no flake attr mapped — add it to the host map in this Makefile"; exit 1; \
 	fi
-	@if echo ' $(LINUX_HOSTS) ' | grep -q ' $(INFERRED) '; then \
+	@if echo ' $(NIXOS_HOSTS) ' | grep -q ' $(INFERRED) '; then \
+	  sudo nixos-rebuild switch --flake $(FLAKE)#$(INFERRED) || sudo $(NIX) run $(NIXFLAGS) nixos-rebuild -- switch --flake $(FLAKE)#$(INFERRED); \
+	elif echo ' $(LINUX_HOSTS) ' | grep -q ' $(INFERRED) '; then \
 	  home-manager switch -b bak --flake $(FLAKE)#$(INFERRED) || $(NIX) run $(NIXFLAGS) home-manager -- switch -b bak --flake $(FLAKE)#$(INFERRED); \
 	else \
 	  sudo darwin-rebuild switch --flake $(FLAKE)#$(INFERRED) || sudo $(NIX) run $(NIXFLAGS) nix-darwin -- switch --flake $(FLAKE)#$(INFERRED); \
@@ -85,7 +90,7 @@ here-zap:
 	@if [ "$(INFERRED)" = unknown ]; then \
 	  echo "machine '$(MACHINE)' has no flake attr mapped — add it to the host map in this Makefile"; exit 1; \
 	fi
-	@if echo ' $(LINUX_HOSTS) ' | grep -q ' $(INFERRED) '; then \
+	@if echo ' $(NIXOS_HOSTS) $(LINUX_HOSTS) ' | grep -q ' $(INFERRED) '; then \
 	  echo "linux hosts have no zap variant (no brew)"; exit 1; \
 	fi
 	sudo darwin-rebuild switch --flake $(FLAKE)#$(INFERRED)-zap || sudo $(NIX) run $(NIXFLAGS) nix-darwin -- switch --flake $(FLAKE)#$(INFERRED)-zap
