@@ -91,10 +91,6 @@
           ];
         };
 
-      # NixOS box: nixosSystem + HM as a NixOS module (mirrors mkDarwin —
-      # one rebuild does system and user together). pc is the only NixOS
-      # host; its system config lived out-of-band at /etc/nixos since
-      # install and this folds it into the fleet.
       mkNixos =
         host:
         nixpkgs.lib.nixosSystem {
@@ -118,8 +114,7 @@
               home-manager.users.${defaultUser}.imports = [
                 ./modules/home/common.nix
                 ./modules/home/linux.nix
-                ./hosts/${host} # host-local HM additions (was standalone-only)
-              ];
+                ./hosts/${host}              ];
             }
           ];
         };
@@ -137,9 +132,6 @@
       nixosConfigurations.pc = mkNixos "pc";
 
       homeConfigurations = {
-        # pc's user env is now driven by nixosConfigurations.pc above; the
-        # standalone homeConfigurations.pc stays as rollback until the
-        # module-based switch is verified, then it can be dropped.
         pc = mkHome { host = "pc"; system = "x86_64-linux"; };
         # TODO: confirm devspace arch (`uname -m` on the vm)
         devspace = mkHome { host = "devspace"; system = "x86_64-linux"; };
