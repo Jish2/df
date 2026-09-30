@@ -140,10 +140,15 @@ doctor:
 	  fi; \
 	done
 	@echo "== ssh config (fleet aliases) =="
-	@if [ -f ~/.ssh/hosts-generated.conf ] && grep -q '^Host mini$$' ~/.ssh/hosts-generated.conf; then \
-	  echo "ok: fleet ssh alias for mini present"; \
+	@if [ -f ~/.ssh/hosts-generated.conf ]; then \
+	  hosts=$$(grep -c '^Host ' ~/.ssh/hosts-generated.conf 2>/dev/null); \
+	  if [ "$$hosts" -gt 0 ]; then \
+	    echo "ok: fleet ssh aliases present ($$hosts peers, self excluded)"; \
+	  else \
+	    echo "!! ~/.ssh/hosts-generated.conf exists but has no Host blocks — run make here to regenerate"; \
+	  fi; \
 	else \
-	  echo "note: no Host mini in ~/.ssh/hosts-generated.conf (run make here to regenerate)"; \
+	  echo "note: no ~/.ssh/hosts-generated.conf yet (run make here to generate)"; \
 	fi
 	@echo "== disk =="
 	@df -h / | tail -1 | awk '{print "root: " $$5 " used, " $$4 " available"}'
