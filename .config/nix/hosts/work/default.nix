@@ -1,9 +1,14 @@
 # work — MBP M4 Max (aarch64-darwin)
 # package lists imported from `brew bundle dump` on 2026-01; see the PR
 # description for the kept/dropped triage.
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 {
-  fleet.tailscaled.enable = true;
+  # Corporate EDR (CrowdStrike Falcon) SIGKILLs the nix-built tailscaled's
+  # ifconfig child at router.Up (argv matching) — the daemon crash-loops and
+  # can never establish the tunnel. The App Store network-extension variant
+  # is Falcon-allowed and keeps this box on the tailnet; do not enable the
+  # nix daemon here until that changes.
+  fleet.tailscaled.enable = lib.mkForce false;
 
   networking.hostName = "HQ-KP2HJMHQ7R";
   networking.localHostName = "HQ-KP2HJMHQ7R";
