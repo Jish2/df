@@ -11,16 +11,17 @@
 # zsh-autosuggestions, then zsh-syntax-highlighting (it wraps widgets, so
 # it goes last). macs already load both via nix-darwin's /etc files — the
 # guards skip (double-sourcing would wrap every widget twice); linux boxes
-# find them in NIX_PROFILES (shipped via HM home.packages; layouts differ
-# between nixpkgs versions, so the glob covers both, first match wins).
+# find them in NIX_PROFILES (space-separated on every nix host, macs
+# included; shipped via HM home.packages). layouts differ between nixpkgs
+# versions, so the glob covers both, first match wins.
 if (( ! ${+functions[_zsh_autosuggest_start]} )); then
-  for _p in ${(s.:.)NIX_PROFILES}; do
+  for _p in ${=NIX_PROFILES}; do
     _m=("$_p"/share/**/zsh-autosuggestions/zsh-autosuggestions.zsh(N))
     (( ${#_m} )) && { source "${_m[1]}"; break }
   done
 fi
 if (( ! ${+functions[_zsh_highlight]} )); then
-  for _p in ${(s.:.)NIX_PROFILES}; do
+  for _p in ${=NIX_PROFILES}; do
     _m=("$_p"/share/**/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh(N))
     (( ${#_m} )) && { source "${_m[1]}"; break }
   done
