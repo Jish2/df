@@ -20,10 +20,12 @@ done
 # zoxide
 eval "$(zoxide init zsh --cmd cd)"
 
-# pure zsh prompt
-# fpath+=("$(brew --prefix)/share/zsh/site-functions")
+# pure zsh prompt (darwin: wired by nix-darwin into /etc/zshenv; linux: HM
+# port pending — fall back to the default theme when pure isn't on fpath)
 autoload -U promptinit; promptinit
-prompt pure
+if (( ${+functions[prompt_pure_setup]} )); then
+  prompt pure
+fi
 
 # A tree marks shells opened by `treehouse get` or `treehouse enter`.
 # Keep it in Pure's preprompt (the path and Git information line), and put the
@@ -39,22 +41,25 @@ treehouse_prompt_precmd() {
 add-zsh-hook precmd treehouse_prompt_precmd
 prompt_newline=' %(21V.%F{green}%21v%f.)'$'\n%{\r%}'
 
-# terraform (bashcompinit already ran in /etc/zshrc)
-complete -o nospace -C /opt/homebrew/bin/terraform terraform
+# terraform (bashcompinit already ran in /etc/zshrc; darwin path only)
+command -v terraform >/dev/null && complete -o nospace -C "$(command -v terraform)" terraform
 
 # pyenv (interactive shell function setup; PATH is set in .zprofile)
 command -v pyenv >/dev/null && eval "$(pyenv init -)"
 
-# volta
-export PATH="/Users/jgoon/.volta/bin:$PATH"
+# volta (work box)
+[ -d "$HOME/.volta/bin" ] && export PATH="$HOME/.volta/bin:$PATH"
 export PATH="$HOME/bin:$PATH"
 
 # kubectl krew
 export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 
-# kubectl autocomplete
-source <(kubectl completion zsh)
-compdef kubecolor=kubectl
+# kubectl autocomplete (kubectl may be a kubecolor alias — guard on the
+# unwrapped binary; kubecolor may not be installed on every machine)
+if command -v kubectl >/dev/null 2>&1 && [[ $(whence -p kubectl 2>/dev/null) ]]; then
+  source <("$(whence -p kubectl)" completion zsh)
+fi
+command -v kubecolor >/dev/null 2>&1 && compdef kubecolor=kubectl
 
 # fzf config
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
@@ -107,7 +112,8 @@ export PATH="$HOME/.local/bin:$PATH"
 #   tmux attach -t main || tmux new -s main
 # fi
 
-export PATH="/opt/homebrew/opt/rustup/bin:$PATH"
+# rustup (darwin)
+command -v rustup >/dev/null || [ -d /opt/homebrew/opt/rustup/bin ] && export PATH="/opt/homebrew/opt/rustup/bin:$PATH"
 
 # Vite+ bin (https://viteplus.dev) — optional, not installed on every machine
 [ -r "$HOME/.config/vite-plus/env" ] && . "$HOME/.config/vite-plus/env"

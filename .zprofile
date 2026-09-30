@@ -1,5 +1,5 @@
-# brew
-eval "$(/opt/homebrew/bin/brew shellenv)"
+# brew (darwin; nix-darwin boxes also get brew via nix-homebrew — both live in /opt/homebrew)
+command -v /opt/homebrew/bin/brew >/dev/null 2>&1 && eval "$(/opt/homebrew/bin/brew shellenv)"
 
 # nvm
 export NVM_DIR="$HOME/.nvm"
@@ -14,16 +14,16 @@ export PYENV_ROOT="$HOME/.pyenv"
 [ -e "$PYENV_ROOT/shims/.pyenv-shim" ] && rm -f "$PYENV_ROOT/shims/.pyenv-shim"
 # `--path` only sets PATH (fast, login-shell only). The interactive shell
 # function setup is done in .zshrc with `pyenv init -`.
-eval "$(pyenv init --path)"
+command -v pyenv >/dev/null 2>&1 && eval "$(pyenv init --path)"
 
 # go
-PATH=${PATH}:`go env GOPATH`/bin
+command -v go >/dev/null 2>&1 && PATH=${PATH}:`go env GOPATH`/bin
 
-# ruby gems
-export PATH="/opt/homebrew/lib/ruby/gems/3.3.0/bin:$PATH"
+# ruby gems (darwin)
+command -v /opt/homebrew/opt/ruby >/dev/null 2>&1 && export PATH="/opt/homebrew/lib/ruby/gems/3.3.0/bin:$PATH"
 
 # console ninja
-PATH=~/.console-ninja/.bin:$PATH
+[ -d "$HOME/.console-ninja/.bin" ] && PATH="$HOME/.console-ninja/.bin:$PATH"
 
 # fc command
 FCEDIT=nvim
