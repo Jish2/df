@@ -75,7 +75,8 @@ here:
 # cleanup = "zap" for this activation only (the -zap flake attr). run
 # `make plan` first — if anything ssh depends on (tailscale, cloudflared)
 # shows under 'would be REMOVED', declare it in the host module BEFORE
-# zapping, or the network path to this machine goes with it. see AGENTS.md.
+# zapping, or the network path to this machine goes with it. see the
+# fleet-ssh-safety skill / FLEET.md.
 here-zap:
 	@if [ "$(INFERRED)" = unknown ]; then \
 	  echo "machine '$(MACHINE)' has no flake attr mapped — add it to the host map in this Makefile"; exit 1; \
