@@ -20,8 +20,9 @@ done
 # zoxide
 eval "$(zoxide init zsh --cmd cd)"
 
-# pure zsh prompt (darwin: wired by nix-darwin into /etc/zshenv; linux: HM
-# port pending — fall back to the default theme when pure isn't on fpath)
+# pure zsh prompt (macs: pure-prompt ships via nix-darwin systemPackages
+# and /etc/zshenv fpath; linux: via HM home.packages — both land the plugin
+# in NIX_PROFILES, which the platform zshenv adds to fpath)
 autoload -U promptinit; promptinit
 if (( ${+functions[prompt_pure_setup]} )); then
   prompt pure
