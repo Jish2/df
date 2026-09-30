@@ -87,7 +87,7 @@
             ./modules/home/linux.nix
             ./hosts/${host}
             # backupFileExtension is darwin-integration-only; standalone
-            # HM takes -b bak on the CLI (make pc/devspace)
+            # HM takes -b bak on the CLI (make devspace)
           ];
         };
 
@@ -132,7 +132,7 @@
       nixosConfigurations.pc = mkNixos "pc";
 
       homeConfigurations = {
-        pc = mkHome { host = "pc"; system = "x86_64-linux"; };
+        # pc's user env rides nixosConfigurations.pc (HM as a NixOS module)
         # TODO: confirm devspace arch (`uname -m` on the vm)
         devspace = mkHome { host = "devspace"; system = "x86_64-linux"; };
       };
