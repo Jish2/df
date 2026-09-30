@@ -82,8 +82,28 @@ There are no per-host switch targets (`make work` etc. were removed): they
 applied a named host's config to whatever machine ran the command — the
 classic lockout was `make work` while SSH'd into mini. `make here` maps this
 machine's LocalHostName to its flake attr, so cross-applying is impossible.
-New hosts get wired in by adding to the host map in the Makefile. Remote-switch
-protocol (herdr pane + lifeline + fresh-connection verify) is in AGENTS.md.
+New hosts get wired in by adding to the host map in the Makefile.
+
+### Switching a remote machine (mini) — the protocol
+
+A mid-switch failure on a remote box means a physical visit. Follow this,
+in order; don't improvise:
+
+1. `make plan HOST=mini` — dry-run, changes nothing. Fix anything surprising
+   before proceeding.
+2. Run the switch in a herdr remote pane: `herdr --remote mini`. Panes are
+   persistent on the remote server, so a mid-activation disconnect can't
+   abort the switch, and the log is kept. Bare `ssh` in a scratch terminal
+   does neither.
+3. Open a second ssh session to mini and keep it open as a lifeline for the
+   whole switch — existing sessions keep their shell; only *new* connections
+   exercise the new `/etc/zshenv`.
+4. Keep the rollback one-liner ready in the lifeline:
+   `$(darwin-rebuild --list-generations | grep <prev-gen-id> | awk '{print $NF}')/activate`
+5. Run `make here` in the herdr pane.
+6. From your laptop, open a fresh `ssh mini 'echo ok'`. Only close the
+   lifeline after it succeeds.
+7. `make doctor` on mini (fresh session) as belt-and-suspenders.
 
 ## Bootstrap (post-yadm)
 
