@@ -106,24 +106,20 @@ New hosts get wired in by adding to the host map in the Makefile.
 
 ### Switching a remote machine (mini) — the protocol
 
-A mid-switch failure on a remote box means a physical visit. Follow this,
-in order; don't improvise:
+The authoritative, agent-executable procedure is the **fleet-ssh-safety
+skill** (`~/.agents/skills/fleet-ssh-safety/`) — read-only steps over ssh,
+the switch itself in a pane on mini's herdr server (`herdr --machine mini
+pane ...`), the sudo password as the human gate, fresh-connection verify
+before closing the lifeline. Do not improvise a substitute (tmux, nohup,
+`ssh -t`). Shape:
 
-1. `make plan HOST=mini` — dry-run, changes nothing. Fix anything surprising
-   before proceeding.
-2. Run the switch in a herdr remote pane: `herdr --remote mini`. Panes are
-   persistent on the remote server, so a mid-activation disconnect can't
-   abort the switch, and the log is kept. Bare `ssh` in a scratch terminal
-   does neither.
-3. Open a second ssh session to mini and keep it open as a lifeline for the
-   whole switch — existing sessions keep their shell; only *new* connections
-   exercise the new `/etc/zshenv`.
-4. Keep the rollback one-liner ready in the lifeline:
-   `$(darwin-rebuild --list-generations | grep <prev-gen-id> | awk '{print $NF}')/activate`
-5. Run `make here` in the herdr pane.
-6. From your laptop, open a fresh `ssh mini 'echo ok'`. Only close the
-   lifeline after it succeeds.
-7. `make doctor` on mini (fresh session) as belt-and-suspenders.
+- plan (`make plan`) → pane on mini's herdr server → lifeline ssh session
+  with the rollback line staged → `sudo make here` in the pane → user
+  types the sudo password once (Touch-ID can't fire remotely) → watch to
+  completion (`EXIT_CODE=`) → fresh `ssh mini 'echo ok'` → `make doctor`.
+
+`herdr --remote mini` is the human's way to attach to that pane; the
+machine API (`herdr --machine mini ...`) is the agent's way to drive it.
 
 ## Bootstrap (post-yadm)
 
