@@ -16,12 +16,24 @@ Decisions:
 
 - **No second router.** yadm alternates (`##o.Darwin,h.HOST`) become host
   modules; yadm's checkout-to-`~` becomes HM symlinks from the nix store.
+- **`.zshrc` stays yadm-owned, permanently** (decided 2026-09-30, after the
+  linux plugin work): it must remain a plain editable file because tools
+  append to it (`pyenv init`, etc.) — installers can't append to a store
+  symlink and won't learn a `.zshrc.local` escape hatch. Nix provides
+  (packages ship via HM), dotfiles compose (`.zshrc` sources them). The
+  plugin mechanism in `.zshrc` (NIX_PROFILES walk, guarded, in-tree) IS the
+  end state for linux boxes — not a bridge to a `programs.zsh` port. See
+  "Migration from yadm" for what that means for the waves.
 - The repo lives at `~/github/df` (or anywhere); nothing pre-exists at `~`.
 - **`pc` is folded in**: its system config now lives in the flake
   (`nixosConfigurations.pc`, hosts/pc/configuration.nix) — the out-of-band
   `/etc/nixos` era ended with the fold. HM rides along as a NixOS module,
   so `sudo nixos-rebuild switch --flake ~/.config/nix#pc` does system+user
-  in one shot, same shape as the macs.
+  in one shot, same shape as the macs. The box's `/etc/nixos` was emptied
+  deliberately (2026-09-30): bare `sudo nixos-rebuild switch` now fails
+  loudly instead of silently building the stale pre-fold config. Rollback
+  is generations (`nixos-rebuild switch --rollback`); gen 10 is the last
+  pre-fold generation.
 - Flake attrs are stable role names (`work`, `personal`, ...), not hostnames.
 
 ## Layering
@@ -174,9 +186,12 @@ startup script so rebuilds re-apply. TODO: confirm arch + home persistence.
 yadm stays live until the last file moves. Port in waves:
 
 1. Stand up the flake + module split on `work`; HM manages nothing yet.
-2. Move files wave by wave — zsh/git/tmux → nvim → the rest. Each landing:
+2. Move files wave by wave — git/tmux → nvim → the rest. Each landing:
    delete from the yadm repo, wire as `home.file`/`programs.*` (HM
    auto-backs-up and replaces the real file with a store symlink).
+   `.zshrc` is NOT in the waves: it stays yadm-owned permanently (see
+   Decisions) — `programs.zsh.enable` would take over the whole file and
+   break the installer-append workflow.
 3. GUI-mutated files (`karabiner.json`, iterm2 plist, zen mods) can't be
    read-only store symlinks — keep imperative or copy-on-activation; decide
    per file.
