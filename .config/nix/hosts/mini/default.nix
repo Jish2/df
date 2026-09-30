@@ -6,6 +6,8 @@
 # REMOVED' list is empty.
 { pkgs, ... }:
 {
+  fleet.tailscaled.enable = true;
+
   networking.hostName = "Joshuas-Mac-mini";
   networking.localHostName = "Joshuas-Mac-mini";
   networking.computerName = "Joshua’s Mac mini"; # (curly apostrophe, as shipped)

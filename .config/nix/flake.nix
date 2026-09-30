@@ -44,6 +44,7 @@
           };
           modules = [
             ./modules/darwin/common.nix
+            ./modules/darwin/tailscaled.nix # headless mesh client (fleet.tailscaled)
             ./hosts/${host}
             home-manager.darwinModules.home-manager
             nix-homebrew.darwinModules.nix-homebrew

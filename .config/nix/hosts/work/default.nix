@@ -3,6 +3,8 @@
 # description for the kept/dropped triage.
 { pkgs, ... }:
 {
+  fleet.tailscaled.enable = true;
+
   networking.hostName = "HQ-KP2HJMHQ7R";
   networking.localHostName = "HQ-KP2HJMHQ7R";
   networking.computerName = "HQ-KP2HJMHQ7R";
