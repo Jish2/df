@@ -72,10 +72,18 @@ Private facts (control-plane instance ID) live in
 ## Apply
 
 ```sh
-make work        # darwin-rebuild switch --flake ~/.config/nix#work   (macs; HM rides along)
-make pc          # home-manager switch --flake ~/.config/nix#pc       (linux)
-make plan HOST=work   # dry-run: build + brew drift report, changes nothing
+make here        # switch THIS machine (host inferred from hostname) — the only way to switch
+make here-zap    # same, plus one self-cleaning brew activation; check `make plan` first
+make plan        # dry-run: build + brew drift report, changes nothing
+make doctor      # verify SSH-critical invariants (see AGENTS.md)
 ```
+
+There are no per-host switch targets (`make work` etc. were removed): they
+applied a named host's config to whatever machine ran the command — the
+classic lockout was `make work` while SSH'd into mini. `make here` maps this
+machine's LocalHostName to its flake attr, so cross-applying is impossible.
+New hosts get wired in by adding to the host map in the Makefile. Remote-switch
+protocol (herdr pane + lifeline + fresh-connection verify) is in AGENTS.md.
 
 ## Bootstrap (post-yadm)
 
