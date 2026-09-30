@@ -71,11 +71,59 @@ Private facts (control-plane instance ID) live in
 
 ## Apply
 
+### Hard rules (SSH-critical — breaking one on mini = physical visit)
+
+Authoritative copy: `.agents/skills/fleet-ssh-safety/SKILL.md` (agent-facing)
+— this is the human summary:
+
+1. Switch with `make here` only. No per-host switch targets exist.
+2. mini's tailscaled is the nix daemon (`org.jgoon.tailscaled`); never brew
+   services tailscale. work stays App Store variant (Falcon kills the nix
+   daemon). Joins wizard-only; no auth keys in the repo.
+3. sshd / Remote Login unmanaged and on — never touch them.
+4. After any switch on a remote box, verify a fresh ssh session before
+   closing the lifeline (broken `/etc/zsh*` kills new sessions only).
+5. Removals only via `make here-zap` after a clean `make plan`; plain
+   switches only ever add.
+
+`make doctor` verifies all of these mechanically, sudo-free, over plain
+ssh.
+
+### Commands
+
 ```sh
-make work        # darwin-rebuild switch --flake ~/.config/nix#work   (macs; HM rides along)
-make pc          # home-manager switch --flake ~/.config/nix#pc       (linux)
-make plan HOST=work   # dry-run: build + brew drift report, changes nothing
+make here        # switch THIS machine (host inferred from hostname) — the only way to switch
+make here-zap    # same, plus one self-cleaning brew activation; check `make plan` first
+make plan        # dry-run: build + brew drift report, changes nothing
+make doctor      # verify SSH-critical invariants (see hard rules above)
 ```
+
+There are no per-host switch targets (`make work` etc. were removed): they
+applied a named host's config to whatever machine ran the command — the
+classic lockout was `make work` while SSH'd into mini. `make here` maps this
+machine's LocalHostName to its flake attr, so cross-applying is impossible.
+New hosts get wired in by adding to the host map in the Makefile.
+
+### Switching a remote machine (mini) — the protocol
+
+A mid-switch failure on a remote box means a physical visit. Follow this,
+in order; don't improvise:
+
+1. `make plan HOST=mini` — dry-run, changes nothing. Fix anything surprising
+   before proceeding.
+2. Run the switch in a herdr remote pane: `herdr --remote mini`. Panes are
+   persistent on the remote server, so a mid-activation disconnect can't
+   abort the switch, and the log is kept. Bare `ssh` in a scratch terminal
+   does neither.
+3. Open a second ssh session to mini and keep it open as a lifeline for the
+   whole switch — existing sessions keep their shell; only *new* connections
+   exercise the new `/etc/zshenv`.
+4. Keep the rollback one-liner ready in the lifeline:
+   `$(darwin-rebuild --list-generations | grep <prev-gen-id> | awk '{print $NF}')/activate`
+5. Run `make here` in the herdr pane.
+6. From your laptop, open a fresh `ssh mini 'echo ok'`. Only close the
+   lifeline after it succeeds.
+7. `make doctor` on mini (fresh session) as belt-and-suspenders.
 
 ## Bootstrap (post-yadm)
 

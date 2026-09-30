@@ -95,10 +95,11 @@
         name = "postgresql@14";
         restart_service = "changed"; # actively running today (brew services)
       }
-      # tailscaled runs out-of-band as a SYSTEM daemon
-      # (/Library/LaunchDaemons/com.tailscale.tailscaled.plist, ssh access to
-      # this box depends on it). install the CLI, but never let brew services
-      # own a second, conflicting daemon.
+      # tailscaled is the NIX launchd daemon (fleet.tailscaled.enable =
+      # true above; LaunchDaemon org.jgoon.tailscaled) — ssh access to this
+      # box depends on it. the brew formula is the CLI only: never let brew
+      # services start/stop a second, conflicting daemon, and never uninstall
+      # it (a zap that removes it loses the CLI too).
       "tailscale"
       # --- tap formulae -------------------------------------------------------
       # topaz and policy moved formula→cask upstream (GoReleaser casks, the
@@ -164,9 +165,9 @@
   # the stale formula copies stay until an explicit cleanup), and the
   # hand-curated defaults apply per fleet policy.
   #
-  # self-cleaning stays opt-in per switch: `make mini-zap` (or `make
-  # here-zap`) runs this host with cleanup = "zap" for one activation —
-  # plain `make mini` never removes anything.
+  # self-cleaning stays opt-in per switch: `make here-zap` runs this host
+  # with cleanup = "zap" for one activation — plain `make here` never
+  # removes anything.
   #
   # post-switch triage mirrors work: pure + zsh-autosuggestions/
   # zsh-syntax-highlighting are declared as brews (status quo) while
