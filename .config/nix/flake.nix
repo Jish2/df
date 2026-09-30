@@ -80,6 +80,7 @@
             inherit inputs;
             user = defaultUser;
             selfAttr = host;
+            hostKind = "standalone";
           };
           modules = [
             ./modules/home/common.nix
@@ -112,6 +113,7 @@
               home-manager.extraSpecialArgs = {
                 user = defaultUser;
                 selfAttr = host;
+                hostKind = "nixos";
               };
               home-manager.users.${defaultUser}.imports = [
                 ./modules/home/common.nix
