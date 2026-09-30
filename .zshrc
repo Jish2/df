@@ -3,8 +3,29 @@
 
 # some configs are replicated in ~/.config/nix/flake.nix
 
-# plugins (zsh-autosuggestions, zsh-syntax-highlighting, pure) are wired by
-# nix-darwin into /etc/zshenv + /etc/zshrc — no brew paths here
+# plugins: macs source zsh-autosuggestions + zsh-syntax-highlighting from
+# nix-darwin's /etc/zshenv + /etc/zshrc (store paths); linux boxes source
+# them from NIX_PROFILES below (shipped via HM home.packages). pure ships
+# on fpath (prompt_pure_setup) in both worlds — see the prompt block below.
+
+# zsh-autosuggestions, then zsh-syntax-highlighting (it wraps widgets, so
+# it goes last). macs already load both via nix-darwin's /etc files — the
+# guards skip (double-sourcing would wrap every widget twice); linux boxes
+# find them in NIX_PROFILES (shipped via HM home.packages; layouts differ
+# between nixpkgs versions, so the glob covers both, first match wins).
+if (( ! ${+functions[_zsh_autosuggest_start]} )); then
+  for _p in ${(s.:.)NIX_PROFILES}; do
+    _m=("$_p"/share/**/zsh-autosuggestions/zsh-autosuggestions.zsh(N))
+    (( ${#_m} )) && { source "${_m[1]}"; break }
+  done
+fi
+if (( ! ${+functions[_zsh_highlight]} )); then
+  for _p in ${(s.:.)NIX_PROFILES}; do
+    _m=("$_p"/share/**/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh(N))
+    (( ${#_m} )) && { source "${_m[1]}"; break }
+  done
+fi
+unset _p _m
 
 # syntax-highlighting-theme
 source ~/.config/zsh/themes/catppuccin_mocha-zsh-syntax-highlighting.zsh
