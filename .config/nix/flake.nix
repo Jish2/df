@@ -89,6 +89,38 @@
             # HM takes -b bak on the CLI (make pc/devspace)
           ];
         };
+
+      # NixOS box: nixosSystem + HM as a NixOS module (mirrors mkDarwin —
+      # one rebuild does system and user together). pc is the only NixOS
+      # host; its system config lived out-of-band at /etc/nixos since
+      # install and this folds it into the fleet.
+      mkNixos =
+        host:
+        nixpkgs.lib.nixosSystem {
+          specialArgs = {
+            inherit inputs self;
+            user = defaultUser;
+          };
+          modules = [
+            ./hosts/${host}/configuration.nix
+            ./hosts/${host}/hardware-configuration.nix
+            home-manager.nixosModules.home-manager
+            {
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+              home-manager.backupFileExtension = "bak";
+              home-manager.extraSpecialArgs = {
+                user = defaultUser;
+                selfAttr = host;
+              };
+              home-manager.users.${defaultUser}.imports = [
+                ./modules/home/common.nix
+                ./modules/home/linux.nix
+                ./hosts/${host} # host-local HM additions (was standalone-only)
+              ];
+            }
+          ];
+        };
     in
     {
       darwinConfigurations = {
@@ -100,7 +132,12 @@
         mini-zap = mkDarwin "mini" [ zapModule ];
       };
 
+      nixosConfigurations.pc = mkNixos "pc";
+
       homeConfigurations = {
+        # pc's user env is now driven by nixosConfigurations.pc above; the
+        # standalone homeConfigurations.pc stays as rollback until the
+        # module-based switch is verified, then it can be dropped.
         pc = mkHome { host = "pc"; system = "x86_64-linux"; };
         # TODO: confirm devspace arch (`uname -m` on the vm)
         devspace = mkHome { host = "devspace"; system = "x86_64-linux"; };

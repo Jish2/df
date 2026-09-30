@@ -1,6 +1,8 @@
-# pc — Omarchy (Arch, x86_64-linux), dual-boots Windows for gaming.
-# standalone home-manager on top of Omarchy; nix is deliberately NOT the
-# system package manager here.
+# pc — NixOS (x86_64-linux), dual-boots Windows for gaming.
+# full fleet member since the system-config fold: nixosConfigurations.pc
+# drives BOTH system and user env (HM as a NixOS module — one rebuild).
+# this file stays host-local HM additions; the system half lives in
+# ./configuration.nix + ./hardware-configuration.nix.
 { pkgs, lib, ... }:
 {
   # CLI env comes from modules/tools.nix (nix column) via the hm-linux shared
@@ -11,8 +13,6 @@
     gnumake
   ];
 
-  # GUI apps (hyprland tweaks, browsers, discord, ...) stay on pacman/omarchy
-  # where desktop integration is native.
-  # TODO: confirm Omarchy's zsh setup doesn't fight ours when the yadm port
-  # brings .zshrc under home-manager.
+  # GUI apps (browsers, discord, ...) beyond firefox stay flatpak/pacman
+  # where desktop integration is native — GNOME via configuration.nix.
 }

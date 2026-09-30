@@ -9,7 +9,7 @@ module imports in the flake, not filename tricks.
 | `work` | MBP M4 Max | macOS 26 | aarch64-darwin | nix-darwin + HM | `HQ-KP2HJMHQ7R` | `jgoon` |
 | `personal` | MBP M3 Pro | macOS | aarch64-darwin | nix-darwin + HM | TODO | TODO |
 | `mini` | M1 Mac Mini (always on) | macOS 26.6 | aarch64-darwin | nix-darwin + HM, server profile | `Joshuas-Mac-mini` | `jgoon` |
-| `pc` | desktop, dual-boots Windows (gaming) | NixOS (see `/etc/nixos`; standalone) | x86_64-linux | out-of-band NixOS | `pc` | `jgoon` |
+| `pc` | desktop, dual-boots Windows (gaming) | NixOS 26.05 | x86_64-linux | NixOS + HM (folded in) | `pc` | `jgoon` |
 | `devspace` | Coder VM | Linux | x86_64 | HM standalone | n/a (ephemeral) | TODO |
 
 Decisions:
@@ -17,8 +17,11 @@ Decisions:
 - **No second router.** yadm alternates (`##o.Darwin,h.HOST`) become host
   modules; yadm's checkout-to-`~` becomes HM symlinks from the nix store.
 - The repo lives at `~/github/df` (or anywhere); nothing pre-exists at `~`.
-- **`pc` stays Omarchy** — nix layers the user env on top; revisit only if
-  Omarchy becomes annoying.
+- **`pc` is folded in**: its system config now lives in the flake
+  (`nixosConfigurations.pc`, hosts/pc/configuration.nix) — the out-of-band
+  `/etc/nixos` era ended with the fold. HM rides along as a NixOS module,
+  so `sudo nixos-rebuild switch --flake ~/.config/nix#pc` does system+user
+  in one shot, same shape as the macs.
 - Flake attrs are stable role names (`work`, `personal`, ...), not hostnames.
 
 ## Layering
@@ -60,9 +63,9 @@ it runs exactly once per box.
 What nix still owns: the aws cli on every box (`tools.nix`) so the
 wizard can mint locally; the tailscale daemon/CLI themselves are
 bootstrapped however each host gets them (cask, App Store, brew, NixOS
-system — the wizard probes all variants). pc (out-of-band NixOS at
-`/etc/nixos`, not managed by this flake) gets the same wizard; its
-config deliberately does NOT adopt `services.tailscale.authKeyFile` —
+system — the wizard probes all variants). pc (NixOS, folded into the flake
+since the system-config fold) gets the same wizard; its config
+deliberately does NOT adopt `services.tailscale.authKeyFile` —
 that would be a second join mechanism.
 
 Private facts (control-plane instance ID) live in
@@ -129,8 +132,10 @@ nix installer's snippets aside so nix-darwin's /etc guard passes
 → `make here`. the Makefile fallback uses the daemon-profile nix path, so
 the switch still works after the rename drops nix from new shells.
 
-**pc:** `sudo pacman -S nix` → clone → `make pc`
-(first run uses the `nix run home-manager` fallback in the Makefile)
+**pc:** NixOS is installed from the ISO as usual, then `yadm pull`
+delivers the flake and `make here` applies it (hostmap infers `pc`). The
+system half goes through `nixos-rebuild switch --flake ~/.config/nix#pc`
+(sudo) — HM rides along in the same rebuild.
 
 **devspace:** same, `--no-daemon` if no sudo; put both steps in the Coder
 startup script so rebuilds re-apply. TODO: confirm arch + home persistence.
