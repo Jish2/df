@@ -71,11 +71,39 @@ Private facts (control-plane instance ID) live in
 
 ## Apply
 
+### Hard rules (SSH-critical — breaking one on mini = physical visit)
+
+1. **Switch with `make here` only.** No per-host targets exist
+   (`make work` while ssh'd into mini used to rewire mini with work's
+   hostname, brew lists, dock — they were removed for exactly this).
+2. **mini's tailscaled is the nix launchd daemon** (`org.jgoon.tailscaled`,
+   from `fleet.tailscaled.enable = true`). Never `brew services
+   start/stop/restart tailscale` — a second daemon fights the nix one for
+   the socket and state. **work is the exception**: keep
+   `fleet.tailscaled.enable = mkForce false` there — corporate EDR
+   (CrowdStrike Falcon) SIGKILLs the nix daemon; work stays on the App
+   Store variant. Joins are wizard-only
+   (`~/.agents/skills/tailnet-join`); no auth keys in the repo.
+3. **sshd / Remote Login are unmanaged and stay on.** Never touch
+   `/etc/ssh/sshd_config`, never disable Remote Login on a remote box.
+4. **After any switch on a remote box, verify a fresh ssh session**
+   (`ssh mini 'echo ok'`): sshd runs commands through the login shell, so
+   a broken `/etc/zsh*` file kills every *new* session while existing
+   ones live — it looks exactly like a dead box.
+5. **Removals only via `make here-zap`, only after a clean `make plan`** —
+   the "would be REMOVED" list must contain nothing ssh depends on
+   (tailscale, cloudflared). Plain switches only ever add.
+
+`make doctor` verifies all of these mechanically, sudo-free, over plain
+ssh.
+
+### Commands
+
 ```sh
 make here        # switch THIS machine (host inferred from hostname) — the only way to switch
 make here-zap    # same, plus one self-cleaning brew activation; check `make plan` first
 make plan        # dry-run: build + brew drift report, changes nothing
-make doctor      # verify SSH-critical invariants (see AGENTS.md)
+make doctor      # verify SSH-critical invariants (see hard rules above)
 ```
 
 There are no per-host switch targets (`make work` etc. were removed): they
