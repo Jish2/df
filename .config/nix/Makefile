@@ -16,6 +16,10 @@ ifeq ($(MACHINE),HQ-KP2HJMHQ7R)
   INFERRED := work
 else ifeq ($(MACHINE),Joshuas-Mac-mini)
   INFERRED := mini
+else ifeq ($(MACHINE),pc)
+  INFERRED := pc
+else ifeq ($(MACHINE),devspace)
+  INFERRED := devspace
 else
   INFERRED := unknown
 endif
