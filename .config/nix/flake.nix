@@ -71,14 +71,14 @@
           ] ++ extraModules;
         };
 
-      # linux: standalone home-manager (pc stays Omarchy; devspace is ephemeral)
+      # linux: standalone home-manager (devspace; pc rides nixosConfigurations)
       mkHome =
-        { host, system }:
+        { host, system, user }:
         home-manager.lib.homeManagerConfiguration {
           pkgs = nixpkgs.legacyPackages.${system};
           extraSpecialArgs = {
             inherit inputs;
-            user = defaultUser;
+            user = user;
             selfAttr = host;
             hostKind = "standalone";
           };
@@ -132,9 +132,11 @@
       nixosConfigurations.pc = mkNixos "pc";
 
       homeConfigurations = {
-        # pc's user env rides nixosConfigurations.pc (HM as a NixOS module)
-        # TODO: confirm devspace arch (`uname -m` on the vm)
-        devspace = mkHome { host = "devspace"; system = "x86_64-linux"; };
+        # pc's user env rides nixosConfigurations.pc (HM as a NixOS module);
+        # devspace's attr runs on the Coder VM as user `coder` (hostname
+        # jgoon-jgoon-box, stable EBS home, ephemeral root — re-applied per
+        # rebuild by the box-side bootstrap in scripts/devspace-apply.sh)
+        devspace = mkHome { host = "devspace"; system = "x86_64-linux"; user = "coder"; };
       };
     };
 }

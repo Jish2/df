@@ -10,7 +10,7 @@ module imports in the flake, not filename tricks.
 | `personal` | MBP M3 Pro | macOS | aarch64-darwin | nix-darwin + HM | TODO | TODO |
 | `mini` | M1 Mac Mini (always on) | macOS 26.6 | aarch64-darwin | nix-darwin + HM, server profile | `Joshuas-Mac-mini` | `jgoon` |
 | `pc` | desktop, dual-boots Windows (gaming) | NixOS 26.05 | x86_64-linux | NixOS + HM (folded in) | `pc` | `jgoon` |
-| `devspace` | Coder VM | Linux | x86_64 | HM standalone | n/a (ephemeral) | TODO |
+| `devspace` | Coder VM (linux-vm-secure) | Ubuntu 24.04 | x86_64-linux | HM standalone | `jgoon-jgoon-box` | `coder` |
 
 Decisions:
 
@@ -149,8 +149,15 @@ delivers the flake and `make here` applies it (hostmap infers `pc`). The
 system half goes through `nixos-rebuild switch --flake ~/.config/nix#pc`
 (sudo) — HM rides along in the same rebuild.
 
-**devspace:** same, `--no-daemon` if no sudo; put both steps in the Coder
-startup script so rebuilds re-apply. TODO: confirm arch + home persistence.
+**devspace:** the workspace's $HOME is a persistent EBS volume, but the EC2
+instance is recreated from the AMI on rebuild (root disk — /nix, nix
+profiles — is ephemeral). Bootstrap once by hand: `yadm pull` on the box
+(switch yadm to main first if the Sep-14 `linux-zshrc-hostfile` WIP branch
+is checked out) → `.config/nix/scripts/devspace-apply.sh` — it applies the
+HM generation, then arms the boot-time devspace-nix-apply systemd user unit
+(linger is armed by the template) which re-applies after every rebuild.
+Later config updates: `make here` on the box (the hostmap maps
+jgoon-jgoon-box → devspace).
 
 ## If onboarding hurt: rollback
 
@@ -199,8 +206,9 @@ yadm stays live until the last file moves. Port in waves:
 
 ## Open questions
 
-- [ ] hostnames + users for personal / pc / devspace
-- [ ] devspace arch and home persistence
+- [x] devspace arch and home persistence → x86_64, persistent $HOME volume,
+      ephemeral root (AMI-baked nix) — re-apply unit landed 2026-09-30
+- [ ] hostnames + users for personal (devspace resolved: jgoon-jgoon-box/coder)
 - [x] what services does mini run → tailscaled (system daemon, NOT brew
   services — ssh depends on it), postgresql@14 (brew service), plus a fleet
   of hand-rolled launchagents: cloudflared tunnels, BlueBubbles, headscale,

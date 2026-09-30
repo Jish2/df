@@ -18,6 +18,8 @@ else ifeq ($(MACHINE),Joshuas-Mac-mini)
   INFERRED := mini
 else ifeq ($(MACHINE),pc)
   INFERRED := pc
+else ifeq ($(MACHINE),jgoon-jgoon-box)
+  INFERRED := devspace
 else ifeq ($(MACHINE),devspace)
   INFERRED := devspace
 else
@@ -39,6 +41,10 @@ NIXFLAGS = --extra-experimental-features 'nix-command flakes'
 # homebrew drift both directions. nothing changes on the machine.
 # iterate until 'would be REMOVED' is empty before running here-zap.
 plan:
+	@if echo ' $(LINUX_HOSTS) ' | grep -q ' $(HOST) '; then \
+	  $(NIX) build $(NIXFLAGS) --no-link $(FLAKE)#homeConfigurations.$(HOST).activationPackage; \
+	  echo "build ok (eval+build only, nothing activated)"; exit 0; \
+	fi
 	@darwin-rebuild build --flake $(FLAKE)#$(HOST) || \
 	  $(NIX) run $(NIXFLAGS) nix-darwin -- build --flake $(FLAKE)#$(HOST)
 	@echo "build ok (eval+build only, nothing activated)"
