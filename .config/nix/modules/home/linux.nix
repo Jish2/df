@@ -9,7 +9,7 @@ let
   nameOrAttr = t: t.nix;
 in
 {
-  home.packages = map (t: pkgs.${t.nix}) tools ++ [ pure-prompt ];
+  home.packages = map (t: pkgs.${t.nix}) tools ++ [ pkgs.pure-prompt ];
 
   home.homeDirectory = "/home/${user}";
 
