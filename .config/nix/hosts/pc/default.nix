@@ -6,7 +6,9 @@
   # CLI env comes from modules/tools.nix (nix column) via the hm-linux shared
   # module; host-local additions go below.
   home.packages = with pkgs; [
-    # pc-specific: nothing yet
+    # make — the fleet Makefile (`make here`) is the only switch path, and
+    # NixOS's minimal install doesn't ship gnumake
+    gnumake
   ];
 
   # GUI apps (hyprland tweaks, browsers, discord, ...) stay on pacman/omarchy
