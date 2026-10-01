@@ -1,0 +1,8 @@
+# devspace fleet self-heal — the user manager (linger) boots ~70s before
+# home-coder.mount lands, so ~/.config/systemd/user units never load at
+# boot; the Coder template only explicitly starts its own services
+# (vault, builderai) post-mount.
+if [ -e "$HOME/.config/systemd/user/devspace-nix-apply.timer" ] &&
+  [ ! -e "$HOME/.local/state/nix/profiles/home-manager" ]; then
+  systemctl --user start --no-block devspace-nix-apply.timer devspace-nix-apply.service 2>/dev/null
+fi

@@ -23,13 +23,15 @@ let
     ''
       Host ${name}
         HostName ${ip}
-        User ${user}
+        User jgoon
         IdentityFile ~/.ssh/id_ed25519
         IdentitiesOnly yes
         AddKeysToAgent yes
     '';
 
-  # every peer except self, one Host block each
+  # every peer except self, one Host block each. peers take the fleet
+  # user (jgoon) — NOT the local user: devspace runs as `coder`, but every
+  # peer box wants jgoon. User jgoon on work/mini/pc is a no-op (same user).
   peers = lib.filterAttrs (n: _: n != selfAttr) fleet;
   blocks = lib.concatStringsSep "\n\n" (lib.mapAttrsToList block peers);
   fleetList = lib.concatStringsSep ", " (lib.attrNames fleet);
