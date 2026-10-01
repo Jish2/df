@@ -1,0 +1,7 @@
+# Linux-wide .zshrc.local config
+#
+# Keep Linux-only overrides here. Host-specific overrides can live in:
+#   .zshrc.local##o.Linux,h.<hostname>
+
+# Alt+Delete (alt+backspace variants already bind via zsh defaults)
+bindkey '\e[3;3~' backward-kill-word
