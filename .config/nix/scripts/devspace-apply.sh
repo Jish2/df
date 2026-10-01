@@ -62,6 +62,11 @@ install_unit() {
   cat > "$UNIT_DIR/$UNIT" <<EOF
 [Unit]
 Description=devspace: re-apply nix home-manager after workspace rebuild
+# wait for the persistent home EBS volume: the linger user manager can
+# start before home-coder.mount is up, and then $HOME is a bare root-disk
+# mountpoint (found this in the live rebuild test — ConditionResult=no
+# fired on an unmounted home).
+RequiresMountsFor=$HOME
 ConditionPathIsDirectory=$FLAKE
 
 [Service]
