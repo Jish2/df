@@ -155,12 +155,20 @@ store, dpkg installs like yadm — is ephemeral). Bootstrap once by hand:
 `yadm pull` on the box (switch yadm to main first if the Sep-14
 `linux-zshrc-hostfile` WIP branch is checked out) →
 `.config/nix/scripts/devspace-apply.sh` — it applies the HM generation,
-then arms the boot-time devspace-nix-apply systemd user unit (linger is
-armed by the template) which re-applies after every rebuild. After a
-rebuild the yadm binary is gone (dpkg, ephemeral) — but the HM profile
-it armed ships yadm (tools.nix), so `yadm pull` works again once the unit
-has re-applied. Later config updates: `yadm pull && make here` on the box
-(the hostmap maps jgoon-jgoon-box → devspace).
+then arms devspace-nix-apply.timer (systemd user timer, checks every
+couple of minutes, no-op when the generation is healthy).
+
+Two rebuild-recovery facts, both measured live:
+- the linger user manager reaches default.target ~70s BEFORE
+  home-coder.mount lands, so $HOME/.config/systemd/user units never load
+  at boot (the template's own services dodge this by being explicitly
+  started by the Coder startup script). The `.zshrc.local##o.Linux,h.jgoon-jgoon-box`
+  alternate re-arms the timer+service on the first interactive zsh after
+  a rebuild.
+- the yadm binary is dpkg-installed on the (ephemeral) root disk — it
+dies on every rebuild. tools.nix ships yadm in the HM profile, so the
+re-apply restores it. Later config updates: `yadm pull && make here` on
+the box (the hostmap maps jgoon-jgoon-box → devspace).
 
 ## If onboarding hurt: rollback
 
