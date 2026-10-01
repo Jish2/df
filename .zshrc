@@ -44,7 +44,15 @@ eval "$(zoxide init zsh --cmd cd)"
 
 # pure zsh prompt (macs: pure-prompt ships via nix-darwin systemPackages
 # and /etc/zshenv fpath; linux: via HM home.packages — both land the plugin
-# in NIX_PROFILES, which the platform zshenv adds to fpath)
+# in NIX_PROFILES, which the platform zshenv adds to fpath). NixOS is the
+# only linux platform whose zshenv does that; Ubuntu/Coder boxes don't, so
+# walk the profiles for site-functions the same way the plugins above do.
+# Harmless on macs (their /etc/zshenv already added the same path; the
+# guard below skips double-activation).
+for _p in ${=NIX_PROFILES}; do
+  [ -d "$_p/share/zsh/site-functions" ] && fpath=("$_p/share/zsh/site-functions" $fpath)
+done
+unset _p
 autoload -U promptinit; promptinit
 if (( ${+functions[prompt_pure_setup]} )); then
   prompt pure
