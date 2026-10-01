@@ -1,5 +1,10 @@
 # compinit + bashcompinit run in nix-darwin's /etc/zshrc before this
-# file lands; no need to duplicate them here anymore
+# file lands (macs). linux has no platform compinit — run it here (no-op
+# on macs: the guards below skip already-registered completions, and
+# re-running compinit is cheap).
+autoload -Uz compinit bashcompinit
+compinit
+bashcompinit
 
 # some configs are replicated in ~/.config/nix/flake.nix
 
