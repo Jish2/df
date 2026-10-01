@@ -167,8 +167,11 @@ Two rebuild-recovery facts, both measured live:
   a rebuild.
 - the yadm binary is dpkg-installed on the (ephemeral) root disk — it
 dies on every rebuild. tools.nix ships yadm in the HM profile, so the
-re-apply restores it. Later config updates: `yadm pull && make here` on
-the box (the hostmap maps jgoon-jgoon-box → devspace).
+re-apply restores it. Same for the login shell: the AMI ships /bin/bash
+and chsh resets on rebuild — the re-apply re-asserts /usr/bin/zsh
+(passwordless sudo is AMI-baked). Later config updates:
+`yadm pull && make here` on the box (the hostmap maps
+jgoon-jgoon-box → devspace).
 
 ## If onboarding hurt: rollback
 
