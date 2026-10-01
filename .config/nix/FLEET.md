@@ -158,6 +158,14 @@ store, dpkg installs like yadm — is ephemeral). Bootstrap once by hand:
 then arms devspace-nix-apply.timer (systemd user timer, checks every
 couple of minutes, no-op when the generation is healthy).
 
+The herdr server runs as the `herdr-server` systemd user service
+(`systemd.user.services.herdr-server` in hosts/devspace): starts at boot
+via linger, waits for the home-volume mount with the same st_dev guard,
+restarts on failure. The binary is herdr's self-updating
+`~/.local/bin/herdr` (on the home volume), not a nix store path —
+`herdr update` works and the unit follows it. After a workspace rebuild,
+no manual server start is needed.
+
 Two rebuild-recovery facts, both measured live:
 - the linger user manager reaches default.target ~70s BEFORE
   home-coder.mount lands, so $HOME/.config/systemd/user units never load
