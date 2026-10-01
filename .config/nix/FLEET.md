@@ -158,6 +158,16 @@ store, dpkg installs like yadm — is ephemeral). Bootstrap once by hand:
 then arms devspace-nix-apply.timer (systemd user timer, checks every
 couple of minutes, no-op when the generation is healthy).
 
+The herdr server runs as the `herdr-server` systemd user service
+(`systemd.user.services.herdr-server` in hosts/devspace): waits for the
+home-volume mount with the same st_dev guard, restarts on failure. The
+binary is herdr's self-updating `~/.local/bin/herdr` (on the home
+volume), not a nix store path — `herdr update` works and the unit
+follows it. NOTE: because the linger user manager starts ~70s before
+home-coder.mount (facts above), the unit dir is not visible at boot —
+the server comes back when the re-apply guard chain runs HM activation
+on first login, not at boot.
+
 ## Herdr server as a fleet-wide service
 
 herdr is the fleet multiplexer — the only surface an agent can drive and
@@ -172,9 +182,11 @@ running instead of sitting dead until someone notices:
 - **work / personal** — LaunchAgent: starts at login, alive while logged
   in. Daily laptops; that is the right lifecycle.
 - **pc** — systemd user service + `linger = true` on the user (set in
-  hosts/pc/configuration.nix): user manager runs from boot.
-- **devspace** — HM user service + boot-time home-mount wait wrapper
-  (see the devspace bootstrap paragraph; lands via its own PR).
+  hosts/pc/configuration.nix): user manager runs from boot (pc has no
+  separate home mount, so units load normally).
+- **devspace** — HM user service (see the devspace paragraphs above):
+  returns via the re-apply guard chain on first login after a rebuild;
+  the boot-time unit dir is not visible before the home mount.
 
 All of them resolve the herdr binary at start (`~/.local/bin/herdr`,
 nix profile, brew formula — whichever the box has) instead of pinning a
