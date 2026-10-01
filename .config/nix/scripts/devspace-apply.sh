@@ -8,7 +8,7 @@
 # $HOME dangles, so the config must re-apply itself at boot.
 #
 # Run once by hand after `yadm pull` on the box (see FLEET.md bootstrap);
-# afterwards the devspace-nix-apply user unit re-runs `apply` on boot whenever
+# afterwards the devspace-nix-apply path unit re-runs `apply` at boot whenever
 # the HM generation is missing.
 set -euo pipefail
 
@@ -16,10 +16,14 @@ FLAKE="$HOME/.config/nix"
 SCRIPTS="$FLAKE/scripts"
 UNIT_DIR="$HOME/.config/systemd/user"
 UNIT="devspace-nix-apply.service"
+PATH_UNIT="devspace-nix-apply.path"
 # absolute path: the boot-time user unit runs with a minimal PATH where nix
 # isn't discoverable. this is the AMI-baked multi-user nix profile path —
 # stable across rebuilds (Determinate installer layout).
 NIX="${NIX:-/nix/var/nix/profiles/default/bin/nix}"
+# array: 'nix-command flakes' is ONE option value — a flat string would
+# word-split and nix would parse 'flakes' as the subcommand (caught live).
+# (the AMI's /etc/nix/nix.conf already sets this; the flag is a safety net.)
 NIXFLAGS=(--extra-experimental-features 'nix-command flakes')
 # HM's profile link: dies (dangles) whenever the workspace is rebuilt —
 # every stop recreates the EC2 instance from the AMI, and the store paths
@@ -59,32 +63,53 @@ hm_missing() {
 
 install_unit() {
   mkdir -p "$UNIT_DIR"
+  # --- apply service ------------------------------------------------------
+  # the linger user manager starts BEFORE home-coder.mount lands (79s late
+  # in the live test) — a plain default.target oneshot evaluates against
+  # an unmounted $HOME and skips (ConditionResult=no). So this unit never
+  # self-triggers at boot; the path unit below fires it the moment the
+  # mount lands. RequiresMountsFor adds correct ordering for the rare case
+  # where both race together.
   cat > "$UNIT_DIR/$UNIT" <<EOF
 [Unit]
 Description=devspace: re-apply nix home-manager after workspace rebuild
-# wait for the persistent home EBS volume: the linger user manager can
-# start before home-coder.mount is up, and then $HOME is a bare root-disk
-# mountpoint (found this in the live rebuild test — ConditionResult=no
-# fired on an unmounted home).
 RequiresMountsFor=$HOME
 ConditionPathIsDirectory=$FLAKE
 
 [Service]
 Type=oneshot
-# Only fires when the HM generation died with the root disk: every workspace
+# Only fires when the HM generation is missing or dangling: every workspace
 # stop recreates the EC2 instance from the AMI (fresh /nix store), so the
-# profile link dangles. If the generation is healthy the unit skips — config
-# updates are manual (\`make here\` on the box, or this script).
+# profile link dangles. If the generation is healthy the unit skips —
+# config updates are manual (\`make here\` on the box, or this script).
 ExecCondition=/bin/sh -c 'test ! -e "$HM_LINK"'
 ExecStart=$SCRIPTS/devspace-apply.sh apply
 RemainAfterExit=yes
+EOF
+
+  # --- path watcher -------------------------------------------------------
+  # triggers the apply service when the HM profile directory changes —
+  # chiefly the moment the home EBS volume mounts at boot (the profiles
+  # dir appears) or the link state changes after a rebuild. The service's
+  # ExecCondition still gates: a healthy generation means one no-op check.
+  cat > "$UNIT_DIR/$PATH_UNIT" <<EOF
+[Unit]
+Description=devspace: watch for a dangling (rebuilt) HM generation
+ConditionPathIsDirectory=$FLAKE
+
+[Path]
+PathExists=$HOME/.local/state/nix
+PathModified=$HOME/.local/state/nix/profiles
+Unit=$UNIT
 
 [Install]
 WantedBy=default.target
 EOF
+
   systemctl --user daemon-reload
   systemctl --user enable "$UNIT" >/dev/null
-  echo "devspace-apply: unit armed ($UNIT)"
+  systemctl --user enable --now "$PATH_UNIT" >/dev/null
+  echo "devspace-apply: unit armed ($UNIT + $PATH_UNIT)"
 }
 
 case "${1:-}" in
