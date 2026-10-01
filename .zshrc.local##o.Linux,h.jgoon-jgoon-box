@@ -1,13 +1,7 @@
 # devspace fleet self-heal — the user manager (linger) boots ~70s before
 # home-coder.mount lands, so ~/.config/systemd/user units never load at
 # boot; the Coder template only explicitly starts its own services
-# (vault, builderai) post-mount. This re-arms the fleet re-apply machinery
-# on the first zsh of any kind after a workspace rebuild. No-op when
-# healthy (one -e test), silent for scp/rsync/ssh-exec.
-#
-# the guard fires only when the devspace-nix-apply timer exists (first
-# bootstrap done) and the HM generation is dead — the signature of a
-# workspace rebuild (fresh AMI root disk, store paths gone).
+# (vault, builderai) post-mount.
 if [ -e "$HOME/.config/systemd/user/devspace-nix-apply.timer" ] &&
   [ ! -e "$HOME/.local/state/nix/profiles/home-manager" ]; then
   systemctl --user start --no-block devspace-nix-apply.timer devspace-nix-apply.service 2>/dev/null

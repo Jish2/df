@@ -9,7 +9,6 @@
 # hostname is jgoon-jgoon-box; `make here` maps it via the hostmap.
 { pkgs, ... }:
 {
-  # base CLI set comes from modules/tools.nix (nix column) via
-  # modules/home/linux.nix; nothing devspace-specific yet.
+  # base CLI set comes from modules/tools.nix (nix column)
   home.packages = with pkgs; [ ];
 }

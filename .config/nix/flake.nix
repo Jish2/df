@@ -71,7 +71,6 @@
           ] ++ extraModules;
         };
 
-      # linux: standalone home-manager (devspace; pc rides nixosConfigurations)
       mkHome =
         { host, system, user }:
         home-manager.lib.homeManagerConfiguration {

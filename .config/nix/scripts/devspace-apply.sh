@@ -1,15 +1,10 @@
 #!/usr/bin/env bash
-# devspace (Coder VM) — apply the fleet home-manager config, and arm the
-# boot-time re-apply timer.
-#
 # Why this exists: the workspace's $HOME is a persistent EBS volume, but the
 # EC2 instance (root disk — including /nix and every nix profile) is recreated
 # from the AMI on each workspace rebuild. After a rebuild every HM symlink in
 # $HOME dangles, so the config must re-apply itself at boot.
 #
-# Run once by hand after `yadm pull` on the box (see FLEET.md bootstrap);
-# afterwards the devspace-nix-apply timer re-checks every couple of minutes
-# and re-applies whenever the HM generation is missing (a no-op when healthy).
+# Run once by hand after `yadm pull` on the box (see FLEET.md bootstrap).
 set -euo pipefail
 
 FLAKE="$HOME/.config/nix"
@@ -23,7 +18,7 @@ TIMER_UNIT="devspace-nix-apply.timer"
 NIX="${NIX:-/nix/var/nix/profiles/default/bin/nix}"
 # array: 'nix-command flakes' is ONE option value — a flat string would
 # word-split and nix would parse 'flakes' as the subcommand (caught live).
-# (the AMI's /etc/nix/nix.conf already sets this; the flag is a safety net.)
+# (the AMI's /etc/nix/nix.conf already sets this; the flag is a safety net against AMIs that drop it.)
 NIXFLAGS=(--extra-experimental-features 'nix-command flakes')
 # HM's profile link: dies (dangles) whenever the workspace is rebuilt —
 # every stop recreates the EC2 instance from the AMI, and the store paths
@@ -40,8 +35,6 @@ home_mounted() {
   [ "$(stat -c %d /home/coder)" != "$(stat -c %d /)" ]
 }
 
-# true when the HM generation is missing or dangling (the workspace was
-# rebuilt; the generation's store paths on the ephemeral root disk are gone)
 hm_missing() {
   [ ! -e "$HM_LINK" ]
 }
@@ -85,7 +78,6 @@ apply_if_missing() {
 
 install_units() {
   mkdir -p "$UNIT_DIR"
-  # --- apply service ------------------------------------------------------
   # started ONLY by the timer (no default.target WantedBy): at cold boot the
   # user manager reaches default.target ~80s before home-coder.mount lands
   # (measured live), so a boot-triggered oneshot evaluates against the bare
@@ -105,7 +97,6 @@ Type=oneshot
 ExecStart=$SCRIPTS/devspace-apply.sh apply-if-missing
 EOF
 
-  # --- timer ---------------------------------------------------------------
   # no RemainAfterExit on the service: an active(exited) oneshot ignores
   # timer re-triggers, and the periodic healthy-check is the design.
   cat > "$UNIT_DIR/$TIMER_UNIT" <<EOF
@@ -120,7 +111,6 @@ OnUnitActiveSec=2min
 WantedBy=timers.target
 EOF
 
-  # clean up earlier iterations of this mechanism if present
   systemctl --user disable --now "$UNIT" >/dev/null 2>&1 || true
   systemctl --user disable --now devspace-nix-apply.path >/dev/null 2>&1 || true
   rm -f "$UNIT_DIR/devspace-nix-apply.path"
