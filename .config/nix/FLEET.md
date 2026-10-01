@@ -149,15 +149,18 @@ delivers the flake and `make here` applies it (hostmap infers `pc`). The
 system half goes through `nixos-rebuild switch --flake ~/.config/nix#pc`
 (sudo) — HM rides along in the same rebuild.
 
-**devspace:** the workspace's $HOME is a persistent EBS volume, but the EC2
-instance is recreated from the AMI on rebuild (root disk — /nix, nix
-profiles — is ephemeral). Bootstrap once by hand: `yadm pull` on the box
-(switch yadm to main first if the Sep-14 `linux-zshrc-hostfile` WIP branch
-is checked out) → `.config/nix/scripts/devspace-apply.sh` — it applies the
-HM generation, then arms the boot-time devspace-nix-apply systemd user unit
-(linger is armed by the template) which re-applies after every rebuild.
-Later config updates: `make here` on the box (the hostmap maps
-jgoon-jgoon-box → devspace).
+**devspace:** the workspace's $HOME is a persistent EBS volume, but every
+workspace stop recreates the EC2 instance from the AMI (root disk — /nix
+store, dpkg installs like yadm — is ephemeral). Bootstrap once by hand:
+`yadm pull` on the box (switch yadm to main first if the Sep-14
+`linux-zshrc-hostfile` WIP branch is checked out) →
+`.config/nix/scripts/devspace-apply.sh` — it applies the HM generation,
+then arms the boot-time devspace-nix-apply systemd user unit (linger is
+armed by the template) which re-applies after every rebuild. After a
+rebuild the yadm binary is gone (dpkg, ephemeral) — but the HM profile
+it armed ships yadm (tools.nix), so `yadm pull` works again once the unit
+has re-applied. Later config updates: `yadm pull && make here` on the box
+(the hostmap maps jgoon-jgoon-box → devspace).
 
 ## If onboarding hurt: rollback
 
