@@ -59,6 +59,7 @@ apply() {
     cat "$err" >&2
     exit 1
   fi
+  fix_login_shell
   "$gen/activate"
   echo "devspace-apply: generation activated ($gen)"
 }
@@ -69,11 +70,26 @@ apply_if_missing() {
     echo "devspace-apply: home volume not mounted yet, skipping this tick"
     exit 0
   fi
+  fix_login_shell
   if ! hm_missing; then
     echo "devspace-apply: HM generation present, nothing to do"
     exit 0
   fi
   apply
+}
+
+# the AMI ships /bin/bash as the login shell and chsh writes /etc/passwd
+# on the ephemeral root disk — every rebuild resets it and every shell
+# lands in bash with the stock prompt. the fleet's shell is zsh (macs via
+# nix-darwin, pc via NixOS); re-assert it. passwordless sudo is AMI-baked.
+fix_login_shell() {
+  if [ "$(getent passwd coder | cut -d: -f7)" != /usr/bin/zsh ] && [ -x /usr/bin/zsh ]; then
+    if sudo -n chsh -s /usr/bin/zsh coder 2>/dev/null; then
+      echo "devspace-apply: login shell restored to /usr/bin/zsh"
+    else
+      echo "devspace-apply: WARNING could not set zsh as login shell" >&2
+    fi
+  fi
 }
 
 install_units() {
