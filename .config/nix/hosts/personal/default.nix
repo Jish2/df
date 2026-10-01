@@ -3,6 +3,8 @@
 # FLEET.md import (brew bundle dump + defaults dump) to build its lists.
 { ... }:
 {
+  fleet.herdr.enable = true;
+
   # networking.hostName = "...";
   # networking.localHostName = "...";
 

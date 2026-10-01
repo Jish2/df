@@ -10,6 +10,8 @@
   # nix daemon here until that changes.
   fleet.tailscaled.enable = lib.mkForce false;
 
+  fleet.herdr.enable = true;
+
   networking.hostName = "HQ-KP2HJMHQ7R";
   networking.localHostName = "HQ-KP2HJMHQ7R";
   networking.computerName = "HQ-KP2HJMHQ7R";

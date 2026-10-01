@@ -8,6 +8,13 @@
 {
   fleet.tailscaled.enable = true;
 
+  # headless always-on box, auto-login off: run herdr from boot without a
+  # login session (LaunchDaemon as the user), not a LaunchAgent.
+  fleet.herdr = {
+    enable = true;
+    daemon = true;
+  };
+
   networking.hostName = "Joshuas-Mac-mini";
   networking.localHostName = "Joshuas-Mac-mini";
   networking.computerName = "Joshua’s Mac mini"; # (curly apostrophe, as shipped)

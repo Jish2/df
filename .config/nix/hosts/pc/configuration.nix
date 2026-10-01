@@ -71,6 +71,9 @@
       "wheel"
     ];
     shell = pkgs.zsh;
+    # herdr-server (HM user service) must run without an active login:
+    # this box is reached over ssh/machine API and may reboot unattended.
+    linger = true;
   };
 
   # Flatpak (Roblox via Sober, etc.)
