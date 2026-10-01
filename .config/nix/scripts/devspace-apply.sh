@@ -131,6 +131,23 @@ EOF
   systemctl --user disable --now devspace-nix-apply.path >/dev/null 2>&1 || true
   rm -f "$UNIT_DIR/devspace-nix-apply.path"
 
+  # bash guard: ssh logins land in bash (login shell until fix_login_shell
+  # wins the race), and .bashrc's interactive guard returns early — so the
+  # zshrc trigger never fires for the FIRST ssh after a rebuild. this file
+  # is not yadm-tracked (no conflict) and lives on the home volume, so the
+  # guard persists across rebuilds and re-arms the heal at first ssh.
+  # systemctl --no-block: never hold the login open for the build.
+  cat > "$HOME/.bash_profile" <<'GUARD'
+# devspace fleet self-heal: after a workspace rebuild the HM generation
+# dies with the root disk; re-arm the re-apply machinery on first login.
+# silent no-op when healthy. (written by .config/nix/scripts/devspace-apply.sh)
+if [ -e "$HOME/.config/systemd/user/devspace-nix-apply.timer" ] &&
+  [ ! -e "$HOME/.local/state/nix/profiles/home-manager" ]; then
+  systemctl --user daemon-reload >/dev/null 2>&1
+  systemctl --user start --no-block devspace-nix-apply.timer devspace-nix-apply.service >/dev/null 2>&1
+fi
+GUARD
+
   systemctl --user daemon-reload
   systemctl --user enable --now "$TIMER_UNIT" >/dev/null
   echo "devspace-apply: units armed ($TIMER_UNIT -> $UNIT)"
