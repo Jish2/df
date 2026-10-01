@@ -20,7 +20,7 @@ UNIT="devspace-nix-apply.service"
 # isn't discoverable. this is the AMI-baked multi-user nix profile path —
 # stable across rebuilds (Determinate installer layout).
 NIX="${NIX:-/nix/var/nix/profiles/default/bin/nix}"
-NIXFLAGS="--extra-experimental-features nix-command flakes"
+NIXFLAGS=(--extra-experimental-features 'nix-command flakes')
 # HM's profile link: dies (dangles) whenever the workspace is rebuilt —
 # every stop recreates the EC2 instance from the AMI, and the store paths
 # it points at live on the ephemeral root disk.
@@ -34,7 +34,7 @@ apply() {
   # (linger starts the user manager before the daemon settles).
   local gen="" err=/tmp/devspace-nix-apply.err
   for _ in $(seq 1 30); do
-    if gen="$("$NIX" $NIXFLAGS build \
+    if gen="$("$NIX" "${NIXFLAGS[@]}" build \
       --no-link --print-out-paths \
       "$FLAKE#homeConfigurations.devspace.activationPackage" 2>"$err")"; then
       break
