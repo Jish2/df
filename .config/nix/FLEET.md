@@ -158,6 +158,30 @@ store, dpkg installs like yadm — is ephemeral). Bootstrap once by hand:
 then arms devspace-nix-apply.timer (systemd user timer, checks every
 couple of minutes, no-op when the generation is healthy).
 
+## Herdr server as a fleet-wide service
+
+herdr is the fleet multiplexer — the only surface an agent can drive and
+the human can attach to. Every box now declares its server in nix
+(`fleet.herdr` module on darwin, `systemd.user.services.herdr-server` on
+linux), so a rebooted or rebuilt box comes back with the server already
+running instead of sitting dead until someone notices:
+
+- **mini** — LaunchDaemon (`fleet.herdr.daemon = true`): runs from boot
+  WITHOUT login, as the user (the box is headless with auto-login off;
+  a LaunchAgent would never fire after a reboot).
+- **work / personal** — LaunchAgent: starts at login, alive while logged
+  in. Daily laptops; that is the right lifecycle.
+- **pc** — systemd user service + `linger = true` on the user (set in
+  hosts/pc/configuration.nix): user manager runs from boot.
+- **devspace** — HM user service + boot-time home-mount wait wrapper
+  (see the devspace bootstrap paragraph; lands via its own PR).
+
+All of them resolve the herdr binary at start (`~/.local/bin/herdr`,
+nix profile, brew formula — whichever the box has) instead of pinning a
+nix store path: `herdr update` / `brew upgrade` keep working, and the
+service follows the upgraded binary. KeepAlive/Restart covers crashes;
+`herdr server stop` (clean exit) is not fought by the supervisor.
+
 Two rebuild-recovery facts, both measured live:
 - the linger user manager reaches default.target ~70s BEFORE
   home-coder.mount lands, so $HOME/.config/systemd/user units never load
