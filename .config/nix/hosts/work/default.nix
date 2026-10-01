@@ -10,7 +10,6 @@
   # nix daemon here until that changes.
   fleet.tailscaled.enable = lib.mkForce false;
 
-  # daily laptop: herdr server as a LaunchAgent, alive while logged in
   fleet.herdr.enable = true;
 
   networking.hostName = "HQ-KP2HJMHQ7R";

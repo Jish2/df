@@ -1,5 +1,3 @@
-# fleet.herdr: run the herdr server persistently on every darwin box.
-#
 # herdr is the fleet multiplexer — the only surface an agent can drive and
 # the human can attach to (FLEET.md). Without a service definition the
 # server only runs from whenever the TUI was last opened, so a rebooted box
@@ -18,15 +16,11 @@
 # the self-updating ~/.local/bin/herdr (mini) or the brew formula (work).
 # Deliberately not a nix store path: `herdr update` and `brew upgrade`
 # keep working, and nix owns the lifecycle, not the version.
-#
-# If a server is already running when the service starts (pre-service
-# hand-start, TUI-opened), the wrapper waits for it to exit and takes
-# over instead of crash-looping on the busy socket.
 {
   config,
   lib,
   pkgs,
-  user, # from mkDarwin specialArgs
+  user,
   ...
 }:
 let

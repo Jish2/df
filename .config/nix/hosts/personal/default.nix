@@ -3,7 +3,6 @@
 # FLEET.md import (brew bundle dump + defaults dump) to build its lists.
 { ... }:
 {
-  # daily laptop: herdr server as a LaunchAgent, alive while logged in
   fleet.herdr.enable = true;
 
   # networking.hostName = "...";

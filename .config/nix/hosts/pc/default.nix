@@ -20,8 +20,6 @@
   # install (version skew between server and CLI). nix owns the
   # lifecycle, not the version. linger (configuration.nix) runs the user
   # manager at boot; NixOS has no home-mount race, so no wait wrapper.
-  # If a server is already running at start (pre-service TUI/hand-start),
-  # the wrapper waits for it to exit and takes over.
   systemd.user.services.herdr-server = {
     Unit.Description = "herdr: headless session server (persistent panes for pc)";
     Service = {
