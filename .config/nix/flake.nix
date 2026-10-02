@@ -11,6 +11,14 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
+
+    # herdr on linux boxes comes from the herdrdev flake (pinned release
+    # tag), not nixpkgs: nixpkgs-unstable's herdr lags releases, and pc's
+    # CLI + server must come from the same closure (version skew between
+    # a profile CLI and a flake server is exactly what this removes).
+    # darwin keeps brew (floats fresh) — see hosts/work brews + FLEET.md.
+    herdr.url = "github:herdrdev/herdr/v0.9.3";
+    herdr.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
@@ -107,6 +115,7 @@
               home-manager.useUserPackages = true;
               home-manager.backupFileExtension = "bak";
               home-manager.extraSpecialArgs = {
+                inherit inputs; # hosts/<linux-nixos>/default.nix builds herdr from inputs.herdr
                 user = defaultUser;
                 selfAttr = host;
                 hostKind = "nixos";
