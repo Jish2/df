@@ -39,6 +39,9 @@
   # NVIDIA proprietary driver (needed for Zotac SPECTRA / OpenRGB I2C)
   services.xserver.videoDrivers = [ "nvidia" ];
   hardware.graphics.enable = true;
+  # Flatpak GL (Sober/Roblox) ships a 32-bit NVIDIA runtime alongside the
+  # 64-bit one; without this the Flatpak GL32.nvidia extension is incomplete.
+  hardware.graphics.enable32Bit = true;
   hardware.nvidia = {
     modesetting.enable = true;
     # Ampere 3070 Ti: NixOS recommends open kernel modules on Turing+
@@ -69,6 +72,7 @@
     extraGroups = [
       "networkmanager"
       "wheel"
+      "gamemode"
     ];
     shell = pkgs.zsh;
     # herdr-server (HM user service) must run without an active login:
@@ -78,6 +82,9 @@
 
   # Flatpak (Roblox via Sober, etc.)
   services.flatpak.enable = true;
+
+  # Sober sets enable_gamemode=true; without this daemon that option is a no-op.
+  programs.gamemode.enable = true;
 
   programs.firefox.enable = true;
 
