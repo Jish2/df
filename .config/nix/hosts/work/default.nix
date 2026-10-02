@@ -151,6 +151,7 @@
       "opcr-io/tap/policy"
       # --- apps ---------------------------------------------------------------
       "1password-cli"
+      "t3-code@nightly"
       "aldente"
       "alfred"
       "asset-catalog-tinkerer"

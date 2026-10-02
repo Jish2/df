@@ -90,6 +90,13 @@
 
   programs.zsh.enable = true;
 
+  # run the t3 CLI (self-contained binary needing libatomic/libstdc++) and
+  # other unpackaged linux binaries without packaging them
+  programs.nix-ld = {
+    enable = true;
+    libraries = with pkgs; [ stdenv.cc.cc ];
+  };
+
   nixpkgs.config.allowUnfree = true;
 
   environment.systemPackages = with pkgs; [
