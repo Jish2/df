@@ -1,2 +1,5 @@
 .DS_Store
 .pi/tasks
+
+# opencode manages this file locally (MCP config); not synced
+.config/opencode/opencode.json
