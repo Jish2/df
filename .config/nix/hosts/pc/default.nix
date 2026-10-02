@@ -1,7 +1,12 @@
 # pc — NixOS (x86_64-linux), dual-boots Windows for gaming.
 # this file stays host-local HM additions; the system half lives in
 # ./configuration.nix + ./hardware-configuration.nix.
-{ pkgs, lib, ... }:
+{
+  inputs,
+  pkgs,
+  lib,
+  ...
+}:
 {
   # CLI env comes from modules/tools.nix (nix column) via the hm-linux shared
   # module; host-local additions go below.
@@ -9,17 +14,21 @@
     # make — the fleet Makefile (`make here`) is the only switch path, and
     # NixOS's minimal install doesn't ship gnumake
     gnumake
+    # herdr — from the pinned herdrdev flake input, so CLI and server come
+    # from one closure and pc's herdr is reproducible from this repo
+    # (replacing the manual `nix profile install` that a rebuilt pc lost).
+    # darwin boxes keep brew — see hosts/work brews + FLEET.md.
+    inputs.herdr.packages.${pkgs.system}.herdr
   ];
 
   # herdr server as a boot-persistent user service. shape mirrors hosts/
   # devspace (herdr is the fleet multiplexer — the only surface an agent
-  # can drive and the human can attach to). the binary is resolved at
-  # start — the nix-profile install today, or ~/.local/bin if `herdr
-  # update` ever relocates it — not ${pkgs.herdr}: that would pin the
-  # flake's older nixpkgs copy next to the profile's herdrdev-flake
-  # install (version skew between server and CLI). nix owns the
-  # lifecycle, not the version. linger (configuration.nix) runs the user
-  # manager at boot; NixOS has no home-mount race, so no wait wrapper.
+  # can drive and the human can attach to). resolution order below puts
+  # ~/.local/bin first — a deliberate escape hatch: `herdr update` on pc
+  # installs the self-updating binary there and the service follows it
+  # without a rebuild — with the HM package as the reproducible floor.
+  # linger (configuration.nix) runs the user manager at boot; NixOS has
+  # no home-mount race, so no wait wrapper.
   systemd.user.services.herdr-server = {
     Unit.Description = "herdr: headless session server (persistent panes for pc)";
     Service = {
@@ -28,7 +37,14 @@
         "${pkgs.writeShellScript "herdr-server-start" ''
           home="$1"
           H=""
-          for c in "$home/.local/bin/herdr" "$home/.nix-profile/bin/herdr"; do
+          # resolution order: self-updating install first (escape hatch
+          # — `herdr update` works without a rebuild), then the HM-managed
+          # package (the reproducible floor), then the legacy manual nix
+          # profile (removed at rollout; kept for the transition switch).
+          for c in \
+            "$home/.local/bin/herdr" \
+            "/etc/profiles/per-user/jgoon/bin/herdr" \
+            "$home/.nix-profile/bin/herdr"; do
             [ -x "$c" ] && H="$c" && break
           done
           if [ -z "$H" ]; then

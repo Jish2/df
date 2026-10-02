@@ -183,7 +183,10 @@ running instead of sitting dead until someone notices:
   in. Daily laptops; that is the right lifecycle.
 - **pc** — systemd user service + `linger = true` on the user (set in
   hosts/pc/configuration.nix): user manager runs from boot (pc has no
-  separate home mount, so units load normally).
+  separate home mount, so units load normally). The herdr **binary is
+  flake-managed** (`inputs.herdr` in hosts/pc — pinned release tag, CLI
+  and server from one closure); `~/.local/bin/herdr` stays first in the
+  wrapper's resolution order as the self-update escape hatch.
 - **devspace** — HM user service (see the devspace paragraphs above):
   returns via the re-apply guard chain on first login after a rebuild;
   the boot-time unit dir is not visible before the home mount.
