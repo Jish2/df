@@ -35,6 +35,23 @@ source fails because of auth, missing credentials, unavailable CLI/tooling, or
 permissions, stop and ask the user to repair access unless they explicitly
 approve a degraded run.
 
+**Auth failures with a reauth URL: open it for the user.** When the failure
+output carries an OAuth/credential-broker URL — e.g. Slack's `Slack user token
+is missing. Open the credential-broker URL in the browser...` or an Atlassian
+`ACTION REQUIRED` auth prompt — extract that exact URL and open it immediately
+with `open "<url>"` (macOS), then tell the user which source failed and that
+the browser is open for reauth. Do not paste the URL and wait — the user
+simply reauths; retry the failed command after they confirm. Two known URLs:
+
+- Slack gateway user token: `https://apis.simulprod.com/credential-broker/v1/connect/slack_metadata`
+- Atlassian first-time OAuth: `https://apis.simulprod.com/credential-broker/v1/connect/atlassian`
+
+This also applies to mid-run token degradation (a source that passed the
+gate and later returns `Unauthenticated`/"user token is missing"): salvage any
+already-captured evidence, open the reauth URL from the error message,
+notify the user, and retry once after they confirm — only then decide whether
+to continue degraded.
+
 When stopping for access, name the failed source, the failed command or tool category, and the shortest next action. Do not write a clean report, refresh `me.md`, sync the Google Doc, advance `last_completed_at`, advance `last_reviewed_through_at`, or mark pending items reviewed until access is repaired or the user explicitly approves a degraded run.
 
 Start with agent-harness chats and Slack for the same checkpoint window.
@@ -68,9 +85,13 @@ discovery. Two working CLIs hit the same MCP gateway:
   interface; reaches `slack_search_public_and_private`, but the gateway ignores
   `after:`/`before:` tokens inside the query string — scope windows client-side.
 
-In the access gate, run `uv run <cli> tools --env prod` before any real call
-(refresh Mac-host auth with `bash ~/.cursor/skills/slack/scripts/refresh-mcp-gateway-token.sh`
-when needed). Always run a broad outbound `from:<@USER_ID>` search across the
+In the access gate, run `uv run <cli> tools --env prod` before any real call.
+Note: there is no `refresh-mcp-gateway-token.sh` script on this Mac host — the
+Slack **user token** (used by `slack_search_public_and_private` and the
+epoch-scoped `search`) is a browser OAuth grant through the credential broker,
+not a refreshable CLI token. When a call returns `Slack user token is missing`,
+open the reauth URL embedded in that error with `open` (see the access-gate
+rule above) and retry after the user confirms. Always run a broad outbound `from:<@USER_ID>` search across the
 checkpoint window before targeted Slack searches. Then search terms from chats,
 GitHub, Jira, docs, branch names, PR titles, blocker words, and follow-up
 language. Expand only the highest-signal Slack threads or channel-history
