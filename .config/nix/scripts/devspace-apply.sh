@@ -7,6 +7,16 @@
 # Run once by hand after `yadm pull` on the box (see FLEET.md bootstrap).
 set -euo pipefail
 
+# callers with minimal environments (coder dotfiles' install.sh, the boot
+# timer) hit activate's nix-build with exit 127 if nix isn't on PATH — the
+# hand-run path only worked because a login shell's PATH carried it. Put
+# the stable nix locations on PATH unconditionally: multi-user default
+# profile (AMI-baked), and the home-volume profiles.
+export PATH="\
+/nix/var/nix/profiles/default/bin:  \
+$HOME/.local/state/nix/profiles/profile/bin:  \
+$HOME/.nix-profile/bin:$PATH"
+
 FLAKE="$HOME/.config/nix"
 SCRIPTS="$FLAKE/scripts"
 UNIT_DIR="$HOME/.config/systemd/user"
