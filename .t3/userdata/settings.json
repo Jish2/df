@@ -1,0 +1,68 @@
+{
+  "projectSettingsFolded": true,
+  "providers": {
+    "cursor": {
+      "enabled": false
+    },
+    "grok": {
+      "enabled": false
+    },
+    "opencode": {
+      "enabled": false
+    }
+  },
+  "providerInstances": {
+    "codex": {
+      "driver": "codex",
+      "enabled": false,
+      "config": {
+        "binaryPath": "codex",
+        "homePath": "",
+        "shadowHomePath": "",
+        "launchArgs": "",
+        "customModels": []
+      }
+    },
+    "claudeAgent": {
+      "driver": "claudeAgent",
+      "enabled": false,
+      "config": {
+        "binaryPath": "claude",
+        "homePath": "",
+        "customModels": [],
+        "launchArgs": "",
+        "autoCompactWindow": ""
+      }
+    },
+    "cursor": {
+      "driver": "cursor",
+      "enabled": true,
+      "config": {
+        "binaryPath": "cursor-agent",
+        "apiEndpoint": "",
+        "customModels": []
+      }
+    },
+    "tau": {
+      "driver": "pi",
+      "displayName": "Tau",
+      "accentColor": "#8b5cf6",
+      "environment": [],
+      "enabled": true,
+      "config": {
+        "binaryPath": "tau",
+        "launchArgs": "",
+        "customModels": []
+      }
+    },
+    "pi": {
+      "driver": "pi",
+      "enabled": false,
+      "config": {
+        "binaryPath": "/Users/jgoon/.local/bin/tau",
+        "launchArgs": "",
+        "customModels": []
+      }
+    }
+  }
+}
