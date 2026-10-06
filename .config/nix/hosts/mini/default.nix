@@ -40,6 +40,7 @@
       "derailed/k9s"
       "hashicorp/tap"
       "hidetatz/tap"
+      "laishulu/homebrew"
       "nikolaeu/numi"
       "opcr-io/tap"
       "oven-sh/bun"
@@ -78,6 +79,7 @@
       "git-delta"
       "git-lfs"
       "just"
+      "macism" # Ctrl+Space EN/CN toggle — karabiner rule runs it
       "lazygit"
       "markdownlint-cli"
       "mas"

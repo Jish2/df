@@ -58,6 +58,7 @@
       "ariga/tap"
       "aserto-dev/tap"
       "cloudflare/cloudflare"
+      "laishulu/homebrew"
       "opcr-io/tap"
       "steipete/tap"
       "vanchonlee/tap"
@@ -94,6 +95,7 @@
       "herdr"
       "jira-cli"
       "lcov"
+      "macism" # Ctrl+Space EN/CN toggle — karabiner rule runs it
       "markdownlint-cli"
       "md-tui"
       "pandoc"
