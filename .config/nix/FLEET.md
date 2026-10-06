@@ -151,12 +151,21 @@ system half goes through `nixos-rebuild switch --flake ~/.config/nix#pc`
 
 **devspace:** the workspace's $HOME is a persistent EBS volume, but every
 workspace stop recreates the EC2 instance from the AMI (root disk — /nix
-store, dpkg installs like yadm — is ephemeral). Bootstrap once by hand:
-`yadm pull` on the box (switch yadm to main first if the Sep-14
-`linux-zshrc-hostfile` WIP branch is checked out) →
-`.config/nix/scripts/devspace-apply.sh` — it applies the HM generation,
-then arms devspace-nix-apply.timer (systemd user timer, checks every
-couple of minutes, no-op when the generation is healthy).
+store, dpkg installs like yadm — is ephemeral). The coder-dotfiles path
+is the bootstrap entrypoint: the repo carries a root `install.sh`, the
+script `coder dotfiles` runs instead of symlinking dotfiles into `$HOME`
+(coder.com/docs/user-guides/workspace-dotfiles). On the box:
+`coder dotfiles --yes -b main https://github.com/Jish2/df.git` — it
+runs install.sh, which yadm-clones the fleet repo if the volume is
+fresh, then hands off to `.config/nix/scripts/devspace-apply.sh`
+apply-if-missing: applies the HM generation if the rebuild killed it,
+re-asserts the zsh login shell, and arms
+devspace-nix-apply.timer (systemd user timer, checks every couple of
+minutes, no-op when the generation is healthy). The manual `yadm pull`
++ devspace-apply.sh sequence remains the fallback if `coder dotfiles`
+isn't usable (e.g. template constraints). The root `install.sh` is a
+no-op on every other host (hostname guard), so `coder dotfiles` on a
+mac is harmless.
 
 The herdr server runs as the `herdr-server` systemd user service
 (`systemd.user.services.herdr-server` in hosts/devspace): waits for the
