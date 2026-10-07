@@ -22,14 +22,21 @@ concurrency:
 
 jobs:
   claude-review:
-    # skip drafts; review once marked ready
-    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.draft == false
+    # skip drafts (review once marked ready) and fork PRs (repo secrets are
+    # not available to them); manual runs always go ahead
+    if: >-
+      github.event_name == 'workflow_dispatch' || (
+        github.event.pull_request.draft == false &&
+        github.event.pull_request.head.repo.full_name == github.repository
+      )
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: write
       issues: read
       id-token: write
+    env:
+      PR_NUMBER: ${{ github.event.pull_request.number || inputs.pr_number }}
 
     steps:
       - name: Checkout repository
@@ -49,6 +56,12 @@ jobs:
           plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
           plugins: 'code-review@claude-code-plugins'
           show_full_output: ${{ inputs.show_full_output == true }}
-          # the inline-comment MCP server only starts when it is allowed here
-          claude_args: '--allowedTools "mcp__github_inline_comment__create_inline_comment"'
-          prompt: '/code-review:code-review --comment ${{ github.repository }}/pull/${{ github.event.pull_request.number || inputs.pr_number }}'
+          # the inline-comment MCP server only starts when it is allowed here;
+          # the gh api call reads earlier inline comments
+          claude_args: '--allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh api repos/${{ github.repository }}/pulls/${{ env.PR_NUMBER }}/comments:*)"'
+          # the plugin stops once Claude has commented, so later pushes would
+          # never be reviewed; review each push without repeating settled points
+          prompt: |
+            /code-review:code-review --comment ${{ github.repository }}/pull/${{ env.PR_NUMBER }}
+
+            This workflow runs on every push, so ignore step 1's check for an earlier Claude comment and review again. First read what has already been discussed: the inline review comments from `gh api repos/${{ github.repository }}/pulls/${{ env.PR_NUMBER }}/comments --paginate` and the summaries from `gh pr view ${{ env.PR_NUMBER }} --comments`. Do not raise a point again if an earlier comment already raised it and the author replied (fixed it, explained it, or accepted the risk). Only bring it back if the new commits change that code in a way that reintroduces the problem, and say what changed. Prefer reviewing what changed since the last review over re-reviewing the whole PR.
