@@ -45,4 +45,9 @@ jobs:
           plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
           plugins: 'code-review@claude-code-plugins'
           show_full_output: ${{ inputs.show_full_output == true }}
-          prompt: '/code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number || inputs.pr_number }} --comment'
+          # CI ends the run when Claude's turn ends, so a subagent left running
+          # in the background is killed before it reports back
+          prompt: |
+            /code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number || inputs.pr_number }} --comment
+
+            This runs non-interactively: launch every subagent in the foreground (run_in_background: false) and wait for its result. Do not end your turn until the review is posted.
