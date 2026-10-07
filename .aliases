@@ -31,7 +31,9 @@ alias brewdump='brew bundle dump --file=~/Brewfile --force'
 alias brewinstall='brew bundle --file=~/Brewfile --force' # add cleanup flag to remove undeclared apps
 
 # tailscale
-alias tailscale="/Applications/Tailscale.app/Contents/MacOS/Tailscale"
+if [[ "$(uname)" == "Darwin" ]]; then
+  alias tailscale="/Applications/Tailscale.app/Contents/MacOS/Tailscale"
+fi
 
 # chatgpt helper
 alias gpt='~/github/scripts/query-chat-gpt-through-codex.sh'
