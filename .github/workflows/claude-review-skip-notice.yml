@@ -1,0 +1,32 @@
+name: Claude Review Skip Notice
+
+# Says on the PR when claude-code-review.yml skips it, so a PR never goes
+# without a word from the review. pull_request_target runs this file from
+# the base branch with a token that can comment, which fork PRs otherwise
+# lack. It never checks out or runs PR code, so that is safe.
+on:
+  pull_request_target:
+    types: [opened, reopened, converted_to_draft]
+
+jobs:
+  notice:
+    if: >-
+      github.event.pull_request.draft == true ||
+      github.event.pull_request.head.repo.full_name != github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      IS_FORK: ${{ github.event.pull_request.head.repo.full_name != github.repository }}
+      ACTIONS_URL: ${{ github.server_url }}/${{ github.repository }}/actions/workflows/claude-code-review.yml
+    steps:
+      - name: Comment that the review was skipped
+        run: |
+          if [ "$IS_FORK" = true ]; then
+            body="**Claude review: skipped** (PR from a fork; it can't use this repo's secrets). A maintainer can run it by hand from [Actions]($ACTIONS_URL) with this PR's number."
+          else
+            body="**Claude review: skipped** (draft). It will run once the PR is marked ready for review."
+          fi
+          gh pr comment "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --body "$body"
