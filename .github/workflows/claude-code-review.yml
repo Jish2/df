@@ -23,7 +23,8 @@ concurrency:
 jobs:
   claude-review:
     # skip drafts (review once marked ready) and fork PRs (repo secrets are
-    # not available to them); manual runs always go ahead
+    # not available to them); manual runs always go ahead.
+    # claude-review-skip-notice.yml comments on the PR when it is skipped
     if: >-
       github.event_name == 'workflow_dispatch' || (
         github.event.pull_request.draft == false &&
