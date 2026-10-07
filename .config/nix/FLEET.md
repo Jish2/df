@@ -86,12 +86,13 @@ Private facts (control-plane instance ID) live in
 
 Facts about the tailnet, decided (do not re-derive):
 
-- **Control plane is headscale** (`https://headscale.jgoon.com`, runs on
-  mini). MagicDNS suffix is `tailnet.jgoon.com` (custom), not
-  `*.tailnet.ts.net`. Infra is Terraform-managed in
-  `~/github/terraform` (`envs/dev/headscale.tf`): headscale 0.28 in Docker
-  on an AWS t3.micro (us-west), Caddy ACME TLS in front, EIP, SQLite on a
-  prevent_destroy EBS volume, embedded DERP (region `jgoon`).
+- **Control plane is headscale** (`https://headscale.jgoon.com`, hosted on
+  AWS — see the Terraform pointer below). MagicDNS suffix is
+  `tailnet.jgoon.com` (custom), not `*.tailnet.ts.net`. Infra is
+  Terraform-managed in `~/github/terraform` (`envs/dev/headscale.tf`):
+  headscale 0.28 in Docker on an AWS t3.micro (us-west), Caddy ACME TLS in
+  front, EIP, SQLite on a prevent_destroy EBS volume, embedded DERP
+  (region `jgoon`).
 - **`tailscale serve --https` / `tailscale cert` DO NOT WORK** on this
   tailnet: cert provisioning is a Tailscale SaaS endpoint headscale doesn't
   implement (verified 2026-10-07: `tailscale cert` → 500 "account does not
