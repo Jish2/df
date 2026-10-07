@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           PR Merged Indicator
 // @description    Marks GitHub pull-request tabs whose PR has been merged: replaces the favicon with GitHub's purple merged badge so you know the tab is safe to close.
-// @version        1.6.0
+// @version        1.7.0
 // ==/UserScript==
 
 /**
@@ -95,6 +95,11 @@
   const HTTP_STAGGER_MS = 3000; // spacing between per-tab fetches (no burst)
   const HTTP_START_DELAY_MS = 15000; // let startup settle before fetching
   const RECHECK_INTERVAL_MS = 30 * 60 * 1000; // re-check unmarked pending PRs
+  // Loaded-but-unbadged PR tabs are re-checked faster: the page DOM only
+  // shows the state at load time, so a PR that merges while its tab sits
+  // loaded and idle would otherwise stay unmarked until a reload/restart
+  // (observed: ros-infra#98 merged with its /changes tab open — no badge).
+  const LOADED_RECHECK_MS = 5 * 60 * 1000;
   const HTTP_MAX_CONTENT = 2 * 1024 * 1024; // 2 MB cap per fetch
 
   // Optional modules; HTTP checking silently degrades if unavailable.
@@ -112,7 +117,7 @@
   // Satori builds (merged PR tabs sat unbadged for hours while pending).
   for (const url of [
     "moz-src:///browser/components/sessionstore/SessionStore.sys.mjs",
-    "resource:///modules/sessionstore/SessionStore.sys.mjs",
+    "resource:///modules/sessionstore/SessionStore.sys.mjs", // smd-optional: legacy fallback, dead on current builds
   ]) {
     try {
       SessionStore = ChromeUtils.importESModule(url).SessionStore;
@@ -131,6 +136,7 @@
   const pendingChecks = new Set();
   const httpTimers = new Set(); // setTimeout ids
   let recheckTimer = null;
+  let loadedRecheckTimer = null;
 
   function isPrUrl(url) {
     return PR_RE.test(url || "");
@@ -503,17 +509,26 @@
     }
   }
 
-  // Staggered sweep over pending PR tabs, re-armed on an interval for the
-  // still-unmarked ones (PRs can be merged while the browser is closed).
-  function runPendingChecks() {
+  // Staggered sweep over unmarked PR tabs — both never-loaded pending tabs
+  // (merged while the browser was closed) and loaded-but-unbadged ones
+  // (merged while the tab sat idle; its DOM still shows load-time state).
+  // Loaded tabs are only fetched on sweeps flagged loadedRecheckDue so they
+  // run on the faster LOADED_RECHECK_MS cadence, not every pending sweep.
+  function runPendingChecks(includeLoaded = false) {
     const work = [];
     for (const tab of Array.from(pendingChecks)) {
-      const url = pendingTabUrl(tab);
+      const url =
+        pendingTabUrl(tab) ||
+        (tab.linkedBrowser && isPrUrl(currentUrl(tab.linkedBrowser))
+          ? currentUrl(tab.linkedBrowser)
+          : null);
       if (!url) {
         // Not (or no longer) a PR tab, or tab vanished.
         pendingChecks.delete(tab);
         continue;
       }
+      const loaded = !isPendingTab(tab);
+      if (loaded && !includeLoaded) continue;
       work.push({ tab, url });
     }
     work.forEach(({ tab, url }, i) => {
@@ -531,8 +546,9 @@
     if (!NetUtil || !SessionStore) return;
     const kickoff = window.setTimeout(() => {
       httpTimers.delete(kickoff);
-      runPendingChecks();
+      runPendingChecks(true); // first sweep covers both queues
       recheckTimer = window.setInterval(runPendingChecks, RECHECK_INTERVAL_MS);
+      loadedRecheckTimer = window.setInterval(() => runPendingChecks(true), LOADED_RECHECK_MS);
     }, HTTP_START_DELAY_MS);
     httpTimers.add(kickoff);
   }
@@ -572,6 +588,10 @@
         // reports merged again) and (re)inject the frame script.
         setMerged(tab, false);
         loadFrameScript(aBrowser);
+        // Fresh PR pages start unbadged; the DOM only shows load-time
+        // state, so queue it for periodic server checks until it is marked
+        // (merged reports remove it from the queue).
+        pendingChecks.add(tab);
       } catch (e) {
         // ignore transient errors during teardown
       }
@@ -635,6 +655,13 @@
         const b = tab.linkedBrowser;
         if (b && isPrUrl(currentUrl(b))) {
           loadFrameScript(b);
+          // A loaded PR tab probes the DOM at load; the DOM keeps showing
+          // the load-time state, so a PR that merges while the tab idles
+          // loaded never updates. Queue unmarked ones for periodic server
+          // checks; the frame result listener removes them once marked.
+          if (!isBadgeImageAttr(tab.getAttribute("image"))) {
+            pendingChecks.add(tab);
+          }
         }
       }
     }
@@ -715,6 +742,10 @@
       if (recheckTimer !== null) {
         window.clearInterval(recheckTimer);
         recheckTimer = null;
+      }
+      if (loadedRecheckTimer !== null) {
+        window.clearInterval(loadedRecheckTimer);
+        loadedRecheckTimer = null;
       }
       for (const id of Array.from(httpTimers)) {
         window.clearTimeout(id);

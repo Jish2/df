@@ -3,3 +3,10 @@
 
 # opencode manages this file locally (MCP config); not synced
 .config/opencode/opencode.json
+
+# T3 Code: everything under ~/.t3 is local app state (logs, secrets, sqlite,
+# caches, worktrees) — sync only the provider settings.
+.t3/*
+!.t3/userdata/
+.t3/userdata/*
+!.t3/userdata/settings.json
