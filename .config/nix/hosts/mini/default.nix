@@ -123,6 +123,7 @@
       "visual-studio-code"
       "codex"
       "claude-code" # CLI; mini+pc only — brew cask floats current
+      "t3-code@nightly" # GUI T3; Cursor Limits needs Keychain in an Aqua session
       "xcodes-app"
       # --- window management / ui utils --------------------------------------
       "rectangle"
