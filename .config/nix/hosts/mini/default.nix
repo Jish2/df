@@ -122,6 +122,7 @@
       "cursor"
       "visual-studio-code"
       "codex"
+      "claude-code" # CLI; mini+pc only — brew cask floats current
       "xcodes-app"
       # --- window management / ui utils --------------------------------------
       "rectangle"

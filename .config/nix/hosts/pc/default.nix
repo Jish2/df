@@ -19,6 +19,9 @@
     # (replacing the manual `nix profile install` that a rebuilt pc lost).
     # darwin boxes keep brew — see hosts/work brews + FLEET.md.
     inputs.herdr.packages.${pkgs.system}.herdr
+    # claude-code — CLI on mini+pc only (darwin uses the brew cask so it
+    # floats current; work/personal/devspace stay without it)
+    claude-code
   ];
 
   # herdr server as a boot-persistent user service. shape mirrors hosts/
