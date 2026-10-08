@@ -123,7 +123,11 @@
       "visual-studio-code"
       "codex"
       "claude-code" # CLI; mini+pc only — brew cask floats current
-      "t3-code@nightly" # GUI T3; Cursor Limits needs Keychain in an Aqua session
+      # GUI client of the launchd t3 serve (com.jgoon.t3code on :3773).
+      # Leave Local environment off in Nightly so it does not spawn a second
+      # server on :3774. The daemon is the source of truth; Limits/Keychain
+      # is not a reason to run a GUI-owned server.
+      "t3-code@nightly"
       "xcodes-app"
       # --- window management / ui utils --------------------------------------
       "rectangle"
