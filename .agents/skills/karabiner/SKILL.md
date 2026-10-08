@@ -15,8 +15,8 @@ rewrite the JSON — that is expected; hand edits are what get lost.
 1. Edit `generator/karabiner-config.ts`. The file is commented rule-by-rule;
    match the existing style (`map()`, `rule()`, condition factories like
    `capsPressed()`).
-2. `cd ~/.config/karabiner/generator && npm ci` — first time only on a
-   machine (node_modules is not tracked).
+2. `cd ~/.config/karabiner/generator && npm install` — first time only on a
+   machine (node_modules and package-lock.json are not tracked).
 3. `npm run build` — regenerates the JSON and writes it to the **live**
    `~/.config/karabiner/karabiner.json` ($HOME, never the nearest copy — in
    a yadm worktree those are different files). Karabiner-Elements watches
