@@ -2059,11 +2059,11 @@
                         "description": "EarPods: tap = toggle Handy dictation, hold ≥250ms = play/pause music (fires mid-press)",
                         "manipulators": [
                             {
-                                "type": "basic",
                                 "from": { "consumer_key_code": "play_or_pause" },
+                                "parameters": { "basic.to_if_held_down_threshold_milliseconds": 250 },
                                 "to_after_key_up": [{ "shell_command": "/Users/jgoon/.config/karabiner/scripts/earpods-release.sh" }],
                                 "to_if_held_down": [{ "shell_command": "/Users/jgoon/.config/karabiner/scripts/earpods-music-toggle.sh" }],
-                                "parameters": { "basic.to_if_held_down_threshold_milliseconds": 250 }
+                                "type": "basic"
                             }
                         ]
                     },
@@ -2071,33 +2071,33 @@
                         "description": "Ctrl+Space toggles EN/Chinese via macism on all keyboards EXCEPT gaming keyboard; never in Roblox",
                         "manipulators": [
                             {
-                                "type": "basic",
+                                "conditions": [
+                                    {
+                                        "bundle_identifiers": [
+                                            "^com\\.roblox\\."
+                                        ],
+                                        "type": "frontmost_application_unless"
+                                    },
+                                    {
+                                        "identifiers": [
+                                            {
+                                                "product_id": 2311,
+                                                "vendor_id": 7847
+                                            },
+                                            {
+                                                "product_id": 866,
+                                                "vendor_id": 10730
+                                            }
+                                        ],
+                                        "type": "device_unless"
+                                    }
+                                ],
                                 "from": {
                                     "key_code": "spacebar",
                                     "modifiers": { "mandatory": ["control"] }
                                 },
-                                "conditions": [
-                                    {
-                                        "type": "frontmost_application_unless",
-                                        "bundle_identifiers": [
-                                            "^com\\.roblox\\."
-                                        ]
-                                    },
-                                    {
-                                        "type": "device_unless",
-                                        "identifiers": [
-                                            {
-                                                "vendor_id": 7847,
-                                                "product_id": 2311
-                                            },
-                                            {
-                                                "vendor_id": 10730,
-                                                "product_id": 866
-                                            }
-                                        ]
-                                    }
-                                ],
-                                "to": [{ "shell_command": "$HOME/.config/karabiner/scripts/toggle-input-source.sh" }]
+                                "to": [{ "shell_command": "$HOME/.config/karabiner/scripts/toggle-input-source.sh" }],
+                                "type": "basic"
                             }
                         ]
                     }

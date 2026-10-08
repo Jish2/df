@@ -2,7 +2,7 @@
   "plugins": ["./prettier-plugin-karabiner.mjs"],
   "overrides": [
     {
-      "files": ["*.json", "assets/**/*.json"],
+      "files": ["karabiner.json", "assets/**/*.json"],
       "options": { "parser": "karabiner-json" }
     }
   ]
