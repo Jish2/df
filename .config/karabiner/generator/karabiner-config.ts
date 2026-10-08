@@ -41,6 +41,8 @@ import {
 const adv360Ble = { vendor_id: 7504, product_id: 24926 }
 const adv360Usb = { vendor_id: 10730, product_id: 866 }
 const gamingKeyboard = { vendor_id: 7847, product_id: 2311 }
+// USB-C EarPods inline remote (Karabiner Event Viewer: is_consumer).
+const appleEarpods = { vendor_id: 1452, product_id: 4363 }
 
 // Condition factories — the live config repeats these on every manipulator.
 const zenApps = () => ifApp(['app.zen-browser.zen', /^com\.jgoon\.satori$/])
@@ -318,18 +320,40 @@ const homeRowModsRule = disable(
 // ---------------------------------------------------------------------------
 // Rule 9 — EarPods center button
 // ---------------------------------------------------------------------------
+// Device-scoped so MacBook F8 does not fire Handy. USB enumerate ghosts
+// are ignored by press duration (<30ms), not a Karabiner device-list on
+// every tap. Handy PTT is F18: tap starts on keydown, hold ≥250ms cancels
+// that start and toggles music. Hardware Fn remaps to F18 for the hold.
 
 const earpodsRule = rule(
   'EarPods: tap = toggle Handy dictation, hold ≥250ms = play/pause music (fires mid-press)',
 ).manipulators(
   mapConsumerKey('play_or_pause')
+    .to({
+      shell_command: '/Users/jgoon/.config/karabiner/scripts/earpods-press.sh',
+    })
     .toAfterKeyUp({
       shell_command: '/Users/jgoon/.config/karabiner/scripts/earpods-release.sh',
     })
     .toIfHeldDown({
+      halt: true,
       shell_command: '/Users/jgoon/.config/karabiner/scripts/earpods-music-toggle.sh',
     })
-    .parameters({ 'basic.to_if_held_down_threshold_milliseconds': 250 }),
+    .parameters({ 'basic.to_if_held_down_threshold_milliseconds': 250 })
+    .condition(ifDevice(appleEarpods)),
+)
+
+// ---------------------------------------------------------------------------
+// Rule 10 — Fn hold = F18 hold (Handy PTT)
+// ---------------------------------------------------------------------------
+// macOS drops CGEvent / virtual-HID Fn, so Handy is bound to F18 instead.
+// A basic remap holds F18 for as long as Fn is held — true push-to-talk.
+// notAdv360: same Mac-keyboard scope as the caps layer.
+
+const fnPassthroughRule = rule(
+  'Fn → F18 hold (Handy push-to-talk; EarPods scripts hold the same F18)',
+).manipulators(
+  map('fn', 'optionalAny').to('f18').condition(notAdv360()),
 )
 
 // ---------------------------------------------------------------------------
@@ -364,6 +388,7 @@ const rules = [
   vimToggleRule,
   homeRowModsRule,
   earpodsRule,
+  fnPassthroughRule,
   inputSourceRule,
 ]
 

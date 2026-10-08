@@ -1,7 +1,7 @@
 {
     "global": {
         "show_in_menu_bar": false,
-        "enable_cgeventtap_fallback": true
+        "enable_cgeventtap_fallback": false
     },
     "profiles": [
         {
@@ -2059,10 +2059,51 @@
                         "description": "EarPods: tap = toggle Handy dictation, hold ≥250ms = play/pause music (fires mid-press)",
                         "manipulators": [
                             {
+                                "conditions": [
+                                    {
+                                        "identifiers": [
+                                            {
+                                                "product_id": 4363,
+                                                "vendor_id": 1452
+                                            }
+                                        ],
+                                        "type": "device_if"
+                                    }
+                                ],
                                 "from": { "consumer_key_code": "play_or_pause" },
                                 "parameters": { "basic.to_if_held_down_threshold_milliseconds": 250 },
+                                "to": [{ "shell_command": "/Users/jgoon/.config/karabiner/scripts/earpods-press.sh" }],
                                 "to_after_key_up": [{ "shell_command": "/Users/jgoon/.config/karabiner/scripts/earpods-release.sh" }],
-                                "to_if_held_down": [{ "shell_command": "/Users/jgoon/.config/karabiner/scripts/earpods-music-toggle.sh" }],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "shell_command": "/Users/jgoon/.config/karabiner/scripts/earpods-music-toggle.sh"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "Fn → F18 hold (Handy push-to-talk; EarPods scripts hold the same F18)",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "identifiers": [
+                                            {
+                                                "product_id": 24926,
+                                                "vendor_id": 7504
+                                            }
+                                        ],
+                                        "type": "device_unless"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "fn",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [{ "key_code": "f18" }],
                                 "type": "basic"
                             }
                         ]
