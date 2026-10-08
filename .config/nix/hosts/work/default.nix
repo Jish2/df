@@ -12,6 +12,11 @@
 
   fleet.herdr.enable = true;
 
+  # Docked at the desk, keep the box awake (lid closed included) while on AC
+  # power so the phone / tailnet / T3 environment stay reachable. No-op on
+  # battery — the laptop still sleeps normally in a bag.
+  fleet.keepAwake.enable = true;
+
   networking.hostName = "HQ-KP2HJMHQ7R";
   networking.localHostName = "HQ-KP2HJMHQ7R";
   networking.computerName = "HQ-KP2HJMHQ7R";
