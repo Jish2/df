@@ -43,3 +43,9 @@ to deal with them.
 
 Apply the deletions. Report files touched, deletion count, and any
 keeps with the keep-rule they matched.
+
+Report in chat only — never post run summaries, cleanup counts, or
+process notes as PR comments or review replies. The PR discussion is
+for reviewers; the diff speaks for itself. Only comment on the PR when
+replying to a review comment that needs an answer for the reviewer
+(and even then, answer the substance, not a summary of what you did).
