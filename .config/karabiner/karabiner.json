@@ -2056,7 +2056,7 @@
                         ]
                     },
                     {
-                        "description": "EarPods: tap = toggle Handy dictation, hold ≥250ms = play/pause music (fires mid-press)",
+                        "description": "EarPods: tap = toggle Handy dictation, hold ≥400ms = play/pause music (fires mid-press)",
                         "manipulators": [
                             {
                                 "conditions": [
@@ -2071,9 +2071,12 @@
                                     }
                                 ],
                                 "from": { "consumer_key_code": "play_or_pause" },
-                                "parameters": { "basic.to_if_held_down_threshold_milliseconds": 250 },
+                                "parameters": {
+                                    "basic.to_if_alone_timeout_milliseconds": 400,
+                                    "basic.to_if_held_down_threshold_milliseconds": 400
+                                },
                                 "to": [{ "shell_command": "/Users/jgoon/.config/karabiner/scripts/earpods-press.sh" }],
-                                "to_after_key_up": [{ "shell_command": "/Users/jgoon/.config/karabiner/scripts/earpods-release.sh" }],
+                                "to_if_alone": [{ "shell_command": "/Users/jgoon/.config/karabiner/scripts/earpods-release.sh" }],
                                 "to_if_held_down": [
                                     {
                                         "halt": true,

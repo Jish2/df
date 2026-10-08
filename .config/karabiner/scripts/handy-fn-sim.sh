@@ -9,11 +9,14 @@ KEYCODE=79
 
 post_f18() {
     _down=$1
+    # Post at the session tap (1), not HID (0). HID posts from a
+    # Karabiner shell_command can deadlock against the grabber so Handy
+    # never sees F18 and press.sh never finishes.
     /usr/bin/osascript -l JavaScript -e "
 ObjC.import('CoreGraphics');
 var src = \$.CGEventSourceCreate(1);
 var ev = \$.CGEventCreateKeyboardEvent(src, $KEYCODE, $_down);
-\$.CGEventPost(0, ev);
+\$.CGEventPost(1, ev);
 "
 }
 
