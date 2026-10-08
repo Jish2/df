@@ -79,6 +79,10 @@ in
         EnvironmentVariables = {
           HOME = "/Users/${user}";
           PATH = "/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin";
+          # launchd strips the user login environment, so panes under the
+          # server would otherwise run in the C locale and zsh mangles
+          # non-ASCII prompt glyphs (e.g. pure's ahead/behind arrows).
+          LANG = "en_US.UTF-8";
         };
         RunAtLoad = true;
         KeepAlive.SuccessfulExit = false;
