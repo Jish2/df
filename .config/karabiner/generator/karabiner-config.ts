@@ -323,10 +323,14 @@ const homeRowModsRule = disable(
 // Device-scoped so MacBook F8 does not fire Handy. USB enumerate ghosts
 // are ignored by press duration (<30ms). Handy PTT is F18, toggled on
 // key-up of a tap (to_if_alone) so we never race the hold threshold.
-// Hold ≥400ms play/pauses music. Hardware Fn remaps to F18 for the hold.
+// Hold ≥700ms play/pauses music. Hardware Fn remaps to F18 for the hold.
+// 400ms was too short: a casual inline-button click to end dictation was
+// classified as a hold, so Handy stayed latched until a very fast retry.
+
+const EARPODS_HOLD_MS = 700
 
 const earpodsRule = rule(
-  'EarPods: tap = toggle Handy dictation, hold ≥400ms = play/pause music (fires mid-press)',
+  `EarPods: tap = toggle Handy dictation, hold ≥${EARPODS_HOLD_MS}ms = play/pause music (fires mid-press)`,
 ).manipulators(
   mapConsumerKey('play_or_pause')
     .to({
@@ -340,8 +344,8 @@ const earpodsRule = rule(
       shell_command: '/Users/jgoon/.config/karabiner/scripts/earpods-music-toggle.sh',
     })
     .parameters({
-      'basic.to_if_alone_timeout_milliseconds': 400,
-      'basic.to_if_held_down_threshold_milliseconds': 400,
+      'basic.to_if_alone_timeout_milliseconds': EARPODS_HOLD_MS,
+      'basic.to_if_held_down_threshold_milliseconds': EARPODS_HOLD_MS,
     })
     .condition(ifDevice(appleEarpods)),
 )
