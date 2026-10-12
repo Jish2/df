@@ -5,7 +5,11 @@ export LANG=en_US.UTF-8
 
 export VOLTA_HOME="$HOME/.volta"
 export PATH="$VOLTA_HOME/bin:$PATH"
-. "$HOME/.cargo/env"
+# guarded: .zshenv runs for every zsh on every box (incl. new ssh sessions),
+# but rustup / Vite+ only exist where they were installed. one-liners keep the
+# installers' exact `. "..."` line intact so they don't re-append it
+# (`if` not `&&`: a missing last file must not leave $? = 1 for the shell).
+if [ -f "$HOME/.cargo/env" ]; then . "$HOME/.cargo/env"; fi
 
 # Vite+ bin (https://viteplus.dev)
-. "$HOME/.config/vite-plus/env"
+if [ -f "$HOME/.config/vite-plus/env" ]; then . "$HOME/.config/vite-plus/env"; fi
