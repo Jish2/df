@@ -55,6 +55,7 @@
             ./modules/darwin/tailscaled.nix
             ./modules/darwin/fleet-herdr.nix
             ./modules/darwin/fleet-keepawake.nix
+            ./modules/darwin/cloudflared-ssh.nix
             ./hosts/${host}
             home-manager.darwinModules.home-manager
             nix-homebrew.darwinModules.nix-homebrew

@@ -23,9 +23,14 @@ the invariants mechanically, sudo-free, over plain ssh.
    services start/stop/restart tailscale` — a second daemon fights the nix
    one for the socket and state. **work is the exception**: keep
    `fleet.tailscaled.enable = lib.mkForce false` there — Falcon SIGKILLs
-   the nix daemon; work uses the App Store variant. Tailnet joins are
-   wizard-only (`~/.agents/skills/tailnet-join`); no auth keys anywhere
-   in the repo.
+   the nix daemon; work uses the App Store variant until it leaves the
+   tailnet, then reaches mini only through ssh.jgoon.com (FLEET.md
+   "Off-tailnet access"). That path is mini's nix LaunchDaemon
+   `org.jgoon.cloudflared-ssh` (`fleet.cloudflaredSsh.enable` in
+   hosts/mini) — it is an ssh lifeline like tailscaled: never disable it,
+   never move it to brew, never delete `~/.cloudflared/mini-ssh.token`.
+   Tailnet joins are wizard-only (`~/.agents/skills/tailnet-join`); no auth
+   keys or tunnel tokens anywhere in the repo.
 3. **sshd / Remote Login are unmanaged and stay on.** Never edit
    `/etc/ssh/sshd_config`, never disable Remote Login on any fleet box.
 4. **A broken `/etc/zsh*` file kills every NEW ssh session while old ones
@@ -87,3 +92,4 @@ drive and the human can attach to.
 
 `make plan` first; if tailscale/cloudflared appear under "would be REMOVED",
 stop and declare them in `hosts/mini/default.nix` before doing anything else.
+On work, brew `cloudflared` is the ssh ProxyCommand to mini — same rule.
