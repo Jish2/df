@@ -367,8 +367,11 @@ Rules:
   until someone logs in (`mini-screen`). That's no worse than the old
   hand-rolled `com.jgoon.t3code` agent. T3 has no supported daemon mode,
   so `fleet.herdr.daemon`'s approach doesn't carry over.
-- The server listens on all interfaces (Connect's tunnel needs loopback),
-  so tailnet peers can still reach `http://100.64.0.3:3773` directly.
+- **Remote clients connect through T3 Connect only, tailnet peers
+  included.** The service binds `127.0.0.1:3773` (T3's default with no
+  `--host`), so `http://100.64.0.3:3773` no longer answers. Add a box by
+  signing in to T3 Connect, not by IP. Don't add `T3CODE_HOST` to the
+  service plist/unit: T3 rewrites that file on every update.
 
 Replaced on mini: the hand-rolled `com.jgoon.t3code` (`t3 serve` pinned to
 one version, tailnet IP only) and `com.jgoon.cloudflared.t3code` (the
