@@ -158,9 +158,16 @@ Using it from work:
 ssh mini                    # first time: browser opens for Cloudflare login + Touch ID, then key auth
 ssh pc                      # same login, then jumps through mini
 cloudflared access login https://ssh.jgoon.com   # optional: log in up front (e.g. before ssh -N)
-ssh mini-vnc &              # forwards mini's :5900 to localhost:5901, no shell
+mini-screen                 # Screen Sharing into mini: forward + open + teardown on Cmd-Q
+ssh mini-vnc &              # (manual version) forwards mini's :5900 to localhost:5901, no shell
 open vnc://localhost:5901   # Screen Sharing.app, mini's macOS login
 ```
+
+`mini-screen` lives in `.config/zsh/functions/mini-screen.zsh` (yadm). It
+forwards over plain `ssh mini`, so it works from any mac, through the
+tunnel on work and over the tailnet elsewhere. It closes the forward when
+Screen Sharing quits (Cmd-Q; closing the window leaves the app running) or
+on Ctrl-C.
 
 Security notes: Access is the outer gate — nothing reaches mini's sshd
 without a Cloudflare account-member login plus WebAuthn. mini's sshd itself
