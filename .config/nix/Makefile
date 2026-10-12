@@ -108,9 +108,11 @@ here-zap:
 # what's load-bearing per machine:
 #   mini — the always-on remote box: the nix launchd daemon
 #          (org.jgoon.tailscaled, from fleet.tailscaled.enable in
-#          hosts/mini) + sshd + shell init files.
-#   work — App Store tailscale (Falcon SIGKILLs the nix daemon), so only
-#          the shell/sshd checks apply.
+#          hosts/mini) + sshd + shell init files, plus the
+#          cloudflared-ssh connector daemon (ssh.jgoon.com) — the only
+#          path into the fleet for boxes off the tailnet.
+#   work — leaving the tailnet (Falcon); reaches mini through
+#          ssh.jgoon.com, so brew cloudflared is load-bearing there.
 doctor:
 	@echo "== hostname =="
 	@echo "attr: $(INFERRED)   LocalHostName: $(MACHINE)"
@@ -141,6 +143,32 @@ doctor:
 	  fi; \
 	else \
 	  echo "n/a on this host: the nix tailscaled daemon runs on mini only (work uses the App Store variant — Falcon kills the nix one)"; \
+	fi
+	@echo "== cloudflared ssh tunnel (ssh.jgoon.com — the off-tailnet path to mini) =="
+	@if [ "$(INFERRED)" = mini ]; then \
+	  if [ -f /Library/LaunchDaemons/org.jgoon.cloudflared-ssh.plist ]; then \
+	    echo "ok: nix-managed connector daemon plist present (org.jgoon.cloudflared-ssh)"; \
+	  else \
+	    echo "!! /Library/LaunchDaemons/org.jgoon.cloudflared-ssh.plist missing — run make here"; \
+	  fi; \
+	  if [ -f ~/.cloudflared/mini-ssh.token ]; then \
+	    echo "ok: connector token file present"; \
+	  else \
+	    echo "!! ~/.cloudflared/mini-ssh.token missing — install it from terraform output (modules/darwin/cloudflared-ssh.nix)"; \
+	  fi; \
+	  if pgrep -f 'token-file .*mini-ssh.token' >/dev/null 2>&1; then \
+	    echo "ok: connector is running"; \
+	  else \
+	    echo "!! connector not running — work can't reach mini (log: ~/Library/Logs/cloudflared-ssh.err.log)"; \
+	  fi; \
+	elif [ "$(INFERRED)" = work ]; then \
+	  if [ -x /opt/homebrew/bin/cloudflared ]; then \
+	    echo "ok: cloudflared present (ProxyCommand for ssh mini)"; \
+	  else \
+	    echo "!! /opt/homebrew/bin/cloudflared missing — ssh mini / pc can't connect"; \
+	  fi; \
+	else \
+	  echo "n/a on this host: tailnet peers reach mini directly"; \
 	fi
 	@echo "== sshd (Remote Login) =="
 	@if nc -z 127.0.0.1 22 2>/dev/null; then \

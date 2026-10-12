@@ -8,6 +8,10 @@
 {
   fleet.tailscaled.enable = true;
 
+  # sshd at ssh.jgoon.com via Cloudflare Tunnel + Access, for boxes off the
+  # tailnet (work). connector token is a hand-installed file — see the module.
+  fleet.cloudflaredSsh.enable = true;
+
   # headless always-on box, auto-login off: run herdr from boot without a
   # login session (LaunchDaemon as the user), not a LaunchAgent.
   fleet.herdr = {
@@ -166,6 +170,7 @@
   # custom services NOT nix-managed yet (~/Library/LaunchAgents); porting any
   # of these into nix-darwin launchd.agents is a deliberate per-service job:
   #   com.jgoon.cloudflared.{t3code,sure,agent-device,webhooks*}  tunnels
+  #     (the ssh tunnel is the exception: nix daemon org.jgoon.cloudflared-ssh)
   #   com.jgoon.{hub-mac-control,hub-mac-control-tunnel,t3code}   hobby services
   #   com.jgoon.agent-device.{proxy,proxy-watchdog}
   #   com.jgoon.openpoker-test-sim

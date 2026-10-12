@@ -5,6 +5,13 @@
 # trailing Include is swallowed by an unterminated Match/Host block, so
 # line 1 is load-bearing (vault: "tailnet ssh aliases"). Keys stay
 # imperative — per-machine secrets.
+#
+# Boxes in offTailnet have no tailscale client (work: Falcon). They reach
+# mini through its Cloudflare tunnel (ssh.jgoon.com, behind Cloudflare
+# Access — modules/darwin/cloudflared-ssh.nix) and every other peer by
+# jumping through mini, which is still on the tailnet. They also get
+# mini-vnc: `ssh mini-vnc` then `open vnc://localhost:5901` for Screen
+# Sharing over the same tunnel. FLEET.md "Off-tailnet access".
 {
   config,
   lib,
@@ -18,22 +25,55 @@ let
   genFile = "${sshDir}/hosts-generated.conf";
   includeLine = "Include ${genFile}";
 
+  offTailnet = [ "work" ];
+  selfOffTailnet = builtins.elem selfAttr offTailnet;
+  # first connect (or an expired Access session) opens the browser for the
+  # Cloudflare login + Touch ID; after that the cached token is reused.
+  tunnelRoute = ''
+    HostName ssh.jgoon.com
+      ProxyCommand /opt/homebrew/bin/cloudflared access ssh --hostname %h'';
+
+  route =
+    name: ip:
+    if !selfOffTailnet then
+      "HostName ${ip}"
+    else if name == "mini" then
+      tunnelRoute
+    else
+      "HostName ${ip}\n  ProxyJump mini";
+
   block =
     name: ip:
     ''
       Host ${name}
-        HostName ${ip}
+        ${route name ip}
         User jgoon
         IdentityFile ~/.ssh/id_ed25519
         IdentitiesOnly yes
         AddKeysToAgent yes
     '';
 
+  # mini's Screen Sharing (:5900) forwarded to localhost:5901 — 5900 may be
+  # taken by this mac's own Screen Sharing
+  vncBlock = ''
+    Host mini-vnc
+      ${tunnelRoute}
+      User jgoon
+      IdentityFile ~/.ssh/id_ed25519
+      IdentitiesOnly yes
+      AddKeysToAgent yes
+      LocalForward 5901 localhost:5900
+      SessionType none
+      ExitOnForwardFailure yes
+  '';
+
   # every peer except self, one Host block each. peers take the fleet
   # user (jgoon) — NOT the local user: devspace runs as `coder`, but every
   # peer box wants jgoon. User jgoon on work/mini/pc is a no-op (same user).
   peers = lib.filterAttrs (n: _: n != selfAttr) fleet;
-  blocks = lib.concatStringsSep "\n\n" (lib.mapAttrsToList block peers);
+  blocks = lib.concatStringsSep "\n\n" (
+    lib.mapAttrsToList block peers ++ lib.optional selfOffTailnet vncBlock
+  );
   fleetList = lib.concatStringsSep ", " (lib.attrNames fleet);
 
   genContent = ''

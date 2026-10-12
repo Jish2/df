@@ -108,6 +108,71 @@ Facts about the tailnet, decided (do not re-derive):
   needs tailnet-style reachability to devspace, the answer is Coder or
   T3 Connect, not tailscale.
 
+## Off-tailnet access (work → mini, pc)
+
+The work laptop is leaving the tailnet (decided 2026-10-12): Falcon already
+kills the nix tailscaled there, and the App Store client is being
+uninstalled. It still needs ssh (and Screen Sharing) into mini and pc, so
+mini publishes its sshd through a Cloudflare Tunnel behind Cloudflare
+Access, and everything else is reached by jumping through mini — mini stays
+on the tailnet.
+
+```
+work ──ssh──> ssh.jgoon.com ──(Access: Cloudflare login + Touch ID)──> tunnel ──> mini:22
+                                                                         └── ProxyJump ──> pc / personal (tailnet IPs)
+```
+
+Where each piece lives:
+
+| piece | where | declared? |
+|---|---|---|
+| tunnel `mini-ssh`, ingress `ssh.jgoon.com → ssh://localhost:22`, DNS CNAME, Access app (Hub's Cloudflare IdP + WebAuthn MFA, 24h session), connector token output | `~/github/terraform` → `envs/cloudflare/mini-ssh-tunnel.tf` (CNAME in `jgoon-com.tf`) | yes |
+| connector on mini: LaunchDaemon `org.jgoon.cloudflared-ssh`, as the user, nix `cloudflared` | `modules/darwin/cloudflared-ssh.nix`, `fleet.cloudflaredSsh.enable` in hosts/mini | yes |
+| work's ssh aliases: `mini` via `cloudflared access ssh` ProxyCommand, `pc`/`personal` via `ProxyJump mini`, `mini-vnc` | `modules/home/ssh-aliases.nix` (`offTailnet = [ "work" ]`) | yes |
+| `cloudflared` client on work | brew formula in hosts/work | yes |
+| `make doctor` checks (daemon, token file, process on mini; cloudflared on work) | `Makefile` | yes |
+
+Why a LaunchDaemon with a token *file*: mini is headless with auto-login
+off, so a LaunchAgent never starts after a reboot (same reason as
+`fleet.herdr.daemon`), and the login Keychain the other tunnels read stays
+locked until someone logs in. The nix package (not brew) because this is an
+ssh lifeline — it must not depend on brew state.
+
+Not declarable (one-time, by hand):
+
+- **connector token** → `~/.cloudflared/mini-ssh.token` (0600) on mini, from
+  `terraform output -raw mini_ssh_tunnel_token`. Secrets stay out of the
+  public repo.
+- **Access login on work** — interactive by design (browser + Touch ID),
+  cached in `~/.cloudflared/` for the session duration.
+- **`authorized_keys`** — work's `id_ed25519.pub` on mini and pc (keys stay
+  imperative, see ssh-aliases.nix).
+- **Screen Sharing on mini** — no nix-darwin module; it is on.
+- **leaving the tailnet** — uninstall the App Store Tailscale on work,
+  delete the node in headscale, then drop `work` from `fleet.nix` (that last
+  part is declarative; it removes `ssh work` from the other boxes).
+
+Using it from work:
+
+```sh
+ssh mini                    # first time: browser opens for Cloudflare login + Touch ID, then key auth
+ssh pc                      # same login, then jumps through mini
+cloudflared access login https://ssh.jgoon.com   # optional: log in up front (e.g. before ssh -N)
+ssh mini-vnc &              # forwards mini's :5900 to localhost:5901, no shell
+open vnc://localhost:5901   # Screen Sharing.app, mini's macOS login
+```
+
+Security notes: Access is the outer gate — nothing reaches mini's sshd
+without a Cloudflare account-member login plus WebAuthn. mini's sshd itself
+is unmanaged (hard rule 3) and still offers password auth; key auth is what
+the aliases use.
+
+Rollout order (each step keeps a working path): terraform apply → token
+file on mini → `make here` on mini (fleet-ssh-safety procedure) →
+`make doctor` on mini → `yadm pull && make here` on work → test `ssh mini`,
+`ssh pc` from work while Tailscale is still installed → only then uninstall
+Tailscale on work.
+
 ## Apply
 
 ### Hard rules (SSH-critical — breaking one on mini = physical visit)
@@ -117,8 +182,11 @@ Authoritative copy: `.agents/skills/fleet-ssh-safety/SKILL.md` (agent-facing)
 
 1. Switch with `make here` only. No per-host switch targets exist.
 2. mini's tailscaled is the nix daemon (`org.jgoon.tailscaled`); never brew
-   services tailscale. work stays App Store variant (Falcon kills the nix
-   daemon). Joins wizard-only; no auth keys in the repo.
+   services tailscale. work never gets the nix daemon (Falcon kills it): App
+   Store variant until it leaves the tailnet, then ssh.jgoon.com (see
+   "Off-tailnet access") — mini's `org.jgoon.cloudflared-ssh` daemon is that
+   path, treat it like tailscaled. Joins wizard-only; no auth keys in the
+   repo.
 3. sshd / Remote Login unmanaged and on — never touch them.
 4. After any switch on a remote box, verify a fresh ssh session before
    closing the lifeline (broken `/etc/zsh*` kills new sessions only).
