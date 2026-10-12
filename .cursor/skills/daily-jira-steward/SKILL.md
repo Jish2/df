@@ -85,6 +85,12 @@ discovery. Two working CLIs hit the same MCP gateway:
   interface; reaches `slack_search_public_and_private`, but the gateway ignores
   `after:`/`before:` tokens inside the query string — scope windows client-side.
 
+Slack user ID for outbound searches: **`U0991TFN6FL`** (verified 2026-10-08 via
+`search-users` / `read-user-profile`; the old ID `U03KVD79M` is dead and returns
+`user_not_found` — do not use it). If a `from:<@...>` search unexpectedly
+returns zero results, re-verify the ID by email with `search-users` before
+assuming there is no signal.
+
 In the access gate, run `uv run <cli> tools --env prod` before any real call.
 Note: there is no `refresh-mcp-gateway-token.sh` script on this Mac host — the
 Slack **user token** (used by `slack_search_public_and_private` and the
