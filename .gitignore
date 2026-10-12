@@ -5,8 +5,7 @@
 .config/opencode/opencode.json
 
 # T3 Code: everything under ~/.t3 is local app state (logs, secrets, sqlite,
-# caches, worktrees) — sync only the provider settings.
-.t3/*
-!.t3/userdata/
-.t3/userdata/*
-!.t3/userdata/settings.json
+# caches, worktrees). settings.json included: T3 keeps one per server (machine
+# config, project IDs local to that box) and syncs the user-preference keys
+# between connected environments itself — a fleet-wide copy just churns.
+.t3/
