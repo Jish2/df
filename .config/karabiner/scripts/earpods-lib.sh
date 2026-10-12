@@ -16,6 +16,7 @@ STARTED_ON_DOWN="$STATE_DIR/handy-earpods-started-on-down"
 MAYBE_RECONNECT="$STATE_DIR/handy-earpods-maybe-reconnect"
 LAST_EVENT="$STATE_DIR/handy-earpods-last-event"
 MUSIC_LAST="$STATE_DIR/handy-earpods-music-last"
+BUTTON_FILE="$STATE_DIR/handy-earpods-button"
 FN_SIM_STATE="$STATE_DIR/handy-fn-sim-held"
 FN_SIM="${EARPODS_FN_SIM:-/Users/jgoon/.config/karabiner/scripts/handy-fn-sim.sh}"
 MIN_TAP_MS=30

@@ -318,37 +318,48 @@ const homeRowModsRule = disable(
 )
 
 // ---------------------------------------------------------------------------
-// Rule 9 — EarPods center button
+// Rule 9 — EarPods inline remote
 // ---------------------------------------------------------------------------
-// Device-scoped so MacBook F8 does not fire Handy. USB enumerate ghosts
-// are ignored by press duration (<30ms). Handy PTT is F18, toggled on
-// key-up of a tap (to_if_alone) so we never race the hold threshold.
-// Hold ≥700ms play/pauses music. Hardware Fn remaps to F18 for the hold.
-// 400ms was too short: a casual inline-button click to end dictation was
-// classified as a hold, so Handy stayed latched until a very fast retry.
+// The USB-C remote is one pill with three stacked consumer keys: volume+
+// (top), play/pause (center), volume- (bottom). Device-scoped so MacBook
+// F8 / keyboard volume keys do not fire Handy. USB enumerate ghosts are
+// ignored by press duration (<30ms). Handy PTT is F18, toggled on key-up
+// of a tap (to_if_alone) so we never race the hold threshold.
+// Tap anywhere on the pill toggles dictation — missing the center by a
+// few millimeters used to be a silent no-op. Hold center ≥700ms
+// play/pauses music. Hold +/− still changes volume.
 
 const EARPODS_HOLD_MS = 700
+const earpodsScript = (name: string, arg = '') => ({
+  shell_command: `/Users/jgoon/.config/karabiner/scripts/${name}${arg ? ` ${arg}` : ''}`,
+})
+const earpodsHoldParams = {
+  'basic.to_if_alone_timeout_milliseconds': EARPODS_HOLD_MS,
+  'basic.to_if_held_down_threshold_milliseconds': EARPODS_HOLD_MS,
+}
 
 const earpodsRule = rule(
-  `EarPods: tap = toggle Handy dictation, hold ≥${EARPODS_HOLD_MS}ms = play/pause music (fires mid-press)`,
-).manipulators(
+  `EarPods: tap any remote button = Handy dictation; hold center ≥${EARPODS_HOLD_MS}ms = music; hold +/− = volume`,
+).manipulators([
   mapConsumerKey('play_or_pause')
-    .to({
-      shell_command: '/Users/jgoon/.config/karabiner/scripts/earpods-press.sh',
-    })
-    .toIfAlone({
-      shell_command: '/Users/jgoon/.config/karabiner/scripts/earpods-release.sh',
-    })
-    .toIfHeldDown({
-      halt: true,
-      shell_command: '/Users/jgoon/.config/karabiner/scripts/earpods-music-toggle.sh',
-    })
-    .parameters({
-      'basic.to_if_alone_timeout_milliseconds': EARPODS_HOLD_MS,
-      'basic.to_if_held_down_threshold_milliseconds': EARPODS_HOLD_MS,
-    })
+    .to(earpodsScript('earpods-press.sh', 'center'))
+    .toIfAlone(earpodsScript('earpods-release.sh'))
+    .toIfHeldDown({ halt: true, ...earpodsScript('earpods-music-toggle.sh') })
+    .parameters(earpodsHoldParams)
     .condition(ifDevice(appleEarpods)),
-)
+  mapConsumerKey('volume_increment')
+    .to(earpodsScript('earpods-press.sh', 'vol+'))
+    .toIfAlone(earpodsScript('earpods-release.sh'))
+    .toIfHeldDown({ halt: true, repeat: true, consumer_key_code: 'volume_increment' })
+    .parameters(earpodsHoldParams)
+    .condition(ifDevice(appleEarpods)),
+  mapConsumerKey('volume_decrement')
+    .to(earpodsScript('earpods-press.sh', 'vol-'))
+    .toIfAlone(earpodsScript('earpods-release.sh'))
+    .toIfHeldDown({ halt: true, repeat: true, consumer_key_code: 'volume_decrement' })
+    .parameters(earpodsHoldParams)
+    .condition(ifDevice(appleEarpods)),
+])
 
 // ---------------------------------------------------------------------------
 // Rule 10 — Fn hold = F18 hold (Handy PTT)

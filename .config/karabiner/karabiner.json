@@ -2056,7 +2056,7 @@
                         ]
                     },
                     {
-                        "description": "EarPods: tap = toggle Handy dictation, hold ≥700ms = play/pause music (fires mid-press)",
+                        "description": "EarPods: tap any remote button = Handy dictation; hold center ≥700ms = music; hold +/− = volume",
                         "manipulators": [
                             {
                                 "conditions": [
@@ -2075,12 +2075,68 @@
                                     "basic.to_if_alone_timeout_milliseconds": 700,
                                     "basic.to_if_held_down_threshold_milliseconds": 700
                                 },
-                                "to": [{ "shell_command": "/Users/jgoon/.config/karabiner/scripts/earpods-press.sh" }],
+                                "to": [{ "shell_command": "/Users/jgoon/.config/karabiner/scripts/earpods-press.sh center" }],
                                 "to_if_alone": [{ "shell_command": "/Users/jgoon/.config/karabiner/scripts/earpods-release.sh" }],
                                 "to_if_held_down": [
                                     {
                                         "halt": true,
                                         "shell_command": "/Users/jgoon/.config/karabiner/scripts/earpods-music-toggle.sh"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "identifiers": [
+                                            {
+                                                "product_id": 4363,
+                                                "vendor_id": 1452
+                                            }
+                                        ],
+                                        "type": "device_if"
+                                    }
+                                ],
+                                "from": { "consumer_key_code": "volume_increment" },
+                                "parameters": {
+                                    "basic.to_if_alone_timeout_milliseconds": 700,
+                                    "basic.to_if_held_down_threshold_milliseconds": 700
+                                },
+                                "to": [{ "shell_command": "/Users/jgoon/.config/karabiner/scripts/earpods-press.sh vol+" }],
+                                "to_if_alone": [{ "shell_command": "/Users/jgoon/.config/karabiner/scripts/earpods-release.sh" }],
+                                "to_if_held_down": [
+                                    {
+                                        "consumer_key_code": "volume_increment",
+                                        "halt": true,
+                                        "repeat": true
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "identifiers": [
+                                            {
+                                                "product_id": 4363,
+                                                "vendor_id": 1452
+                                            }
+                                        ],
+                                        "type": "device_if"
+                                    }
+                                ],
+                                "from": { "consumer_key_code": "volume_decrement" },
+                                "parameters": {
+                                    "basic.to_if_alone_timeout_milliseconds": 700,
+                                    "basic.to_if_held_down_threshold_milliseconds": 700
+                                },
+                                "to": [{ "shell_command": "/Users/jgoon/.config/karabiner/scripts/earpods-press.sh vol-" }],
+                                "to_if_alone": [{ "shell_command": "/Users/jgoon/.config/karabiner/scripts/earpods-release.sh" }],
+                                "to_if_held_down": [
+                                    {
+                                        "consumer_key_code": "volume_decrement",
+                                        "halt": true,
+                                        "repeat": true
                                     }
                                 ],
                                 "type": "basic"

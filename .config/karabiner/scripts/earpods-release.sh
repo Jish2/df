@@ -10,23 +10,28 @@ if [ -f "$DOWN_TS" ]; then
     DOWN=$(cat "$DOWN_TS" 2>/dev/null)
     /bin/rm -f "$DOWN_TS"
 fi
+BUTTON=center
+if [ -f "$BUTTON_FILE" ]; then
+    BUTTON=$(cat "$BUTTON_FILE" 2>/dev/null)
+    /bin/rm -f "$BUTTON_FILE"
+fi
 DUR=0
 if [ -n "$DOWN" ] && [ "$DOWN" -gt 0 ]; then
     DUR=$((NOW - DOWN))
 fi
 
 if [ "$DUR" -lt "$MIN_TAP_MS" ]; then
-    log "TAP ignored (ghost/short ${DUR}ms)"
+    log "TAP ignored (ghost/short ${DUR}ms $BUTTON)"
     exit 0
 fi
 
 if f18_is_held; then
     RESULT=$(handy_f18_up)
-    log "TAP F18 up ${DUR}ms ($RESULT)"
+    log "TAP F18 up ${DUR}ms ($RESULT) $BUTTON"
     exit 0
 fi
 
 RESULT=$(handy_f18_down)
 switch_earpods_mic_bg
-log "TAP F18 down ${DUR}ms ($RESULT)"
+log "TAP F18 down ${DUR}ms ($RESULT) $BUTTON"
 exit 0

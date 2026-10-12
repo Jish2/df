@@ -6,8 +6,10 @@
 . /Users/jgoon/.config/karabiner/scripts/earpods-lib.sh
 
 NOW=$(now_ms)
+BUTTON=${1:-center}
 echo "$NOW" > "$DOWN_TS"
+echo "$BUTTON" > "$BUTTON_FILE"
 /bin/rm -f "$HOLD_FLAG" "$STARTED_ON_DOWN" "$MAYBE_RECONNECT" "$GHOST_FLAG"
 mark_event
-log "PRESS"
+log "PRESS $BUTTON"
 exit 0
