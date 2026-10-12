@@ -127,10 +127,11 @@
       "visual-studio-code"
       "codex"
       "claude-code" # CLI; mini+pc only — brew cask floats current
-      # GUI client of the launchd t3 serve (com.jgoon.t3code on :3773).
-      # Leave Local environment off in Nightly so it does not spawn a second
-      # server on :3774. The daemon is the source of truth; Limits/Keychain
-      # is not a reason to run a GUI-owned server.
+      # GUI client of T3's own background service (com.t3tools.t3code.service
+      # on :3773 — FLEET.md "T3 Code server"). Leave Local environment off in
+      # Nightly so it does not spawn a second server on :3774. The service is
+      # the source of truth; Limits/Keychain is not a reason to run a
+      # GUI-owned server.
       "t3-code@nightly"
       "xcodes-app"
       # --- window management / ui utils --------------------------------------
@@ -169,14 +170,18 @@
   #
   # custom services NOT nix-managed yet (~/Library/LaunchAgents); porting any
   # of these into nix-darwin launchd.agents is a deliberate per-service job:
-  #   com.jgoon.cloudflared.{t3code,sure,agent-device,webhooks*}  tunnels
+  #   com.jgoon.cloudflared.{sure,agent-device,webhooks*}  tunnels
   #     (the ssh tunnel is the exception: nix daemon org.jgoon.cloudflared-ssh)
-  #   com.jgoon.{hub-mac-control,hub-mac-control-tunnel,t3code}   hobby services
+  #   com.jgoon.{hub-mac-control,hub-mac-control-tunnel}   hobby services
   #   com.jgoon.agent-device.{proxy,proxy-watchdog}
   #   com.jgoon.openpoker-test-sim
   #   com.jgoon.tmux
   #   net.headscale.headscale (+ com.cloudflare.cloudflared.headscale)
   #   com.bluebubbles.server
+  #
+  # NOT nix-managed by design: com.t3tools.t3code.service (T3 Code). T3
+  # writes and rewrites that plist itself on every update — see FLEET.md
+  # "T3 Code server".
   #
   # import verified on the machine (`make plan HOST=mini`, 2026-09-23):
   # 49 brews + 25 casks declared = installed. first-switch deltas accepted:
