@@ -75,8 +75,10 @@
       "gamemode"
     ];
     shell = pkgs.zsh;
-    # herdr-server (HM user service) must run without an active login:
-    # this box is reached over ssh/machine API and may reboot unattended.
+    # herdr-server (HM user service) and T3's t3code.service (installed by
+    # `t3 service install`, see FLEET.md "T3 Code server") must run without
+    # an active login: this box is reached over ssh/machine API and may
+    # reboot unattended.
     linger = true;
   };
 
@@ -90,8 +92,9 @@
 
   programs.zsh.enable = true;
 
-  # run the t3 CLI (self-contained binary needing libatomic/libstdc++) and
-  # other unpackaged linux binaries without packaging them
+  # run the t3 CLI and T3's background service (self-contained binary
+  # needing libatomic/libstdc++) and other unpackaged linux binaries
+  # without packaging them
   programs.nix-ld = {
     enable = true;
     libraries = with pkgs; [ stdenv.cc.cc ];

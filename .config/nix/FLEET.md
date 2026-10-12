@@ -320,6 +320,61 @@ and chsh resets on rebuild — the re-apply re-asserts /usr/bin/zsh
 `yadm pull && make here` on the box (the hostmap maps
 jgoon-jgoon-box → devspace).
 
+## T3 Code server (mini, pc)
+
+Decided 2026-10-12: T3 runs as **T3's own background service**
+(`t3 service install`), and other devices reach it through **T3 Connect**.
+Nix provides the prerequisites only. This is the supported upstream setup
+(T3 ships no Nix module or flake and hasn't taken one on), and the only
+one where every update path works: the update button in any client,
+`t3 update` on the box, and Connect keeping its tunnel up across the
+update restart. Unlike herdr, the unit is deliberately NOT declared in nix:
+T3 rewrites it on every update, so a nix-owned copy would fight it.
+
+| piece | where | declared? |
+|---|---|---|
+| user manager from boot (`linger = true`) | hosts/pc/configuration.nix | yes |
+| nix-ld for the self-contained `t3` binary | hosts/pc/configuration.nix | yes |
+| `cloudflared` for the Connect tunnel (mini: brew; pc: T3 downloads its own) | hosts/mini brews | yes |
+| service unit: `com.t3tools.t3code.service` (mini, LaunchAgent) / `t3code.service` (pc, systemd user) | written by `t3 service install` | no, by design |
+| T3 runtime + `t3` launcher | `~/.t3/runtime`, `~/.local/bin/t3`, from the install script | no |
+| Connect link (cloud sign-in) | `~/.t3`, from `t3 connect` | no: per machine |
+
+New machine (or rebuilt box), once, as the user:
+
+```sh
+curl -fsSL https://t3.codes/install.sh | T3CODE_CHANNEL=nightly sh   # nightly matches the t3-code@nightly casks
+t3 connect                   # sign in, link, and accept the background service offer
+```
+
+Over ssh, `t3 connect` prints a sign-in link and takes the code back, so no
+port forwarding is needed. On mini, run it from a logged-in session
+(`mini-screen`): over ssh with nobody at the console, the service installs
+but doesn't start until the next login.
+
+The Connect link is a per-machine identity plus a cloud credential: never
+copy `~/.t3` between machines to skip it. Updating is the client's update
+button, or `t3 update` on the box. `t3 service status` shows the state and
+the log path.
+
+Rules:
+
+- **One server per `~/.t3`.** The service owns `:3773`. Don't also run a
+  hand-started `t3 serve` against the same home: both would write to the
+  same database.
+- **mini runs T3 only while jgoon is logged in.** T3's macOS service is a
+  LaunchAgent, and mini has auto-login off: after a reboot T3 stays down
+  until someone logs in (`mini-screen`). That's no worse than the old
+  hand-rolled `com.jgoon.t3code` agent. T3 has no supported daemon mode,
+  so `fleet.herdr.daemon`'s approach doesn't carry over.
+- The server listens on all interfaces (Connect's tunnel needs loopback),
+  so tailnet peers can still reach `http://100.64.0.3:3773` directly.
+
+Replaced on mini: the hand-rolled `com.jgoon.t3code` (`t3 serve` pinned to
+one version, tailnet IP only) and `com.jgoon.cloudflared.t3code` (the
+`t3code.jgoon.com` tunnel). Delete that tunnel and its DNS record in
+Cloudflare once Connect works.
+
 ## If onboarding hurt: rollback
 
 - packages: cleanup defaults to `"none"` — nothing was ever uninstalled,
