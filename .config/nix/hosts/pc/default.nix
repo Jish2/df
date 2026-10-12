@@ -19,9 +19,14 @@
     # (replacing the manual `nix profile install` that a rebuilt pc lost).
     # darwin boxes keep brew — see hosts/work brews + FLEET.md.
     inputs.herdr.packages.${pkgs.system}.herdr
-    # claude-code — CLI on mini+pc only (darwin uses the brew cask so it
-    # floats current; work/personal/devspace stay without it)
+    # coding-agent CLIs. claude-code is on mini+pc only (darwin uses the
+    # brew cask so it floats current; work/personal/devspace stay without
+    # it). codex + cursor-cli (ships `cursor-agent`) are pc-only for now.
+    # claude-code and cursor-cli are unfree — allowUnfree is set in
+    # configuration.nix.
     claude-code
+    codex
+    cursor-cli
   ];
 
   # herdr server as a boot-persistent user service. shape mirrors hosts/
