@@ -396,37 +396,39 @@ treat it as possible tampering before typing the passphrase.
 | keys enrolled in firmware, BIOS admin password, USB boot off | BIOS | no |
 | TPM-sealed LUKS key (both volumes) | LUKS2 header token | no |
 
-One-time setup. Steps 1–3 work over ssh, steps 4–7 need someone at the pc:
+One-time setup (pc: ASRock B450M Pro4, AMI BIOS). Windows is unaffected: it
+lives on its own disk and ESP, has no BitLocker, boots UEFI (not CSM), and its
+Microsoft-signed bootloader stays trusted.
 
-1. Windows: if BitLocker / Device encryption is on, save the recovery key
-   (account.microsoft.com → Devices) first. Changing Secure Boot will ask
-   for it once.
-2. `sudo nix run nixpkgs#sbctl -- create-keys`, then `make here`, then
-   `sudo sbctl verify`. The `nixos-generation-*.efi` stubs and systemd-boot
-   must be signed; `kernel-*` files unsigned is expected.
-3. Reboot once with Secure Boot still off, to prove lanzaboote's boot path.
-   PCR 7 is unchanged, so this one can be remote.
-4. BIOS (AMI firmware): set an **administrator password**, disable booting
-   from USB/removable devices, then put Secure Boot into **Setup Mode**
-   ("Custom" mode → reset to setup mode / delete the Platform Key). **Don't
-   clear all keys**: that drops the dbx (revoked-binaries list).
-5. Boot NixOS (the disk passphrase is asked for, since PCR 7 changed), then
-   `sudo sbctl enroll-keys --microsoft` (Microsoft keys keep Windows and
-   the GPU's option ROM booting). Reboot, then `bootctl status` must show
-   `Secure Boot: enabled (user)`.
-6. Re-seal the disk key to the new PCR 7, for each volume:
+1. **At the pc, right before step 2:** `make here`. The first switch
+   generates the keys (`generate-sb-keys.service`), stages them on the ESP,
+   and signs the boot stubs (`prepare-sb-auto-enroll.service`). From here
+   on, the next boot enrolls the keys if the firmware is in Setup Mode, and
+   pc's firmware ships in Setup Mode with no keys. So don't reboot remotely
+   between steps 1 and 2: that boot would enroll the keys without the dbx and
+   end at a passphrase prompt.
+2. BIOS (Del/F2): Security → **Supervisor Password**; Boot → **CSM
+   Disabled**; drop USB/network boot from the boot order; Security → Secure
+   Boot → **Secure Boot Mode: Custom** → Key Management → **Install default
+   Secure Boot keys** (this restores the dbx revocation list), then
+   **Platform Key (PK) → Delete** (this enters Setup Mode). **Not** "Clear
+   Secure Boot keys". Set **Secure Boot: Enabled** and save with F10.
+3. systemd-boot enrolls the keys on its own (a short countdown) and resets.
+   NixOS then asks for the disk passphrase once, because PCR 7 changed.
+   `bootctl status` must show `Secure Boot: enabled (user)`.
+4. Re-seal the disk key to the new PCR 7, for each volume:
    `sudo systemd-cryptenroll --wipe-slot=tpm2 --tpm2-device=auto --tpm2-pcrs=7 /dev/disk/by-uuid/<uuid>`
    (`e3b3da45-…` root, `5fa656db-…` swap).
-7. Test: a reboot unlocks without the passphrase, and Windows still boots
-   from the BIOS boot menu.
+5. Test: a reboot unlocks without the passphrase, and Windows still boots
+   from the BIOS boot menu (F11).
 
 A BIOS update or Secure Boot change can reset PCR 7. Then the passphrase
-prompt appears; re-run step 6 once you're sure the change was yours.
+prompt appears; re-run step 4 once you're sure the change was yours.
 
 Known remaining gap (left open for now): with Microsoft keys trusted, a
 skilled attacker may be able to plant a boot entry on the unencrypted ESP
-that chains a Microsoft-signed loader without changing PCR 7. The fix is lanzaboote's
-measured boot (`boot.lanzaboote.measuredBoot`, systemd-pcrlock over PCRs
+that chains a Microsoft-signed loader without changing PCR 7. The fix is
+lanzaboote's measured boot (`boot.lanzaboote.measuredBoot`, systemd-pcrlock over PCRs
 0/4/7). It's still experimental upstream, so it's a follow-up once this is
 stable.
 

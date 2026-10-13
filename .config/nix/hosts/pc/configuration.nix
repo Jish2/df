@@ -15,13 +15,17 @@
   # Secure Boot via lanzaboote: every rebuild signs the boot stubs with this
   # box's own keys (/var/lib/sbctl, root-only, on the encrypted root), and
   # the firmware refuses anything unsigned — a USB stick or a tampered
-  # /boot no longer boots. one-time setup (keys, BIOS setup mode, enroll
-  # with Microsoft keys so Windows + the GPU option ROM still load) is in
-  # FLEET.md "pc Secure Boot". lanzaboote replaces the systemd-boot module.
+  # /boot no longer boots. keys are generated on the first switch, and
+  # systemd-boot enrolls them (plus Microsoft's, so Windows + the GPU option
+  # ROM still load) on the first boot that finds the firmware in Setup Mode.
+  # the BIOS half of the one-time setup is in FLEET.md "pc Secure Boot".
+  # lanzaboote replaces the systemd-boot module.
   boot.loader.systemd-boot.enable = lib.mkForce false;
   boot.lanzaboote = {
     enable = true;
     pkiBundle = "/var/lib/sbctl";
+    autoGenerateKeys.enable = true;
+    autoEnrollKeys.enable = true; # includeMicrosoftKeys defaults to true
   };
   boot.loader.efi.canTouchEfiVariables = true;
   # no kernel-cmdline editing at the boot menu: with TPM auto-unlock below,
