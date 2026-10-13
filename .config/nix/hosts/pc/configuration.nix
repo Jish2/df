@@ -5,9 +5,29 @@
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+  # no kernel-cmdline editing at the boot menu: with TPM auto-unlock below,
+  # `init=/bin/sh` there would be a root shell on an already-unlocked disk
+  boot.loader.systemd-boot.editor = false;
 
   boot.initrd.luks.devices."luks-5fa656db-87e7-4454-9cc7-9d8ce7014ce8".device =
     "/dev/disk/by-uuid/5fa656db-87e7-4454-9cc7-9d8ce7014ce8";
+
+  # TPM2 auto-unlock for both LUKS volumes (root e3b3… from
+  # hardware-configuration.nix, swap 5fa6…), so the box comes back from an
+  # unattended reboot over ssh. systemd initrd (on by default) does the
+  # unseal; the passphrase slot stays as the fallback prompt. keys are
+  # enrolled out-of-band, bound to PCR 7 (survives kernel/nixpkgs updates):
+  #   sudo systemd-cryptenroll --tpm2-device=auto --tpm2-pcrs=7 /dev/disk/by-uuid/<uuid>
+  # Secure Boot is off on this box, so PCR 7 only guards against the disk
+  # being read in another machine — not against someone at the keyboard
+  # booting a modified kernel/initrd from the unencrypted /boot.
+  boot.initrd.luks.devices."luks-5fa656db-87e7-4454-9cc7-9d8ce7014ce8".crypttabExtraOpts = [
+    "tpm2-device=auto"
+  ];
+  boot.initrd.luks.devices."luks-e3b3da45-3b52-4fa2-94a3-bf82ff4358f8".crypttabExtraOpts = [
+    "tpm2-device=auto"
+  ];
+
   networking.hostName = "pc";
 
   networking.networkmanager.enable = true;
