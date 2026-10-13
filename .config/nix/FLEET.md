@@ -425,6 +425,13 @@ Microsoft-signed bootloader stays trusted.
 A BIOS update or Secure Boot change can reset PCR 7. Then the passphrase
 prompt appears; re-run step 4 once you're sure the change was yours.
 
+Status 2026-10-12: done. Secure Boot is `enabled (user)` with own + Microsoft
+keys, both volumes are TPM-sealed to PCR 7, and an unattended reboot unlocked
+in about 1s. **The dbx is still empty**: "Install default Secure Boot keys" left
+none behind. Fill it from Microsoft's list via fwupd (`fwupdmgr update`, needs
+`services.fwupd.enable`). That changes PCR 7, so it's one passphrase boot plus
+a re-run of step 4: do it together with measured boot below.
+
 Known remaining gap (left open for now): with Microsoft keys trusted, a
 skilled attacker may be able to plant a boot entry on the unencrypted ESP
 that chains a Microsoft-signed loader without changing PCR 7. The fix is
