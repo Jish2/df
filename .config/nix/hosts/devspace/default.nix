@@ -10,7 +10,36 @@
 { pkgs, ... }:
 {
   # base CLI set comes from modules/tools.nix (nix column)
-  home.packages = with pkgs; [ ];
+  home.packages = with pkgs; [
+    # flake resolution hits api.github.com unauthenticated, and this box's
+    # proxied egress shares one IP with all of devspaces — 403 rate limit.
+    # wrap nix with the gh token (read from gh's hosts.yml, same trick as
+    # scripts/devspace-apply.sh) so `nixup flake update` / `nixup build`
+    # resolve. macs don't need this (direct egress, own IP).
+    (pkgs.writeShellScriptBin "nixup" ''
+      set -euo pipefail
+      token=""
+      hosts="$HOME/.config/gh/hosts.yml"
+      if [ -r "$hosts" ]; then
+        in_gh=0
+        while IFS= read -r line; do
+          if [ "$in_gh" -eq 0 ]; then
+            [ "$line" = "github.com:" ] && in_gh=1
+          elif [[ "$line" != [[:space:]]* ]]; then
+            break
+          elif [[ "$line" == *oauth_token:* ]]; then
+            token="''${line##*oauth_token: }"
+            break
+          fi
+        done < "$hosts"
+      fi
+      if [[ "$token" == gh[a-z]_* ]]; then
+        exec env NIX_CONFIG="access-tokens = github.com = $token" \
+          /nix/var/nix/profiles/default/bin/nix "$@"
+      fi
+      exec /nix/var/nix/profiles/default/bin/nix "$@"
+    '')
+  ];
 
   # herdr server as a boot-persistent user service.
   #

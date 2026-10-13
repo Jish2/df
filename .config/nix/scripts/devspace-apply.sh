@@ -35,6 +35,28 @@ NIXFLAGS=(--extra-experimental-features 'nix-command flakes')
 # it points at live on the ephemeral root disk.
 HM_LINK="$HOME/.local/state/nix/profiles/home-manager"
 
+# egress from this box is proxied (devspaces-egress-dpi:3128) and shares an
+# IP with every other devspace — unauthenticated api.github.com calls (nix's
+# flake input resolution) get 403 rate-limited. a token lifts the limit.
+# read the token straight from gh's hosts.yml (persistent home volume) with
+# plain awk: gh itself lives in the HM profile, which is exactly the thing
+# that dangles after a rebuild — can't shell out to it at boot time.
+gh_token() {
+  local f="$HOME/.config/gh/hosts.yml" tok="" in_gh=0
+  [ -r "$f" ] || return 0
+  while IFS= read -r line; do
+    if [ $in_gh -eq 0 ]; then
+      [ "$line" = "github.com:" ] && in_gh=1
+    elif [[ "$line" != [[:space:]]* ]]; then
+      break # next top-level host block
+    elif [[ "$line" == *oauth_token:* ]]; then
+      tok="${line##*oauth_token: }"
+      break
+    fi
+  done < "$f"
+  [[ "$tok" == gh[[a-z]]_* ]] && printf %s "$tok"
+}
+
 # the home EBS volume (/dev/nvme2n1) must be mounted over $HOME before
 # anything writes there: the linger user manager starts ~80s before
 # home-coder.mount lands (measured live), and a start against the bare
@@ -55,8 +77,14 @@ apply() {
   # activation package is built by the flake's pinned HM.
   # Retry loop: at boot the nix-daemon and the network may not be up yet.
   local gen="" err=/tmp/devspace-nix-apply.err
+  local tok=""
+  tok="$(gh_token || true)"
+  local -a NIXENV=()
+  if [ -n "$tok" ]; then
+    NIXENV=(env "NIX_CONFIG=access-tokens = github.com = $tok")
+  fi
   for _ in $(seq 1 30); do
-    if gen="$("$NIX" "${NIXFLAGS[@]}" build \
+    if gen="$("${NIXENV[@]}" "$NIX" "${NIXFLAGS[@]}" build \
       --no-link --print-out-paths \
       "$FLAKE#homeConfigurations.devspace.activationPackage" 2>"$err")"; then
       break
