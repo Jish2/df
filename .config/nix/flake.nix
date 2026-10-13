@@ -19,6 +19,11 @@
     # darwin keeps brew (floats fresh) — see hosts/work brews + FLEET.md.
     herdr.url = "github:herdrdev/herdr/v0.9.3";
     herdr.inputs.nixpkgs.follows = "nixpkgs";
+
+    # Secure Boot on pc (hosts/pc/configuration.nix). pinned release tag;
+    # bump deliberately — it signs what the firmware will boot.
+    lanzaboote.url = "github:nix-community/lanzaboote/v1.2.0";
+    lanzaboote.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =

@@ -378,6 +378,58 @@ one version, tailnet IP only) and `com.jgoon.cloudflared.t3code` (the
 `t3code.jgoon.com` tunnel). Delete that tunnel and its DNS record in
 Cloudflare once Connect works.
 
+## pc Secure Boot + TPM disk unlock
+
+Decided 2026-10-12: pc's LUKS volumes unlock from the TPM (PCR 7) so the box
+survives an unattended reboot, and **Secure Boot is on with this box's own
+keys (lanzaboote)**. The PCR 7 binding is only worth anything with Secure
+Boot on. Without it, a USB stick boots, PCR 7 is unchanged, and the TPM
+hands over the disk key. The passphrase slot stays as the fallback. An
+**unexpected passphrase prompt at boot means the boot chain changed**:
+treat it as possible tampering before typing the passphrase.
+
+| piece | where | declared? |
+|---|---|---|
+| lanzaboote (signs boot stubs on every rebuild) | flake input + hosts/pc/configuration.nix | yes |
+| `tpm2-device=auto` in crypttab, boot-menu editor off | hosts/pc/configuration.nix | yes |
+| Secure Boot keys | `/var/lib/sbctl` (root-only, encrypted root) | no: per machine, never copy |
+| keys enrolled in firmware, BIOS admin password, USB boot off | BIOS | no |
+| TPM-sealed LUKS key (both volumes) | LUKS2 header token | no |
+
+One-time setup. Steps 1–3 work over ssh, steps 4–7 need someone at the pc:
+
+1. Windows: if BitLocker / Device encryption is on, save the recovery key
+   (account.microsoft.com → Devices) first. Changing Secure Boot will ask
+   for it once.
+2. `sudo nix run nixpkgs#sbctl -- create-keys`, then `make here`, then
+   `sudo sbctl verify`. The `nixos-generation-*.efi` stubs and systemd-boot
+   must be signed; `kernel-*` files unsigned is expected.
+3. Reboot once with Secure Boot still off, to prove lanzaboote's boot path.
+   PCR 7 is unchanged, so this one can be remote.
+4. BIOS (AMI firmware): set an **administrator password**, disable booting
+   from USB/removable devices, then put Secure Boot into **Setup Mode**
+   ("Custom" mode → reset to setup mode / delete the Platform Key). **Don't
+   clear all keys**: that drops the dbx (revoked-binaries list).
+5. Boot NixOS (the disk passphrase is asked for, since PCR 7 changed), then
+   `sudo sbctl enroll-keys --microsoft` (Microsoft keys keep Windows and
+   the GPU's option ROM booting). Reboot, then `bootctl status` must show
+   `Secure Boot: enabled (user)`.
+6. Re-seal the disk key to the new PCR 7, for each volume:
+   `sudo systemd-cryptenroll --wipe-slot=tpm2 --tpm2-device=auto --tpm2-pcrs=7 /dev/disk/by-uuid/<uuid>`
+   (`e3b3da45-…` root, `5fa656db-…` swap).
+7. Test: a reboot unlocks without the passphrase, and Windows still boots
+   from the BIOS boot menu.
+
+A BIOS update or Secure Boot change can reset PCR 7. Then the passphrase
+prompt appears; re-run step 6 once you're sure the change was yours.
+
+Known remaining gap (left open for now): with Microsoft keys trusted, a
+skilled attacker may be able to plant a boot entry on the unencrypted ESP
+that chains a Microsoft-signed loader without changing PCR 7. The fix is lanzaboote's
+measured boot (`boot.lanzaboote.measuredBoot`, systemd-pcrlock over PCRs
+0/4/7). It's still experimental upstream, so it's a follow-up once this is
+stable.
+
 ## If onboarding hurt: rollback
 
 - packages: cleanup defaults to `"none"` — nothing was ever uninstalled,

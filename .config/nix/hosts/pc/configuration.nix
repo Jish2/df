@@ -1,12 +1,32 @@
-{ config, pkgs, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  inputs,
+  ...
+}:
 
 {
-  imports = [ ./hardware-configuration.nix ];
+  imports = [
+    ./hardware-configuration.nix
+    inputs.lanzaboote.nixosModules.lanzaboote
+  ];
 
-  boot.loader.systemd-boot.enable = true;
+  # Secure Boot via lanzaboote: every rebuild signs the boot stubs with this
+  # box's own keys (/var/lib/sbctl, root-only, on the encrypted root), and
+  # the firmware refuses anything unsigned — a USB stick or a tampered
+  # /boot no longer boots. one-time setup (keys, BIOS setup mode, enroll
+  # with Microsoft keys so Windows + the GPU option ROM still load) is in
+  # FLEET.md "pc Secure Boot". lanzaboote replaces the systemd-boot module.
+  boot.loader.systemd-boot.enable = lib.mkForce false;
+  boot.lanzaboote = {
+    enable = true;
+    pkiBundle = "/var/lib/sbctl";
+  };
   boot.loader.efi.canTouchEfiVariables = true;
   # no kernel-cmdline editing at the boot menu: with TPM auto-unlock below,
-  # `init=/bin/sh` there would be a root shell on an already-unlocked disk
+  # `init=/bin/sh` there would be a root shell on an already-unlocked disk.
+  # lanzaboote's loader.conf inherits this setting.
   boot.loader.systemd-boot.editor = false;
 
   boot.initrd.luks.devices."luks-5fa656db-87e7-4454-9cc7-9d8ce7014ce8".device =
@@ -17,10 +37,12 @@
   # unattended reboot over ssh. systemd initrd (on by default) does the
   # unseal; the passphrase slot stays as the fallback prompt. keys are
   # enrolled out-of-band, bound to PCR 7 (survives kernel/nixpkgs updates):
-  #   sudo systemd-cryptenroll --tpm2-device=auto --tpm2-pcrs=7 /dev/disk/by-uuid/<uuid>
-  # Secure Boot is off on this box, so PCR 7 only guards against the disk
-  # being read in another machine — not against someone at the keyboard
-  # booting a modified kernel/initrd from the unencrypted /boot.
+  #   sudo systemd-cryptenroll --wipe-slot=tpm2 --tpm2-device=auto --tpm2-pcrs=7 /dev/disk/by-uuid/<uuid>
+  # PCR 7 is only meaningful with Secure Boot ON (lanzaboote above): it
+  # records the Secure Boot state and keys, so booting anything not signed
+  # by this box's key, or turning Secure Boot off, keeps the key sealed.
+  # enroll only AFTER `bootctl status` shows "Secure Boot: enabled (user)" —
+  # a key sealed while Secure Boot is off unseals from any USB stick.
   boot.initrd.luks.devices."luks-5fa656db-87e7-4454-9cc7-9d8ce7014ce8".crypttabExtraOpts = [
     "tpm2-device=auto"
   ];
@@ -127,6 +149,7 @@
     yadm
     gh
     openssh
+    sbctl # Secure Boot keys: create-keys / enroll-keys / verify
   ];
 
   nix.settings.experimental-features = [
