@@ -1,0 +1,4 @@
+#!/bin/sh
+if [ "${YADM_HOOK_EXIT:-0}" -eq 0 ] && [ -x "$HOME/.local/bin/skills-sync" ]; then
+    "$HOME/.local/bin/skills-sync" --optional
+fi

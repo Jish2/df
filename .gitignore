@@ -9,3 +9,12 @@
 # config, project IDs local to that box) and syncs the user-preference keys
 # between connected environments itself — a fleet-wide copy just churns.
 .t3/
+
+# Private skill checkouts, loader state, and discovery links stay machine-local.
+/private-skills/
+/.local/state/private-skills/
+/.agents/skills/*
+!/.agents/skills/clean-pr-comments/
+!/.agents/skills/fleet-ssh-safety/
+!/.agents/skills/karabiner/
+!/.agents/skills/tailnet-join/

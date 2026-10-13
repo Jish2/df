@@ -35,7 +35,7 @@ LINUX_HOSTS = devspace
 HOST ?= $(INFERRED)
 NIXFLAGS = --extra-experimental-features 'nix-command flakes'
 
-.PHONY: plan here here-zap doctor extensions
+.PHONY: plan here here-zap doctor extensions skills-machine
 
 # dry-run: builds the darwin generation WITHOUT activating, then reports
 # homebrew drift both directions. nothing changes on the machine.
@@ -66,6 +66,10 @@ plan:
 	@comm -13 /tmp/plan-decl-brews /tmp/plan-inst-leaf-brews; comm -13 /tmp/plan-decl-casks /tmp/plan-inst-casks
 	@echo '== ok: present and declared =='
 	@comm -12 /tmp/plan-decl-brews /tmp/plan-inst-brews | wc -l | tr -d ' '; comm -12 /tmp/plan-decl-casks /tmp/plan-inst-casks | wc -l | tr -d ' '
+
+# Expose the existing host map to standalone tools without applying a config.
+skills-machine:
+	@printf '%s\n' '$(INFERRED)'
 
 # switch THIS machine to its own config, inferred from its hostname.
 #

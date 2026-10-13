@@ -36,6 +36,29 @@ Decisions:
   pre-fold generation.
 - Flake attrs are stable role names (`work`, `personal`, ...), not hostnames.
 
+## Private agent skills
+
+The standalone dotfiles command `~/.local/bin/skills-sync` clones
+`https://github.rbx.com/jgoon/skills` into `~/private-skills` at runtime, then
+links `common/<skill>` and `machines/<role>/<skill>` into `~/.agents/skills`.
+Yadm's `post_clone` and `post_pull` hooks run it after fetching dotfiles.
+The role comes from `make skills-machine`, which reads the existing host map
+without applying any configuration. For an unmapped machine, run
+`skills-sync --machine personal` (or another role) once to save a local override.
+Machine-specific skills override common skills with the same folder name.
+
+Run `skills-sync` to update a clean checkout, or `skills-sync --offline` to
+load local edits. Each machine needs its existing authenticated access to the
+private repo. An unavailable fetch uses the existing checkout when present;
+missing initial access warns without failing the dotfiles hooks. Home Manager
+does not manage this command or the skill discovery directory. The loader
+preserves other skill managers' entries, stops on name collisions before
+changing links, and removes only stale links it owns.
+
+Private contents stay outside the public dotfiles and Nix store. The public
+`.gitignore` excludes `private-skills/`, local loader state, and new skill
+discovery entries by default. Existing public skill folders are allowlisted.
+
 ## Layering
 
 - **nix-darwin** (macs): system packages, homebrew, `system.defaults`, fonts.
