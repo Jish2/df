@@ -6,7 +6,11 @@ from `~/.config/nix`. The Home Manager login agent opens a Terminal window for
 the approval helper at graphical login; it also starts when its new agent is
 loaded. The helper reconnects to the existing `devspace` SSH alias every 15
 seconds after a disconnect. SSH keys, Coder access, and the alias are existing
-prerequisites; this module does not create them.
+prerequisites; this module does not create them. Before each start or reconnect,
+the launcher fetches the latest `main` from
+[jgoon/vm-mac-bridge](https://github.rbx.com/jgoon/vm-mac-bridge) using the Mac's
+existing Git authentication. Enterprise GitHub access must already work for
+your account; credentials are not part of the Nix config.
 
 Every command still requires local approval. Short commands have notification
 Approve/Reject actions; long commands require review in the Terminal window.
@@ -21,12 +25,17 @@ vm-mac-bridge status   # running / stopped
 vm-mac-bridge run      # use this terminal instead
 ```
 
-Ctrl-C stops the helper without a restart loop. To pick up a later helper/config
-update, stop it and run `vm-mac-bridge` again; an existing helper is left alone
-on rebuild. Disable `fleet.vmMacBridge.enable` to remove automatic startup.
+Ctrl-C stops the helper without a restart loop. Upstream bridge updates are
+picked up on startup/reconnect without a Nix rebuild; a running helper keeps
+its current code until then. To update it immediately, stop it and run
+`vm-mac-bridge` again. Launcher/config changes still need `make here` and a
+restart. If Git fetch fails, the launcher reports it and retries every 15
+seconds without starting stale cached code. Local checkout edits are preserved
+and must be resolved before it can update.
+Disable `fleet.vmMacBridge.enable` to remove automatic startup.
 Other Macs keep their current config.
 
-The VM must have the matching protocol-2 script installed at
+The VM must have a compatible upstream transport script installed at
 `/home/coder/.codex/skills/mac-command/scripts/bridge.py`. The VM
 `mac-command send` returns an ID immediately; poll `mac-command status ID --json`
 for the result. `--expires-in SECONDS` controls the queue/approval window (600
@@ -34,7 +43,7 @@ seconds by default), while `send --wait` selects blocking behavior. The Mac
 uses the request's expiry unless `fleet.vmMacBridge.notificationTimeout` sets
 a shorter approval cap. Execution remains capped at 120 seconds by default.
 
-The module lives in `modules/darwin/fleet-vm-mac-bridge.nix`; source provenance
+The module lives in `modules/darwin/fleet-vm-mac-bridge.nix`; update behavior
 and test instructions are in [packages/vm-mac-bridge](packages/vm-mac-bridge/README.md).
 
 ## setup log

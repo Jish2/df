@@ -153,7 +153,10 @@
           vm-mac-bridge =
             pkgs.runCommand "vm-mac-bridge-startup-tests"
               {
-                nativeBuildInputs = [ pkgs.python3 ];
+                nativeBuildInputs = [
+                  pkgs.python3
+                  pkgs.git
+                ];
               }
               ''
                 export PYTHONDONTWRITEBYTECODE=1

@@ -2,11 +2,14 @@
 
 import argparse
 import fcntl
+import hashlib
 import json
+import os
 from pathlib import Path
 import signal
 import subprocess
 import sys
+import tempfile
 import time
 
 
@@ -36,8 +39,62 @@ def start(config, home):
     return 0
 
 
-def helper_arguments(config):
-    args = [config["python"], config["bridge"], "mac", config["host"],
+def source_cache(config, home):
+    identity = json.dumps({"repository": config["repository"], "branch": config["branch"]}, sort_keys=True)
+    key = hashlib.sha256(identity.encode()).hexdigest()[:16]
+    return home / "Library/Application Support/vm-mac-bridge/sources" / key
+
+
+def refresh_bridge(config, home):
+    cache = source_cache(config, home)
+    owner = {"repository": config["repository"], "branch": config["branch"]}
+
+    def git(*arguments, cwd=None):
+        return subprocess.run(
+            [config["git"], *arguments], cwd=cwd, check=True,
+            stdin=subprocess.DEVNULL, capture_output=True, text=True,
+            timeout=config["update_timeout"],
+            env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
+        )
+
+    def entrypoint(checkout):
+        path = checkout / "bridge.py"
+        if not path.is_file() or path.is_symlink():
+            raise RuntimeError("Latest bridge checkout has no regular bridge.py entrypoint")
+        return path
+
+    if cache.is_symlink():
+        raise RuntimeError(f"Refusing to update a linked source cache at {cache}")
+    if not cache.exists():
+        cache.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+        with tempfile.TemporaryDirectory(prefix=".updating-", dir=cache.parent) as temporary:
+            staging = Path(temporary)
+            git("clone", "--single-branch", "--depth", "1",
+                "--branch", config["branch"], "--", config["repository"], str(staging / "checkout"))
+            entrypoint(staging / "checkout")
+            (staging / "owner.json").write_text(json.dumps(owner) + "\n")
+            staging.rename(cache)
+    else:
+        marker = cache / "owner.json"
+        if not marker.is_file() or json.loads(marker.read_text()) != owner:
+            raise RuntimeError(f"Refusing to update an unmanaged source cache at {cache}")
+        checkout = cache / "checkout"
+        if checkout.is_symlink():
+            raise RuntimeError(f"Refusing to update a linked checkout at {checkout}")
+        if git("status", "--porcelain", "--untracked-files=all", cwd=checkout).stdout.strip():
+            raise RuntimeError(f"Bridge checkout has local changes; move or restore them at {checkout}")
+        git("fetch", "--no-tags", "--depth", "1", "--", config["repository"],
+            "refs/heads/" + config["branch"], cwd=checkout)
+        git("checkout", "--detach", "FETCH_HEAD", cwd=checkout)
+    checkout = cache / "checkout"
+    path = entrypoint(checkout)
+    revision = git("rev-parse", "HEAD", cwd=checkout).stdout.strip()
+    print(f"Using latest vm-mac-bridge {config['branch']} at {revision[:12]}.", flush=True)
+    return path
+
+
+def helper_arguments(config, bridge):
+    args = [config["python"], str(bridge), "mac", config["host"],
             "--remote-script", config["remote_script"], "--notify",
             "--notifier-path", config["notifier"], "--max-timeout", str(config["max_timeout"])]
     if config["notification_timeout"] is not None:
@@ -56,7 +113,9 @@ def run(config, home):
         print("VM–Mac bridge: approve requests here or in notifications. Ctrl-C stops the helper.", flush=True)
         while True:
             try:
-                with subprocess.Popen(helper_arguments(config)) as child:
+                bridge = refresh_bridge(config, home)
+                with subprocess.Popen(helper_arguments(config, bridge),
+                                      env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"}) as child:
                     try:
                         result = child.wait()
                     except KeyboardInterrupt:
@@ -74,6 +133,14 @@ def run(config, home):
                 time.sleep(config["reconnect_seconds"])
             except KeyboardInterrupt:
                 return 0
+            except (OSError, ValueError, RuntimeError, subprocess.CalledProcessError,
+                    subprocess.TimeoutExpired) as error:
+                print(f"Bridge update/start failed: {error}. No cached helper will be started.",
+                      file=sys.stderr, flush=True)
+                try:
+                    time.sleep(config["reconnect_seconds"])
+                except KeyboardInterrupt:
+                    return 0
 
 
 if __name__ == "__main__":

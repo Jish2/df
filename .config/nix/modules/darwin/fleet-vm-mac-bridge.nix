@@ -15,7 +15,10 @@ let
   settings = pkgs.writeText "vm-mac-bridge.json" (
     builtins.toJSON {
       python = "${pkgs.python3}/bin/python3";
-      bridge = "${source}/bridge.py";
+      git = "${pkgs.git}/bin/git";
+      repository = "https://github.rbx.com/jgoon/vm-mac-bridge.git";
+      branch = "main";
+      update_timeout = 60;
       host = cfg.host;
       remote_script = cfg.remoteScript;
       notifier = "${app}/Contents/MacOS/terminal-notifier";
@@ -40,7 +43,7 @@ in
     remoteScript = lib.mkOption {
       type = lib.types.str;
       default = "/home/coder/.codex/skills/mac-command/scripts/bridge.py";
-      description = "Installed bridge script on the VM (must support protocol version 2).";
+      description = "Installed transport script on the VM; keep it compatible with the latest upstream helper.";
     };
     reconnectSeconds = lib.mkOption {
       type = lib.types.ints.positive;

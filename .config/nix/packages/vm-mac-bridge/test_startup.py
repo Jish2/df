@@ -1,6 +1,7 @@
 import io
 from pathlib import Path
 import plistlib
+import shutil
 import subprocess
 import tempfile
 import unittest
@@ -17,7 +18,9 @@ class StartupTests(unittest.TestCase):
         self.addCleanup(self.temporary.cleanup)
         self.home = Path(self.temporary.name)
         self.config = {
-            "python": "/nix/python3", "bridge": "/nix/bridge.py", "host": "devspace",
+            "python": "/nix/python3", "git": "git", "host": "devspace",
+            "repository": "https://github.rbx.com/jgoon/vm-mac-bridge.git",
+            "branch": "main", "update_timeout": 60,
             "remote_script": "/home/coder/.codex/skills/mac-command/scripts/bridge.py",
             "notifier": str(self.home / "Applications/vm-mac-bridge.app/Contents/MacOS/terminal-notifier"),
             "terminal_command": str(self.home / "Library/Application Support/vm-mac-bridge/start.command"),
@@ -53,6 +56,7 @@ class StartupTests(unittest.TestCase):
         second.__enter__.return_value = second
         second.wait.return_value = 130
         with mock.patch.object(runner.sys.stdin, "isatty", return_value=True), \
+                mock.patch.object(runner, "refresh_bridge", return_value=Path("/latest/bridge.py")) as update, \
                 mock.patch.object(runner.subprocess, "Popen", side_effect=[first, second]) as execute, \
                 mock.patch.object(runner.time, "sleep") as sleep, \
                 mock.patch.object(runner.sys, "stdout", io.StringIO()):
@@ -60,7 +64,8 @@ class StartupTests(unittest.TestCase):
         sleep.assert_called_once_with(15)
         self.assertEqual(execute.call_count, 2)
         args = execute.call_args.args[0]
-        self.assertEqual(args[:4], ["/nix/python3", "/nix/bridge.py", "mac", "devspace"])
+        self.assertEqual(args[:4], ["/nix/python3", "/latest/bridge.py", "mac", "devspace"])
+        self.assertEqual(update.call_count, 2)
         self.assertIn("--notify", args)
         self.assertNotIn("--notification-timeout", args)
         self.assertFalse(runner.running(self.home))
@@ -72,6 +77,105 @@ class StartupTests(unittest.TestCase):
                 mock.patch.object(runner.sys, "stdout", io.StringIO()):
             self.assertEqual(runner.run(self.config, self.home), 0)
             execute.assert_not_called()
+
+    def test_failed_update_does_not_launch_a_cached_helper(self):
+        with mock.patch.object(runner.sys.stdin, "isatty", return_value=True), \
+                mock.patch.object(runner, "refresh_bridge", side_effect=RuntimeError("update failed")), \
+                mock.patch.object(runner.subprocess, "Popen") as execute, \
+                mock.patch.object(runner.time, "sleep", side_effect=KeyboardInterrupt), \
+                mock.patch.object(runner.sys, "stdout", io.StringIO()), \
+                mock.patch.object(runner.sys, "stderr", io.StringIO()):
+            self.assertEqual(runner.run(self.config, self.home), 0)
+            execute.assert_not_called()
+        self.assertFalse(runner.running(self.home))
+
+
+class SourceUpdateTests(unittest.TestCase):
+    def setUp(self):
+        self.temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temporary.cleanup)
+        self.root = Path(self.temporary.name)
+        self.home = self.root / "home"
+        self.home.mkdir()
+        self.remote = self.root / "upstream"
+        self.git = shutil.which("git")
+        self.assertIsNotNone(self.git, "git is required for source-update tests")
+        self.command("init", "--initial-branch", "main", str(self.remote))
+        self.commit("first")
+        self.config = {"git": self.git, "repository": str(self.remote),
+                       "branch": "main", "update_timeout": 5}
+
+    def command(self, *arguments, cwd=None):
+        return subprocess.run([self.git, *arguments], cwd=cwd, check=True,
+                              capture_output=True, text=True)
+
+    def commit(self, version):
+        (self.remote / "bridge.py").write_text(f"print({version!r})\n")
+        self.command("add", "bridge.py", cwd=self.remote)
+        self.command("-c", "user.name=Bridge Tests", "-c", "user.email=bridge-tests@example.invalid",
+                     "commit", "-m", version, cwd=self.remote)
+
+    def test_initial_checkout_and_later_main_commit_are_used(self):
+        with mock.patch.object(runner.sys, "stdout", io.StringIO()):
+            bridge = runner.refresh_bridge(self.config, self.home)
+            self.assertEqual(bridge.read_text(), "print('first')\n")
+            self.commit("latest")
+            updated = runner.refresh_bridge(self.config, self.home)
+        self.assertEqual(updated, bridge)
+        self.assertEqual(updated.read_text(), "print('latest')\n")
+        cached_revision = self.command("rev-parse", "HEAD", cwd=bridge.parent).stdout
+        upstream_revision = self.command("rev-parse", "HEAD", cwd=self.remote).stdout
+        self.assertEqual(cached_revision, upstream_revision)
+
+    def test_local_edits_are_preserved_and_update_is_refused(self):
+        with mock.patch.object(runner.sys, "stdout", io.StringIO()):
+            bridge = runner.refresh_bridge(self.config, self.home)
+        bridge.write_text("local edits\n")
+        self.commit("latest")
+        with self.assertRaisesRegex(RuntimeError, "local changes"):
+            runner.refresh_bridge(self.config, self.home)
+        self.assertEqual(bridge.read_text(), "local edits\n")
+
+    def test_main_history_rewrite_tracks_current_tip(self):
+        with mock.patch.object(runner.sys, "stdout", io.StringIO()):
+            bridge = runner.refresh_bridge(self.config, self.home)
+            self.commit("second")
+            runner.refresh_bridge(self.config, self.home)
+            self.assertEqual(bridge.read_text(), "print('second')\n")
+            self.command("reset", "--hard", "HEAD~1", cwd=self.remote)
+            runner.refresh_bridge(self.config, self.home)
+        self.assertEqual(bridge.read_text(), "print('first')\n")
+
+    def test_unavailable_upstream_is_an_error_with_cache_preserved(self):
+        with mock.patch.object(runner.sys, "stdout", io.StringIO()):
+            bridge = runner.refresh_bridge(self.config, self.home)
+        self.remote.rename(self.root / "moved-upstream")
+        with self.assertRaises(subprocess.CalledProcessError):
+            runner.refresh_bridge(self.config, self.home)
+        self.assertEqual(bridge.read_text(), "print('first')\n")
+
+    def test_failed_initial_clone_leaves_no_partial_cache(self):
+        self.remote.rename(self.root / "moved-upstream")
+        with self.assertRaises(subprocess.CalledProcessError):
+            runner.refresh_bridge(self.config, self.home)
+        self.assertFalse(runner.source_cache(self.config, self.home).exists())
+        self.assertEqual(list((self.home / "Library/Application Support/vm-mac-bridge/sources").iterdir()), [])
+
+    def test_existing_unmanaged_directory_is_not_modified(self):
+        cache = runner.source_cache(self.config, self.home)
+        cache.mkdir(parents=True)
+        (cache / "keep.txt").write_text("keep")
+        with self.assertRaisesRegex(RuntimeError, "unmanaged"):
+            runner.refresh_bridge(self.config, self.home)
+        self.assertEqual((cache / "keep.txt").read_text(), "keep")
+
+    def test_missing_entrypoint_is_not_accepted(self):
+        self.command("rm", "bridge.py", cwd=self.remote)
+        self.command("-c", "user.name=Bridge Tests", "-c", "user.email=bridge-tests@example.invalid",
+                     "commit", "-m", "remove entrypoint", cwd=self.remote)
+        with self.assertRaisesRegex(RuntimeError, "entrypoint"):
+            runner.refresh_bridge(self.config, self.home)
+        self.assertFalse(runner.source_cache(self.config, self.home).exists())
 
 
 class NotifierTests(unittest.TestCase):

@@ -1,14 +1,23 @@
-# VM–Mac bridge snapshot
+# VM–Mac bridge launcher
 
-`bridge.py` is copied unchanged from
-[jgoon/vm-mac-bridge](https://github.rbx.com/jgoon/vm-mac-bridge), commit
-`ca0a3365dac821c66cf8ea36ed1f68a8b7d0ea9f`. Keeping this small stdlib-only
-snapshot in the dotfiles avoids requiring Enterprise GitHub authentication
-inside a Nix build. Update it deliberately alongside the VM copy; both ends
-must support protocol version 2. The VM skill and CLI remain installed separately.
+The launcher fetches the current `main` branch from
+[jgoon/vm-mac-bridge](https://github.rbx.com/jgoon/vm-mac-bridge) before starting
+or reconnecting the helper. The Mac uses a private, app-owned checkout under
+`~/Library/Application Support/vm-mac-bridge/sources`; the dotfiles contain no
+copy of `bridge.py`. Git runs with the Mac user's existing authentication,
+at runtime. The Nix build only needs the launcher and public notifier source.
+
+Git operations have a 60-second timeout. If fetching fails, the launcher
+reports the failure and retries after the reconnect delay; it never starts
+the older cached helper after a failed update. It refuses to overwrite local
+edits or an unmanaged cache directory. The terminal prints the Git revision
+it starts. A running helper picks up upstream changes on its next restart or
+reconnect, so an active command is allowed to finish before code changes.
+The VM skill and transport remain installed separately; keep them compatible
+with the upstream helper.
 
 `runner.py` owns the local single-instance lock and SSH reconnect loop. It
-launches the existing bridge unchanged, in Terminal, with approval required
+launches the fetched bridge in Terminal, with approval required
 for every command. Reconnecting never resubmits a command. `Ctrl-C` stops it.
 
 `notifier.nix` builds pinned terminal-notifier 3.1.0 with the Nix compiler and
@@ -24,4 +33,5 @@ Run the local startup/installation tests with:
 PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s .config/nix/packages/vm-mac-bridge -v
 ```
 
-These tests do not open Terminal, send notifications, or connect to a VM.
+The update tests use temporary local Git repositories. They do not open
+Terminal, send notifications, or connect to GitHub or a VM.
