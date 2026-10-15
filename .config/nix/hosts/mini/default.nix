@@ -151,6 +151,7 @@
       "beekeeper-studio"
       "docker-desktop" # com.jgoon.docker.plist launchagent starts it at login
       "dotnet-sdk"
+      "figma"
       "git-credential-manager"
       "obsidian"
       "postman"
