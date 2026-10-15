@@ -1,0 +1,160 @@
+import io
+from pathlib import Path
+import plistlib
+import subprocess
+import tempfile
+import unittest
+from unittest import mock
+
+import install_notifier
+import prepare_plist
+import runner
+
+
+class StartupTests(unittest.TestCase):
+    def setUp(self):
+        self.temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temporary.cleanup)
+        self.home = Path(self.temporary.name)
+        self.config = {
+            "python": "/nix/python3", "bridge": "/nix/bridge.py", "host": "devspace",
+            "remote_script": "/home/coder/.codex/skills/mac-command/scripts/bridge.py",
+            "notifier": str(self.home / "Applications/vm-mac-bridge.app/Contents/MacOS/terminal-notifier"),
+            "terminal_command": str(self.home / "Library/Application Support/vm-mac-bridge/start.command"),
+            "reconnect_seconds": 15, "max_timeout": 120, "notification_timeout": None,
+        }
+
+    def test_start_opens_command_in_terminal(self):
+        with mock.patch.object(runner.subprocess, "run") as execute:
+            self.assertEqual(runner.start(self.config, self.home), 0)
+        execute.assert_called_once_with(
+            ["/usr/bin/open", "-a", "Terminal", self.config["terminal_command"]], check=True,
+        )
+
+    def test_duplicate_start_does_not_open_another_terminal(self):
+        with runner.lock_file(self.home), mock.patch.object(runner.subprocess, "run") as execute:
+            self.assertTrue(runner.running(self.home))
+            self.assertEqual(runner.start(self.config, self.home), 0)
+            execute.assert_not_called()
+        self.assertFalse(runner.running(self.home))
+
+    def test_run_requires_interactive_input(self):
+        with mock.patch.object(runner.sys, "stdin", io.StringIO("yes\n")), \
+                mock.patch.object(runner.subprocess, "Popen") as execute:
+            with self.assertRaisesRegex(RuntimeError, "interactive terminal"):
+                runner.run(self.config, self.home)
+            execute.assert_not_called()
+
+    def test_reconnect_keeps_local_approval_and_stops_on_interrupt(self):
+        first = mock.MagicMock()
+        first.__enter__.return_value = first
+        first.wait.return_value = 255
+        second = mock.MagicMock()
+        second.__enter__.return_value = second
+        second.wait.return_value = 130
+        with mock.patch.object(runner.sys.stdin, "isatty", return_value=True), \
+                mock.patch.object(runner.subprocess, "Popen", side_effect=[first, second]) as execute, \
+                mock.patch.object(runner.time, "sleep") as sleep, \
+                mock.patch.object(runner.sys, "stdout", io.StringIO()):
+            self.assertEqual(runner.run(self.config, self.home), 0)
+        sleep.assert_called_once_with(15)
+        self.assertEqual(execute.call_count, 2)
+        args = execute.call_args.args[0]
+        self.assertEqual(args[:4], ["/nix/python3", "/nix/bridge.py", "mac", "devspace"])
+        self.assertIn("--notify", args)
+        self.assertNotIn("--notification-timeout", args)
+        self.assertFalse(runner.running(self.home))
+
+    def test_second_runner_does_not_connect(self):
+        with runner.lock_file(self.home), \
+                mock.patch.object(runner.sys.stdin, "isatty", return_value=True), \
+                mock.patch.object(runner.subprocess, "Popen") as execute, \
+                mock.patch.object(runner.sys, "stdout", io.StringIO()):
+            self.assertEqual(runner.run(self.config, self.home), 0)
+            execute.assert_not_called()
+
+
+class NotifierTests(unittest.TestCase):
+    def setUp(self):
+        self.temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temporary.cleanup)
+        self.root = Path(self.temporary.name)
+        self.source = self.root / "source.app"
+        self.target = self.root / "Applications/vm-mac-bridge.app"
+        self.make_app(self.source, "new")
+
+    def make_app(self, app, content, bundle_id=install_notifier.BUNDLE_ID):
+        (app / "Contents/MacOS").mkdir(parents=True)
+        (app / "Contents/Info.plist").write_bytes(plistlib.dumps({"CFBundleIdentifier": bundle_id}))
+        binary = app / "Contents/MacOS/terminal-notifier"
+        binary.write_text(content)
+        binary.chmod(0o555)
+
+    def content(self):
+        return (self.target / "Contents/MacOS/terminal-notifier").read_text()
+
+    def test_install_signs_before_replacing_and_registers_then_is_idempotent(self):
+        self.make_app(self.target, "previous")
+
+        def execute(args, check):
+            self.assertTrue(check)
+            if args[0] == "/usr/bin/codesign":
+                self.assertEqual(self.content(), "previous")
+                self.assertEqual(install_notifier.bundle_id(Path(args[-1])), install_notifier.BUNDLE_ID)
+            else:
+                self.assertEqual(args, [install_notifier.REGISTER, "-f", str(self.target)])
+                self.assertEqual(self.content(), "new")
+
+        with mock.patch.object(install_notifier.subprocess, "run", side_effect=execute) as run:
+            install_notifier.install(self.source, self.target)
+            install_notifier.install(self.source, self.target)
+        self.assertEqual(run.call_count, 2)
+        self.assertEqual(self.content(), "new")
+
+    def test_failed_signing_preserves_existing_app(self):
+        self.make_app(self.target, "previous")
+        with mock.patch.object(install_notifier.subprocess, "run",
+                               side_effect=subprocess.CalledProcessError(1, "codesign")):
+            with self.assertRaises(subprocess.CalledProcessError):
+                install_notifier.install(self.source, self.target)
+        self.assertEqual(self.content(), "previous")
+
+    def test_failed_registration_restores_existing_app(self):
+        self.make_app(self.target, "previous")
+        with mock.patch.object(install_notifier.subprocess, "run",
+                               side_effect=[None, subprocess.CalledProcessError(1, "lsregister")]):
+            with self.assertRaises(subprocess.CalledProcessError):
+                install_notifier.install(self.source, self.target)
+        self.assertEqual(self.content(), "previous")
+
+    def test_other_app_and_symlink_are_not_replaced(self):
+        self.make_app(self.target, "unrelated", "com.example.other")
+        with mock.patch.object(install_notifier.subprocess, "run") as run:
+            with self.assertRaisesRegex(RuntimeError, "another app"):
+                install_notifier.install(self.source, self.target)
+            run.assert_not_called()
+        self.assertEqual(self.content(), "unrelated")
+        linked = self.root / "linked.app"
+        linked.symlink_to(self.root / "missing.app")
+        with self.assertRaisesRegex(RuntimeError, "another app"):
+            install_notifier.install(self.source, linked)
+        self.assertTrue(linked.is_symlink())
+
+    def test_plist_keeps_upstream_version_with_separate_identity(self):
+        source = self.root / "source.plist"
+        target = self.root / "Info.plist"
+        source.write_bytes(plistlib.dumps({"CFBundleExecutable": "${EXECUTABLE_NAME}",
+                                          "CFBundleName": "${PRODUCT_NAME}",
+                                          "CFBundleIdentifier": "fr.julienxx.oss.terminal-notifier",
+                                          "CFBundleShortVersionString": "3.1.0", "LSUIElement": True}))
+        prepare_plist.prepare(source, target)
+        info = plistlib.loads(target.read_bytes())
+        self.assertEqual(info["CFBundleIdentifier"], install_notifier.BUNDLE_ID)
+        self.assertEqual(info["CFBundleName"], "vm-mac-bridge")
+        self.assertEqual(info["CFBundleExecutable"], "terminal-notifier")
+        self.assertEqual(info["CFBundleShortVersionString"], "3.1.0")
+        self.assertTrue(info["LSUIElement"])
+
+
+if __name__ == "__main__":
+    unittest.main()
