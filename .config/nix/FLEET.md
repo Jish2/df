@@ -12,6 +12,17 @@ module imports in the flake, not filename tricks.
 | `pc` | desktop, dual-boots Windows (gaming) | NixOS 26.05 | x86_64-linux | NixOS + HM (folded in) | `pc` | `jgoon` |
 | `devspace` | Coder VM (linux-vm-secure) | Ubuntu 24.04 | x86_64-linux | HM standalone | `jgoon-jgoon-box` | `coder` |
 
+## Compute routing (which machine does what work)
+
+| need | machine | why |
+|---|---|---|
+| heavy CPU-bound compute (5-min deadline, compiles, data crunch) | work (M4 Max) | ~2x single-thread, ~2.5x multi-thread vs pc's 3800X; ~546 GB/s mem bandwidth; delegation overhead would eat the gap |
+| CUDA / NVIDIA GPU work, NVENC encode | pc (3800X, 16 GB, RTX 3070 Ti) | only CUDA box in the fleet |
+| sustained overnight / long unattended jobs, GitHub runner | pc | desktop thermals; spares the laptop |
+| always-on services, iOS builds | mini | headless, survives laptop sleep/network loss |
+
+Approx benchmarks (Geekbench 6): M4 Max ~4000 single / ~26k multi; 3800X ~1850 single / ~10k multi.
+
 Decisions:
 
 - **No second router.** yadm alternates (`##o.Darwin,h.HOST`) become host
