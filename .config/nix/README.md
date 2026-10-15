@@ -1,5 +1,8 @@
 ## Work Mac VM–Mac bridge
 
+Project decisions, deployment state, and live bridge validation are recorded in
+the [bridge handoff](https://github.rbx.com/jgoon/vm-mac-bridge/blob/main/HANDOFF.md).
+
 `hosts/work` enables `fleet.vmMacBridge`. After merging, stop the old manually
 started helper with Ctrl-C, then apply the work Mac's config with `make here`
 from `~/.config/nix`. The Home Manager login agent opens a Terminal window for
