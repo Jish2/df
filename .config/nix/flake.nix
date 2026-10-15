@@ -44,7 +44,9 @@
       # plain `make <host>` never removes anything.
       zapModule =
         { lib, ... }:
-        { homebrew.onActivation.cleanup = lib.mkForce "zap"; };
+        {
+          homebrew.onActivation.cleanup = lib.mkForce "zap";
+        };
 
       # macs: nix-darwin + home-manager (HM as a darwin module, so one
       # `darwin-rebuild` rebuilds system and user together)
@@ -84,11 +86,16 @@
                 ./modules/home/darwin.nix
               ];
             }
-          ] ++ extraModules;
+          ]
+          ++ extraModules;
         };
 
       mkHome =
-        { host, system, user }:
+        {
+          host,
+          system,
+          user,
+        }:
         home-manager.lib.homeManagerConfiguration {
           pkgs = nixpkgs.legacyPackages.${system};
           extraSpecialArgs = {
@@ -130,12 +137,36 @@
               home-manager.users.${defaultUser}.imports = [
                 ./modules/home/common.nix
                 ./modules/home/linux.nix
-                ./hosts/${host}              ];
+                ./hosts/${host}
+              ];
             }
           ];
         };
     in
     {
+      checks = nixpkgs.lib.genAttrs [ "x86_64-linux" "aarch64-darwin" ] (
+        system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
+        {
+          vm-mac-bridge =
+            pkgs.runCommand "vm-mac-bridge-startup-tests"
+              {
+                nativeBuildInputs = [
+                  pkgs.python3
+                  pkgs.git
+                ];
+              }
+              ''
+                export PYTHONDONTWRITEBYTECODE=1
+                cd ${./packages/vm-mac-bridge}
+                python3 -m unittest discover -v
+                touch "$out"
+              '';
+        }
+      );
+
       darwinConfigurations = {
         work = mkDarwin "work" [ ]; # MBP M4 Max
         work-zap = mkDarwin "work" [ zapModule ];
@@ -152,7 +183,11 @@
         # devspace's attr runs on the Coder VM as user `coder` (hostname
         # jgoon-jgoon-box, stable EBS home, ephemeral root — re-applied per
         # rebuild by the box-side bootstrap in scripts/devspace-apply.sh)
-        devspace = mkHome { host = "devspace"; system = "x86_64-linux"; user = "coder"; };
+        devspace = mkHome {
+          host = "devspace";
+          system = "x86_64-linux";
+          user = "coder";
+        };
       };
     };
 }
