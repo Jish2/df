@@ -100,11 +100,9 @@
         DVTTextShowMinimap = 1;
         DVTTextEnablePredictiveCompletion = 1;
       };
-      "com.apple.Safari" = {
-        ShowDevelopMenu = 1;
-        EnableNarrowTabs = 1;
-        AllowJavaScriptFromAppleEvents = 1;
-      };
+      # Safari keys moved to extraSafariDefaults below: macOS now blocks writes
+      # to the sandboxed Safari container, and one failing `defaults write`
+      # aborts the whole activation (set -e). Tolerate instead.
       "com.apple.Preview" = {
         "com.apple.AnnotationKit.arrowHeadStyle" = 2;
         "com.apple.AnnotationKit.strokeWidth" = 5.0;
@@ -249,6 +247,20 @@
   # pinned at 5 on purpose; read `darwin-rebuild changelog` before bumping
   system.configurationRevision = self.rev or self.dirtyRev or null;
   system.stateVersion = 5;
+
+  # Safari defaults, best-effort. macOS blocks defaults writes into the
+  # sandboxed Safari container (root or not), and the generated activation
+  # script runs with set -e — one failure aborts the whole switch. Kept out
+  # of system.defaults and applied tolerantly instead.
+  system.activationScripts.extraSafariDefaults.text = ''
+    echo "safari defaults (best-effort)..." >&2
+    for kv in ShowDevelopMenu-1 EnableNarrowTabs-1 AllowJavaScriptFromAppleEvents-1; do
+      key="$\{kv%%-*\}" val="$\{kv#*-\}"
+      launchctl asuser "$(id -u -- jgoon)" sudo --user=jgoon -- \
+        defaults write com.apple.Safari "$key" -bool "$val" >/dev/null 2>&1 || \
+        echo "warning: could not write Safari $key (sandboxed container)" >&2
+    done
+  '';
 
   # copy apps into /Applications (as finder aliases) so spotlight indexes them
   system.activationScripts.applications.text =

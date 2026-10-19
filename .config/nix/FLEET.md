@@ -49,26 +49,36 @@ Decisions:
 
 ## Private agent skills
 
-The standalone dotfiles command `~/.local/bin/skills-sync` clones
-`https://github.rbx.com/jgoon/skills` into `~/private-skills` at runtime, then
-links `common/<skill>` and `machines/<role>/<skill>` into `~/.agents/skills`.
-Yadm's `post_clone` and `post_pull` hooks run it after fetching dotfiles.
+Skills are consolidated in the private repo `github.com/Jish2/skills` and
+loaded by `skills-sync`, which Home Manager installs from the flake's
+`skills` input (`modules/home/skills-sync.nix`) and runs on every
+`make here` activation. The loader clones the repo into `~/private-skills`,
+refreshes pinned third-party sources (`third-party.yaml`: mattpocock,
+pstack) into `~/.local/share/skills/third-party/`, and links the resolved
+skills into every harness's discovery directory (`~/.agents/skills`,
+`~/.tau/agent/skills`, `~/.cursor/skills`, `~/.codex/skills`,
+`~/.claude/skills`).
+
+Repo layout and precedence (later wins on name collision within a harness):
+`third-party.yaml` → `common/` → `harnesses/<harness>/` →
+`machines/<role>/` → `machines/<role>/harnesses/<harness>/`. Local copies
+of a vendored skill shadow the pinned upstream one.
+
 The role comes from `make skills-machine`, which reads the existing host map
 without applying any configuration. For an unmapped machine, run
-`skills-sync --machine personal` (or another role) once to save a local override.
-Machine-specific skills override common skills with the same folder name.
+`skills-sync --machine personal` (or another role) once to save a local
+override. Each role maps to the harnesses it uses (`ROLE_HARNESSES` in the
+loader); the default links all five.
 
-Run `skills-sync` to update a clean checkout, or `skills-sync --offline` to
-load local edits. Each machine needs its existing authenticated access to the
-private repo. An unavailable fetch uses the existing checkout when present;
-missing initial access warns without failing the dotfiles hooks. Home Manager
-does not manage this command or the skill discovery directory. The loader
-preserves other skill managers' entries, stops on name collisions before
-changing links, and removes only stale links it owns.
+Run `skills-sync` for a manual sync, or `skills-sync --offline` to relink
+from local checkouts without network. Existing entries in a discovery
+directory that the loader does not own (rbx-skills org snapshots, other
+managers, real directories) are left untouched and win over links.
 
-Private contents stay outside the public dotfiles and Nix store. The public
-`.gitignore` excludes `private-skills/`, local loader state, and new skill
-discovery entries by default. Existing public skill folders are allowlisted.
+Skill content stays outside the Nix store: the flake input pins only the
+loader script, and the checkout lives in `~/private-skills`. The
+`.gitignore` excludes all skill discovery directories and loader state.
+The old `github.rbx.com/jgoon/skills` repo is superseded by `Jish2/skills`.
 
 ## Layering
 

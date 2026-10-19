@@ -108,7 +108,6 @@
       "sshpass"
       "terminal-notifier"
       "tree-sitter-cli"
-      "vercel"
       # --- services ----------------------------------------------------------
       {
         name = "ollama";
@@ -138,6 +137,9 @@
       "cursor"
       "visual-studio-code"
       "datagrip"
+      # vercel moved from brews to casks: homebrew removed the core formula
+      # (formulae.brew.sh/api/formula/vercel.json is 404) and it's cask-only now
+      "vercel"
       # --- window management / ui utils --------------------------------------
       "rectangle"
       "alt-tab"

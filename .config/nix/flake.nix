@@ -4,6 +4,11 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
+    # personal skills loader (the tool only; skill content stays in
+    # ~/private-skills outside the store — see modules/home/skills-sync.nix)
+    skills.url = "github:Jish2/skills";
+    skills.flake = false;
+
     nix-darwin.url = "github:nix-darwin/nix-darwin/master";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
 
@@ -78,6 +83,7 @@
               home-manager.extraSpecialArgs = {
                 user = defaultUser;
                 selfAttr = host;
+                inherit inputs;
               };
               home-manager.users.${defaultUser}.imports = [
                 ./modules/home/common.nix

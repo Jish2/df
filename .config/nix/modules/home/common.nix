@@ -8,7 +8,10 @@
   home.stateVersion = "25.05";
   programs.home-manager.enable = true;
 
-  imports = [ ./ssh-aliases.nix ];
+  imports = [
+    ./ssh-aliases.nix
+    ./skills-sync.nix
+  ];
 
   # NOTE: backupFileExtension ("bak") is declared by the flake itself in the
   # darwin HM block (system-level) — can't live here; this file is a user

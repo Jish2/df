@@ -89,6 +89,9 @@ here:
 	else \
 	  sudo darwin-rebuild switch --flake $(FLAKE)#$(INFERRED) || sudo $(NIX) run $(NIXFLAGS) nix-darwin -- switch --flake $(FLAKE)#$(INFERRED); \
 	fi
+	@# private skills: sync after every successful switch (see modules/home/skills-sync.nix).
+	@# --optional: a missing checkout or network warns but never fails the rebuild.
+	@$(HOME)/.local/bin/skills-sync --optional || true
 
 # one explicit self-cleaning switch: same host config, but homebrew
 # cleanup = "zap" for this activation only (the -zap flake attr). run

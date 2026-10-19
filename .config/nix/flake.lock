@@ -199,7 +199,8 @@
         "lanzaboote": "lanzaboote",
         "nix-darwin": "nix-darwin",
         "nix-homebrew": "nix-homebrew",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "skills": "skills"
       }
     },
     "rust-overlay": {
@@ -241,6 +242,22 @@
       "original": {
         "owner": "oxalica",
         "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1792447982,
+        "narHash": "sha256-3N6aFeLPdYAc8OGmfTKljWEIVQARc31aQdY4krCO6lE=",
+        "owner": "Jish2",
+        "repo": "skills",
+        "rev": "b78f0dc6e4d98a7148f0dc01b6bb72aec07c4714",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Jish2",
+        "repo": "skills",
         "type": "github"
       }
     }

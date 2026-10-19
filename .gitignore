@@ -11,10 +11,13 @@
 .t3/
 
 # Private skill checkouts, loader state, and discovery links stay machine-local.
+# Skills are consolidated in github.com/Jish2/skills and linked by skills-sync
+# (installed + run by Home Manager on `make here`); nothing here is tracked.
 /private-skills/
 /.local/state/private-skills/
+/.local/share/skills/
 /.agents/skills/*
-!/.agents/skills/clean-pr-comments/
-!/.agents/skills/fleet-ssh-safety/
-!/.agents/skills/karabiner/
-!/.agents/skills/tailnet-join/
+/.tau/agent/skills/*
+/.cursor/skills/*
+/.codex/skills/*
+/.claude/skills/*
