@@ -92,7 +92,6 @@
       "pure"
       "ripgrep"
       "tmux"
-      "vercel"
       "wget"
       "yadm"
       "yarn"
@@ -127,6 +126,9 @@
       "visual-studio-code"
       "codex"
       "claude-code" # CLI; mini+pc only — brew cask floats current
+      # vercel moved from brews to casks: homebrew removed the core formula
+      # (formulae.brew.sh/api/formula/vercel.json is 404) and it's cask-only now
+      "vercel"
       # GUI client of T3's own background service (com.t3tools.t3code.service
       # on :3773 — FLEET.md "T3 Code server"). Leave Local environment off in
       # Nightly so it does not spawn a second server on :3774. The service is
