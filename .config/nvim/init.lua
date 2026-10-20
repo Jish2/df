@@ -293,6 +293,22 @@ require('lazy').setup({
       require('telescope').setup {
         -- You can put your default mappings / updates / etc. in here
         --  All the info you're looking for is in `:help telescope.setup()`
+        defaults = {
+          -- Include hidden files/dirs (e.g. .github) in grep pickers, but keep
+          -- .git contents out. Does NOT search gitignored paths; add '--no-ignore'
+          -- if you ever want that.
+          vimgrep_arguments = {
+            'rg',
+            '--color=never',
+            '--no-heading',
+            '--with-filename',
+            '--line-number',
+            '--column',
+            '--smart-case',
+            '--hidden',
+            '--glob=!.git/',
+          },
+        },
         extensions = {
           ['ui-select'] = {
             require('telescope.themes').get_dropdown(),
