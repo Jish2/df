@@ -14,6 +14,8 @@
     # make — the fleet Makefile (`make here`) is the only switch path, and
     # NixOS's minimal install doesn't ship gnumake
     gnumake
+    # skills-sync loader (github.com/Jish2/skills) is a python3 script
+    python3
     # herdr — from the pinned herdrdev flake input, so CLI and server come
     # from one closure and pc's herdr is reproducible from this repo
     # (replacing the manual `nix profile install` that a rebuilt pc lost).
