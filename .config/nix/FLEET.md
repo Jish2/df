@@ -54,21 +54,19 @@ loaded by `skills-sync`, which Home Manager installs from the flake's
 `skills` input (`modules/home/skills-sync.nix`) and runs on every
 `make here` activation. The loader clones the repo into `~/private-skills`,
 refreshes pinned third-party sources (`third-party.yaml`: mattpocock,
-pstack) into `~/.local/share/skills/third-party/`, and links the resolved
-skills into every harness's discovery directory (`~/.agents/skills`,
+pstack, cursor/plugins, ayghri/i-have-adhd, herdrdev/herdr) into
+`~/.local/share/skills/third-party/`, and links the resolved skills into
+every harness's discovery directory (`~/.agents/skills`,
 `~/.tau/agent/skills`, `~/.cursor/skills`, `~/.codex/skills`,
 `~/.claude/skills`).
 
-Repo layout and precedence (later wins on name collision within a harness):
-`third-party.yaml` → `common/` → `harnesses/<harness>/` →
-`machines/<role>/` → `machines/<role>/harnesses/<harness>/`. Local copies
-of a vendored skill shadow the pinned upstream one.
-
-The role comes from `make skills-machine`, which reads the existing host map
-without applying any configuration. For an unmapped machine, run
-`skills-sync --machine personal` (or another role) once to save a local
-override. Each role maps to the harnesses it uses (`ROLE_HARNESSES` in the
-loader); the default links all five.
+Skills follow the agentskills.io spec (SKILL.md with name + description,
+validatable with `npx skills-ref validate`). Routing is frontmatter-only:
+`metadata.machines: [roles]` and `metadata.harnesses: [names]` in each
+skill's SKILL.md restrict where it lands; omit a key to allow everywhere.
+All owned skills live in `common/`; there are no per-machine directories.
+A local `common/` copy with the same folder name shadows a vendored
+third-party skill. Vendored skills default to every machine and harness.
 
 Run `skills-sync` for a manual sync, or `skills-sync --offline` to relink
 from local checkouts without network. Existing entries in a discovery
