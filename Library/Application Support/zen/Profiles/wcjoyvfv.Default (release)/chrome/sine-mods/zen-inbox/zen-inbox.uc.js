@@ -64,6 +64,8 @@
   const CONTEXT_SEND_ID = "context_zen-send-to-inbox";
   const CONTEXT_REMOVE_ID = "context_zen-remove-from-inbox";
   const CONTEXT_RESET_ID = "context_zen-reset-inbox-timer";
+  const CONTEXT_UNLOAD_ID = "context_zen-inbox-unload";
+  const UNLOAD_ALL_CLASS = "zen-inbox-header-unload-all";
 
   const HOUR_MS = 60 * 60 * 1000;
   const MINUTE_MS = 60 * 1000;
@@ -599,6 +601,27 @@
       header.appendChild(count);
     }
 
+    if (!header.querySelector(`.${UNLOAD_ALL_CLASS}`)) {
+      // Unload-all affordance, mirroring Zen's folder reset button.
+      const unloadAll = document.createXULElement("toolbarbutton");
+      unloadAll.classList.add(
+        UNLOAD_ALL_CLASS,
+        "tab-reset-button",
+        "reset-icon",
+      );
+      unloadAll.setAttribute("tooltiptext", "Unload All Inbox Tabs");
+      unloadAll.setAttribute("aria-label", "Unload all Inbox tabs");
+      unloadAll.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const section = event.currentTarget.closest(
+          `.${PINNED_SECTION_CLASS}`,
+        );
+        unloadAllInboxTabsInSection(section);
+      });
+      header.appendChild(unloadAll);
+    }
+
     if (!header.hasAttribute(HEADER_READY_ATTRIBUTE)) {
       header.addEventListener("click", onInboxHeaderClick);
       header.addEventListener("keydown", onInboxHeaderKeyDown);
@@ -789,10 +812,15 @@
     const collapsed = workspace.hasAttribute("collapsedpinnedtabs");
     if (collapsed && hasInbox) {
       workspace.setAttribute(PRESERVE_COLLAPSE_ATTRIBUTE, "true");
-      pinnedSection.removeAttribute("hidden");
+      // Only mutate when the value actually differs: redundant setAttribute
+      // would re-trigger our own MutationObserver (which observes "hidden"
+      // on the pinned section) and loop forever.
+      if (pinnedSection.hasAttribute("hidden")) {
+        pinnedSection.removeAttribute("hidden");
+      }
     } else {
       workspace.removeAttribute(PRESERVE_COLLAPSE_ATTRIBUTE);
-      if (collapsed) {
+      if (collapsed && !pinnedSection.hasAttribute("hidden")) {
         pinnedSection.setAttribute("hidden", "true");
       }
     }
@@ -1027,7 +1055,14 @@
       resetTimers(contextTabs());
     });
 
-    contextMenu.append(separator, send, remove, reset);
+    const unload = document.createXULElement("menuitem");
+    unload.id = CONTEXT_UNLOAD_ID;
+    unload.setAttribute("label", "Unload Inbox Tab");
+    unload.addEventListener("command", () => {
+      unloadInboxTabs(contextTabs());
+    });
+
+    contextMenu.append(separator, send, remove, reset, unload);
     contextMenu.addEventListener("popupshowing", updateContextMenu);
   }
 
@@ -1046,11 +1081,23 @@
     const send = document.getElementById(CONTEXT_SEND_ID);
     const remove = document.getElementById(CONTEXT_REMOVE_ID);
     const reset = document.getElementById(CONTEXT_RESET_ID);
+    const unload = document.getElementById(CONTEXT_UNLOAD_ID);
+
+    const loadedInboxTabs = inboxTabs.filter((tab) => isUnloadableTab(tab));
 
     separator.hidden = !enabled || candidates.length === 0;
     send.hidden = !enabled || !hasRegularTabs;
     remove.hidden = !enabled || inboxTabs.length === 0;
     reset.hidden = !enabled || inboxTabs.length === 0;
+    unload.hidden = !enabled || loadedInboxTabs.length === 0;
+    if (!unload.hidden) {
+      unload.setAttribute(
+        "label",
+        loadedInboxTabs.length === 1
+          ? "Unload Inbox Tab"
+          : `Unload ${loadedInboxTabs.length} Inbox Tabs`,
+      );
+    }
   }
 
   function setInbox(tabs, inInbox) {
@@ -1078,6 +1125,53 @@
     }
 
     refreshSoon();
+  }
+
+  function isUnloadableTab(tab) {
+    // Mirror Firefox's own "Unload Tab" rules: already-unloaded tabs
+    // (no linkedPanel) and non-remote browsers (about: pages, etc.)
+    // cannot be unloaded.
+    return (
+      isTab(tab) &&
+      Boolean(tab.linkedPanel) &&
+      Boolean(tab.linkedBrowser?.isRemoteBrowser)
+    );
+  }
+
+  async function unloadInboxTabs(tabs) {
+    if (!Services.prefs.getBoolPref(ENABLED_PREF, true)) {
+      return;
+    }
+
+    const unloadable = tabs.filter(
+      (tab) => ensureState(tab)?.inInbox && isUnloadableTab(tab),
+    );
+    if (!unloadable.length) {
+      return;
+    }
+
+    // explicitUnloadTabs picks a different tab when the selection would be
+    // unloaded, and discards the rest. Unloaded tabs stay in the inbox.
+    await window.gBrowser.explicitUnloadTabs(unloadable);
+    refreshSoon();
+  }
+
+  function unloadAllInboxTabsInSection(section) {
+    const workspace = section?.closest("zen-workspace");
+    if (!workspace) {
+      return;
+    }
+
+    const unloadable = inboxTabsInSection(section).filter((tab) =>
+      isUnloadableTab(tab),
+    );
+    if (!unloadable.length) {
+      return;
+    }
+
+    // explicitUnloadTabs selects a different tab when the selection would be
+    // unloaded. Unloaded tabs stay in the inbox.
+    window.gBrowser.explicitUnloadTabs(unloadable).then(() => refreshSoon());
   }
 
   function resetTimers(tabs) {
@@ -1319,5 +1413,5 @@
     startWhenReady();
   }
   window.addEventListener("unload", uninitialize, { once: true });
-  window.__zenInbox = { refresh, setInbox, resetTimers };
+  window.__zenInbox = { refresh, setInbox, resetTimers, unloadInboxTabs };
 })();

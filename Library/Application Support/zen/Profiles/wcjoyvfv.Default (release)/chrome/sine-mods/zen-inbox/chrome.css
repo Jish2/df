@@ -65,6 +65,38 @@
     display: none;
   }
 
+  /* Unload-all affordance on the inbox header: only while hovered,
+     mirroring Zen's folder reset button behavior. */
+  & > .zen-inbox-header .zen-inbox-header-unload-all {
+    display: none;
+    appearance: none;
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    fill: currentColor;
+    -moz-context-properties: fill, fill-opacity;
+    padding: var(--tab-close-button-padding, 4px);
+    width: var(--size-item-medium, 28px);
+    height: var(--size-item-medium, 28px);
+    margin-inline-start: auto;
+    border-radius: var(--tab-border-radius, 4px);
+    list-style-image: url("chrome://browser/skin/zen-icons/unpin.svg");
+  }
+
+  & > .zen-inbox-header:is(:hover, :focus-within)
+    .zen-inbox-header-unload-all {
+    display: flex;
+  }
+
+  & > .zen-inbox-header .zen-inbox-header-unload-all:hover {
+    background-color: color-mix(in srgb, currentColor 10%, transparent);
+  }
+
+  & > .zen-inbox-header .zen-inbox-header-unload-all:hover:active {
+    background-color: color-mix(in srgb, currentColor 20%, transparent);
+  }
+
   & > .zen-inbox-header .zen-current-workspace-indicator-stack {
     align-items: center;
     display: flex;
