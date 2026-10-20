@@ -26,6 +26,11 @@
     daemon = true;
   };
 
+  # idle T3 Claude threads write a handoff before their prompt cache
+  # expires. needs the one-time Keychain + webhook setup in FLEET.md
+  # "Auto-handoff" first.
+  fleet.autoHandoff.enable = true;
+
   networking.hostName = "Joshuas-Mac-mini";
   networking.localHostName = "Joshuas-Mac-mini";
   networking.computerName = "Joshua’s Mac mini"; # (curly apostrophe, as shipped)
