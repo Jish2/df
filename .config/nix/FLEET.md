@@ -63,9 +63,11 @@ every harness's discovery directory (`~/.agents/skills`,
 Skills follow the agentskills.io spec (SKILL.md with name + description,
 validatable with `npx skills-ref validate`). Routing is centralized in
 the repo's `routing.yaml` — a complete manifest: every skill is declared
-there with explicit `machines` (roles listed by name) and `harnesses`
+there with `machines` (named groups like `fleet`, defined as explicit
+role lists at the top of the file, or explicit roles) and `harnesses`
 (`agents` expands to pi/cursor/codex/claude; tau is covered via
-~/.agents/skills and has no separate target). All owned skills live
+~/.agents/skills and has no separate target). A new machine role does
+not auto-inherit anything until it is added to its group or an entry. All owned skills live
 in `common/`; there are no per-machine directories. A local `common/`
 copy with the same folder name shadows a vendored third-party skill, and
 routing applies by name to both.
