@@ -3,6 +3,10 @@
 # description for the kept/dropped triage.
 { pkgs, lib, ... }:
 {
+  imports = [ ../../modules/darwin/fleet-vm-mac-bridge.nix ];
+
+  fleet.vmMacBridge.enable = true;
+
   # Corporate EDR (CrowdStrike Falcon) SIGKILLs the nix-built tailscaled's
   # ifconfig child at router.Up (argv matching) — the daemon crash-loops and
   # can never establish the tunnel. The App Store network-extension variant
