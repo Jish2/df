@@ -62,11 +62,12 @@ every harness's discovery directory (`~/.agents/skills`,
 
 Skills follow the agentskills.io spec (SKILL.md with name + description,
 validatable with `npx skills-ref validate`). Routing is centralized in
-the repo's `routing.yaml` — a per-skill table of `machines: [roles]` /
-`harnesses: [names]` exceptions; a skill absent from it lands everywhere.
-All owned skills live in `common/`; there are no per-machine directories.
-A local `common/` copy with the same folder name shadows a vendored
-third-party skill, and routing applies by name to both.
+the repo's `routing.yaml` — a complete manifest: every skill is declared
+there with explicit `machines` and `harnesses` (`fleet` expands to all
+roles, `agents` to the pi/cursor/codex/claude set). All owned skills live
+in `common/`; there are no per-machine directories. A local `common/`
+copy with the same folder name shadows a vendored third-party skill, and
+routing applies by name to both.
 
 Run `skills-sync` for a manual sync, or `skills-sync --offline` to relink
 from local checkouts without network. Existing entries in a discovery

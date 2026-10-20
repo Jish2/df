@@ -248,11 +248,11 @@
     "skills": {
       "flake": false,
       "locked": {
-        "lastModified": 1792519326,
-        "narHash": "sha256-ZJ8wLhZ7i/5UGugr2QfF3foRmbLm/j15zAcnZVdtEcE=",
+        "lastModified": 1792519682,
+        "narHash": "sha256-fzdG+mvPF81AAtCiiTD8Kh1NJDrmAcC+A4Xjtm4YRKI=",
         "owner": "Jish2",
         "repo": "skills",
-        "rev": "aabb6942a9d1bdb29281758b8dd250a28bb24a6c",
+        "rev": "97a0cb8529cae945cb87ada89f9b4cb8bd09b35d",
         "type": "github"
       },
       "original": {
