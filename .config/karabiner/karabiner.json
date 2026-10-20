@@ -2056,7 +2056,7 @@
                         ]
                     },
                     {
-                        "description": "EarPods: tap any remote button = Handy dictation; hold center ≥700ms = music; hold +/− = volume",
+                        "description": "EarPods: tap center = Handy dictation; hold center ≥700ms = music; tap +/− = volume step; hold +/− = volume repeat",
                         "manipulators": [
                             {
                                 "conditions": [
@@ -2102,8 +2102,7 @@
                                     "basic.to_if_alone_timeout_milliseconds": 700,
                                     "basic.to_if_held_down_threshold_milliseconds": 700
                                 },
-                                "to": [{ "shell_command": "/Users/jgoon/.config/karabiner/scripts/earpods-press.sh vol+" }],
-                                "to_if_alone": [{ "shell_command": "/Users/jgoon/.config/karabiner/scripts/earpods-release.sh" }],
+                                "to_if_alone": [{ "consumer_key_code": "volume_increment" }],
                                 "to_if_held_down": [
                                     {
                                         "consumer_key_code": "volume_increment",
@@ -2130,8 +2129,7 @@
                                     "basic.to_if_alone_timeout_milliseconds": 700,
                                     "basic.to_if_held_down_threshold_milliseconds": 700
                                 },
-                                "to": [{ "shell_command": "/Users/jgoon/.config/karabiner/scripts/earpods-press.sh vol-" }],
-                                "to_if_alone": [{ "shell_command": "/Users/jgoon/.config/karabiner/scripts/earpods-release.sh" }],
+                                "to_if_alone": [{ "consumer_key_code": "volume_decrement" }],
                                 "to_if_held_down": [
                                     {
                                         "consumer_key_code": "volume_decrement",

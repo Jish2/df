@@ -338,8 +338,22 @@ const earpodsHoldParams = {
   'basic.to_if_held_down_threshold_milliseconds': EARPODS_HOLD_MS,
 }
 
+// Volume keys must NOT go through the dictation scripts — a tap there is a
+// volume step, not dictation. No plain `to`: outputting volume on keydown
+// would fire immediately and race to_if_held_down's repeat. to_if_alone
+// emits one step on key-up (tap), to_if_held_down repeats while held; the
+// two are mutually exclusive so a hold never double-steps.
+const earpodsVolumeMap = (
+  key: 'volume_increment' | 'volume_decrement',
+) =>
+  mapConsumerKey(key)
+    .toIfAlone({ consumer_key_code: key })
+    .toIfHeldDown({ halt: true, repeat: true, consumer_key_code: key })
+    .parameters(earpodsHoldParams)
+    .condition(ifDevice(appleEarpods))
+
 const earpodsRule = rule(
-  `EarPods: tap any remote button = Handy dictation; hold center ≥${EARPODS_HOLD_MS}ms = music; hold +/− = volume`,
+  `EarPods: tap center = Handy dictation; hold center ≥${EARPODS_HOLD_MS}ms = music; tap +/− = volume step; hold +/− = volume repeat`,
 ).manipulators([
   mapConsumerKey('play_or_pause')
     .to(earpodsScript('earpods-press.sh', 'center'))
@@ -347,18 +361,8 @@ const earpodsRule = rule(
     .toIfHeldDown({ halt: true, ...earpodsScript('earpods-music-toggle.sh') })
     .parameters(earpodsHoldParams)
     .condition(ifDevice(appleEarpods)),
-  mapConsumerKey('volume_increment')
-    .to(earpodsScript('earpods-press.sh', 'vol+'))
-    .toIfAlone(earpodsScript('earpods-release.sh'))
-    .toIfHeldDown({ halt: true, repeat: true, consumer_key_code: 'volume_increment' })
-    .parameters(earpodsHoldParams)
-    .condition(ifDevice(appleEarpods)),
-  mapConsumerKey('volume_decrement')
-    .to(earpodsScript('earpods-press.sh', 'vol-'))
-    .toIfAlone(earpodsScript('earpods-release.sh'))
-    .toIfHeldDown({ halt: true, repeat: true, consumer_key_code: 'volume_decrement' })
-    .parameters(earpodsHoldParams)
-    .condition(ifDevice(appleEarpods)),
+  earpodsVolumeMap('volume_increment'),
+  earpodsVolumeMap('volume_decrement'),
 ])
 
 // ---------------------------------------------------------------------------
