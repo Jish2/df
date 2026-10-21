@@ -108,9 +108,11 @@ def main() -> None:
         sys.exit(1)
 
     for path in handoffs.PROJECTS_DIR.glob("*/*.jsonl"):
-        # Cheap prefilter on file mtime; the transcript is only parsed near the window.
+        # Cheap prefilter on file mtime. It only bounds idle time from below: Claude Code
+        # appends untimestamped records (last-prompt, cost-state) ~30 min after a session
+        # goes quiet, so a recently touched file can still be inside the window.
         mtime_age = (now.timestamp() - path.stat().st_mtime) / 60
-        if not (a.idle_min - 5 <= mtime_age <= a.idle_max + 5):
+        if mtime_age > a.idle_max + 5:
             continue
         s = handoffs.parse_session(path)
         sid = s["sessionId"]
