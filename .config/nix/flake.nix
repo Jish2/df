@@ -68,6 +68,7 @@
             ./modules/darwin/cloudflared-ssh.nix
             ./modules/darwin/remote-access.nix
             ./modules/darwin/auto-handoff
+            ./modules/darwin/fleet-t3s.nix
             ./hosts/${host}
             home-manager.darwinModules.home-manager
             nix-homebrew.darwinModules.nix-homebrew
@@ -108,6 +109,7 @@
           modules = [
             ./modules/home/common.nix
             ./modules/home/linux.nix
+            ./modules/home/t3s.nix
             ./hosts/${host}
             # backupFileExtension is darwin-integration-only; standalone
             # HM takes -b bak on the CLI (make devspace)
@@ -138,6 +140,7 @@
               home-manager.users.${defaultUser}.imports = [
                 ./modules/home/common.nix
                 ./modules/home/linux.nix
+                ./modules/home/t3s.nix
                 ./hosts/${host}              ];
             }
           ];

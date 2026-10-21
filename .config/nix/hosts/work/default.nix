@@ -17,6 +17,10 @@
   # battery — the laptop still sleeps normally in a bag.
   fleet.keepAwake.enable = true;
 
+  # keep this machine's t3s sidecar fresh (search surface for agents; see
+  # common/t3-history skill). user confirmed work machines: this laptop + devspace.
+  fleet.t3s.enable = true;
+
   networking.hostName = "HQ-KP2HJMHQ7R";
   networking.localHostName = "HQ-KP2HJMHQ7R";
   networking.computerName = "HQ-KP2HJMHQ7R";

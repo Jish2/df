@@ -5,6 +5,8 @@
 {
   fleet.herdr.enable = true;
 
+  fleet.t3s.enable = true;
+
   # networking.hostName = "...";
   # networking.localHostName = "...";
 

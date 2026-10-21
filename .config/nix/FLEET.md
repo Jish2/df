@@ -542,6 +542,29 @@ lanzaboote's measured boot (`boot.lanzaboote.measuredBoot`, systemd-pcrlock over
 0/4/7). It's still experimental upstream, so it's a follow-up once this is
 stable.
 
+## T3 thread sidecar as a fleet-wide service
+
+`t3s` (from private-skills `common/t3-history`) indexes each machine's
+T3 Code store into a small FTS5 sidecar (`~/.local/share/t3s/index.db`);
+`t3s sync` pulls other boxes' sidecars over ssh, so one search sees the
+whole fleet's T3 threads. Every box keeps its LOCAL sidecar fresh via
+nix so any other box can pull on demand — sync is deliberately
+on-demand (run by the agent/user at search time), not a second timer:
+
+- **macs (work / mini / personal)** — `fleet.t3s.enable = true` in each
+  host: LaunchAgent `org.jgoon.t3s-index` runs `t3s index` every
+  30 minutes (RunAtLoad; Nice 10).
+- **linux (pc / devspace)** — `modules/home/t3s.nix` (imported by the
+  flake for both HM paths): systemd user service + timer, same cadence.
+- The `t3s` binary itself ships via private-skills
+  (`common/t3-history/bin/t3s`, delivered by skills-sync to every
+  harness dir); the nix wrappers resolve it at start, like herdr —
+  nix owns the lifecycle, not the version.
+
+Machine groups (work = laptop + devspace, personal = mini + pc + the
+personal laptop) default in the script and can be overridden per
+machine at `~/.config/t3s/groups.toml`.
+
 ## If onboarding hurt: rollback
 
 - packages: cleanup defaults to `"none"` — nothing was ever uninstalled,

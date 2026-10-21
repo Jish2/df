@@ -31,6 +31,10 @@
   # "Auto-handoff" first.
   fleet.autoHandoff.enable = true;
 
+  # t3s sidecar indexing (personal box, but syncing its sidecar is how the
+  # other machines see mini's T3 threads; user's group map: mini = personal)
+  fleet.t3s.enable = true;
+
   networking.hostName = "Joshuas-Mac-mini";
   networking.localHostName = "Joshuas-Mac-mini";
   networking.computerName = "Joshua’s Mac mini"; # (curly apostrophe, as shipped)
