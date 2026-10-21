@@ -279,8 +279,9 @@ pane ...`), the sudo password as the human gate, fresh-connection verify
 before closing the lifeline. Do not improvise a substitute (tmux, nohup,
 `ssh -t`). Shape:
 
-- plan (`make plan`) → pane on mini's herdr server → lifeline ssh session
-  with the rollback line staged → `sudo make here` in the pane → user
+- plan (`make plan`) → pane on mini's herdr server → lifeline (an open
+  ssh session, or a live T3 Connect session while jgoon is logged in) with
+  the rollback line staged → `sudo make here` in the pane → user
   types the sudo password once (Touch-ID can't fire remotely) → watch to
   completion (`EXIT_CODE=`) → fresh `ssh mini 'echo ok'` → `make doctor`.
 
