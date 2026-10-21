@@ -430,6 +430,56 @@ one version, tailnet IP only) and `com.jgoon.cloudflared.t3code` (the
 `t3code.jgoon.com` tunnel). Delete that tunnel and its DNS record in
 Cloudflare once Connect works.
 
+## Auto-handoff (mini)
+
+Reopening a T3 thread after its 1-hour prompt cache expires re-bills its
+whole context. On mini, `fleet.autoHandoff` (modules/darwin/auto-handoff)
+runs a LaunchAgent, `org.jgoon.auto-handoff`, every 5 minutes. When a T3
+Claude thread has been idle 40–50 minutes with at least 60k tokens of
+context, it POSTs a signed request to a T3 webhook task. That task's Haiku
+agent sends the thread a message asking it to write a handoff doc to
+`~/.handoffs/<project>/` while its cache is still cheap to read. The
+watcher itself makes no model calls. Back at any machine, `/catch-up` (the
+`catch-up` skill in Jish2/skills) finds that doc, or writes one from the
+transcript when there isn't one.
+
+It's a LaunchAgent for the same reason T3 is: both only run while jgoon is
+logged in, and the webhook URL and secret sit in the login Keychain.
+
+One-time setup, from a logged-in session on mini (`mini-screen`), before
+the switch that enables it:
+
+1. Check the skill is synced: `ls ~/.claude/skills/catch-up/scripts/handoffs.py`.
+2. Create the signing secret and copy it to the clipboard:
+   ```sh
+   security add-generic-password -a "$USER" -s session-handoff-webhook-secret -w "$(openssl rand -hex 32)"
+   security find-generic-password -a "$USER" -s session-handoff-webhook-secret -w | tr -d '\n' | pbcopy
+   ```
+3. In T3, start a thread on **Haiku** titled "Auto-handoff relay" and send:
+   > Create a webhook scheduled task bound to this thread. Use the prompt below the line in `~/.config/nix/modules/darwin/auto-handoff/relay-prompt.md`, verbatim. Signature: header `x-auto-handoff-signature`, encoding `hex`, prefix `sha256=`; ask me for the secret with request_secret. Then give me the webhookUrl.
+
+   Paste the secret from step 2 when asked. This needs T3 Connect.
+4. Store the URL: `security add-generic-password -U -a "$USER" -s session-handoff-webhook-url -w '<webhookUrl>'`
+5. Switch (`make here`, per the remote protocol above).
+6. Check: `/usr/bin/python3 -I ~/.config/nix/modules/darwin/auto-handoff/auto_handoff.py --dry-run -v`
+   lists what it would do right now. The log is `~/Library/Logs/auto-handoff.log`.
+
+Behaviour:
+
+- Only sessions T3 started count (`entrypoint: sdk-ts` in Claude Code's
+  session logs); CLI sessions are skipped.
+- Each idle stretch triggers at most once (ledger:
+  `~/.handoffs/.auto-handoff-ledger.json`), and a thread whose last prompt
+  was already an `[auto-handoff]` is skipped.
+- The relay sends with `mode: "queue"`: if you come back in the same few
+  seconds, the handoff waits behind your turn instead of interrupting it.
+- Mapping a session to its thread reads T3's private state DB
+  (`~/.t3/userdata/statev2.sqlite`, read-only). If a T3 update changes the
+  schema, runs log "no T3 thread found" and send nothing.
+
+Tune with `fleet.autoHandoff.{idleMin,idleMax,minTokens}`; turn it off with
+`enable = false`.
+
 ## pc Secure Boot + TPM disk unlock
 
 Decided 2026-10-12: pc's LUKS volumes unlock from the TPM (PCR 7) so the box
