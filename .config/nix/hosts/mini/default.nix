@@ -12,6 +12,13 @@
   # tailnet (work). connector token is a hand-installed file — see the module.
   fleet.cloudflaredSsh.enable = true;
 
+  # Remote Login + Screen Sharing kept on (one-way; see the module). ssh is
+  # limited to Administrators + agent, as found on the machine.
+  fleet.remoteAccess = {
+    enable = true;
+    sshAllowUsers = [ "agent" ];
+  };
+
   # headless always-on box, auto-login off: run herdr from boot without a
   # login session (LaunchDaemon as the user), not a LaunchAgent.
   fleet.herdr = {

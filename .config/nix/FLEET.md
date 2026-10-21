@@ -195,7 +195,9 @@ Not declarable (one-time, by hand):
   cached in `~/.cloudflared/` for the session duration.
 - **`authorized_keys`** — work's `id_ed25519.pub` on mini and pc (keys stay
   imperative, see ssh-aliases.nix).
-- **Screen Sharing on mini** — no nix-darwin module; it is on.
+- **VNC password on mini** — Screen Sharing itself is declared
+  (`fleet.remoteAccess`, modules/darwin/remote-access.nix); the password
+  for non-Apple VNC viewers is a secret and stays hand-set.
 - **leaving the tailnet** — uninstall the App Store Tailscale on work,
   delete the node in headscale, then drop `work` from `fleet.nix` (that last
   part is declarative; it removes `ssh work` from the other boxes).
@@ -219,8 +221,8 @@ on Ctrl-C.
 
 Security notes: Access is the outer gate — nothing reaches mini's sshd
 without a Cloudflare account-member login plus WebAuthn. mini's sshd itself
-is unmanaged (hard rule 3) and still offers password auth; key auth is what
-the aliases use.
+is declared on but its config is stock (hard rule 3) and still offers
+password auth; key auth is what the aliases use.
 
 Rollout order (each step keeps a working path): terraform apply → token
 file on mini → `make here` on mini (fleet-ssh-safety procedure) →
@@ -242,7 +244,9 @@ Authoritative copy: `.agents/skills/fleet-ssh-safety/SKILL.md` (agent-facing)
    "Off-tailnet access") — mini's `org.jgoon.cloudflared-ssh` daemon is that
    path, treat it like tailscaled. Joins wizard-only; no auth keys in the
    repo.
-3. sshd / Remote Login unmanaged and on — never touch them.
+3. Remote Login and mini's Screen Sharing are declared on, one-way
+   (`fleet.remoteAccess`): nothing may switch them off. Never edit
+   `/etc/ssh/sshd_config`, never add sshd settings without a lifeline.
 4. After any switch on a remote box, verify a fresh ssh session before
    closing the lifeline (broken `/etc/zsh*` kills new sessions only).
 5. Removals only via `make here-zap` after a clean `make plan`; plain

@@ -183,6 +183,16 @@ doctor:
 	else \
 	  echo "!! nothing listening on :22 — Remote Login is off (only load-bearing on machines reached over ssh, e.g. mini)"; \
 	fi
+	@echo "== Screen Sharing =="
+	@if [ "$(INFERRED)" = mini ]; then \
+	  if nc -z 127.0.0.1 5900 2>/dev/null; then \
+	    echo "ok: listening on :5900"; \
+	  else \
+	    echo "!! nothing listening on :5900 — Screen Sharing is off (mini-screen / ssh mini-vnc can't connect)"; \
+	  fi; \
+	else \
+	  echo "n/a on this host: only mini's Screen Sharing is declared (fleet.remoteAccess)"; \
+	fi
 	@echo "== shell init files (every new ssh session parses these) =="
 	@for f in /etc/zshenv /etc/zshrc /etc/zprofile; do \
 	  if [ -f $$f ]; then \
