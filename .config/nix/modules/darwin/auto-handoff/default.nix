@@ -11,6 +11,11 @@
 # threads to hand off), and the webhook URL + signing secret live in the
 # login Keychain, which is only unlocked inside a login session.
 #
+# Declared through Home Manager (~/Library/LaunchAgents, bootstrapped into
+# gui/<uid>), not nix-darwin's launchd.agents: nix-darwin's activation runs
+# as root and `launchctl load`s /Library/LaunchAgents into the SYSTEM domain,
+# so the job ran as root with HOME=/var/root (no skill, no Keychain).
+#
 # Runtime dependencies outside nix:
 #   - handoffs.py from the catch-up skill (Jish2/skills, linked to
 #     ~/.claude/skills/catch-up by skills-sync)
@@ -61,8 +66,9 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    launchd.agents.auto-handoff = {
-      serviceConfig = {
+    home-manager.users.${user}.launchd.agents.auto-handoff = {
+      enable = true;
+      config = {
         Label = "org.jgoon.auto-handoff";
         # system python (stdlib only); the store copy of the script imports
         # handoffs.py from the synced skill at run time
