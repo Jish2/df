@@ -80,6 +80,8 @@ def post(url: str, secret: str, payload: dict) -> None:
     sig = hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
     req = urllib.request.Request(url, data=body, method="POST", headers={
         "Content-Type": "application/json",
+        # Cloudflare in front of relay.t3.codes rejects the default Python-urllib agent (error 1010)
+        "User-Agent": "session-handoff-auto/1",
         "X-Auto-Handoff-Signature": f"sha256={sig}",
     })
     with urllib.request.urlopen(req, timeout=30) as r:
