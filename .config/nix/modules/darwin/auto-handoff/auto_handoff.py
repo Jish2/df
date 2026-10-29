@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Ask idle T3 Claude threads to write a handoff before their prompt cache expires.
+"""Ask idle T3 Claude threads to /compact before their prompt cache expires.
 
 Run every few minutes by launchd. For each Claude session T3 started, it checks how
 long the session has been idle and how big its context is. When a session is inside
 the idle window (default 40-50 min; the cache lasts 60) and large enough to be worth
-it, it POSTs a signed request to a T3 webhook task, whose agent sends the handoff
-message into that thread. No model runs unless a thread qualifies.
+it, it POSTs a signed request to a T3 webhook task, whose agent queues `/compact`
+into that thread. No model runs unless a thread qualifies.
 
   auto_handoff.py --dry-run -v   show what it would do, without sending anything
 """
@@ -75,6 +75,18 @@ def prune(ledger: dict, now: dt.datetime) -> dict:
     return {k: v for k, v in ledger.items() if parse_ts(v["sentAt"]) > keep}
 
 
+def last_prompt_is_compact(path: Path) -> bool:
+    """A compacted session still logs its old, large context until the next real turn, and
+    the compact itself restarts the idle clock, so without this it would be compacted again
+    every idle stretch."""
+    last = ""
+    for e in handoffs.iter_entries(path):
+        text = handoffs.prompt_text(e)
+        if text is not None:
+            last = text
+    return "<command-name>/compact</command-name>" in last
+
+
 def post(url: str, secret: str, payload: dict) -> None:
     body = json.dumps(payload, separators=(",", ":"), sort_keys=True).encode()
     sig = hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
@@ -128,10 +140,10 @@ def main() -> None:
             skip = "outside idle window"
         elif s["contextTokens"] < a.min_tokens:
             skip = "context below threshold"
-        elif s["lastPromptIsAutoHandoff"]:
-            skip = "already handed off"
         elif ledger.get(sid, {}).get("lastActivity") == s["lastActivity"]:
             skip = "already sent for this idle stretch"
+        elif last_prompt_is_compact(path):
+            skip = "already compacted"
         if skip:
             if a.verbose:
                 log(f"skip {label}: {skip}")

@@ -438,11 +438,11 @@ whole context. On mini, `fleet.autoHandoff` (modules/darwin/auto-handoff)
 runs a LaunchAgent, `org.jgoon.auto-handoff`, every 5 minutes. When a T3
 Claude thread has been idle 40–50 minutes with at least 60k tokens of
 context, it POSTs a signed request to a T3 webhook task. That task's Haiku
-agent sends the thread a message asking it to write a handoff doc to
-`~/.handoffs/<project>/` while its cache is still cheap to read. The
-watcher itself makes no model calls. Back at any machine, `/catch-up` (the
-`catch-up` skill in Jish2/skills) finds that doc, or writes one from the
-transcript when there isn't one.
+agent queues `/compact` into the thread while its cache is still warm, so
+the next message re-bills a summary instead of the whole history. The
+watcher itself makes no model calls. (The name predates compacting: it
+used to ask the thread for a handoff doc instead. `/catch-up` in
+Jish2/skills still reads those docs and can write one from a transcript.)
 
 It's a LaunchAgent for the same reason T3 is: both only run while jgoon is
 logged in, and the webhook URL and secret sit in the login Keychain.
@@ -456,10 +456,13 @@ the switch that enables it:
    security add-generic-password -a "$USER" -s session-handoff-webhook-secret -w "$(openssl rand -hex 32)"
    security find-generic-password -a "$USER" -s session-handoff-webhook-secret -w | tr -d '\n' | pbcopy
    ```
-3. In T3, start a thread on **Haiku** titled "Auto-handoff relay" and send:
+3. In T3, start a thread on **Haiku** titled "Auto-compact relay" and send:
    > Create a webhook scheduled task bound to this thread. Use the prompt below the line in `~/.config/nix/modules/darwin/auto-handoff/relay-prompt.md`, verbatim. Signature: header `x-auto-handoff-signature`, encoding `hex`, prefix `sha256=`; ask me for the secret with request_secret. Then give me the webhookUrl.
 
-   Paste the secret from step 2 when asked. This needs T3 Connect.
+   Paste the secret from step 2 when asked. This needs T3 Connect. The task
+   runs on the model of the thread that creates it, and a secret is only
+   usable in the project of the thread that asked for it, so create the task
+   from the thread itself, not into another project.
 4. Store the URL: `security add-generic-password -U -a "$USER" -s session-handoff-webhook-url -w '<webhookUrl>'`
 5. Switch (`make here`, per the remote protocol above).
 6. Check: `/usr/bin/python3 -I ~/.config/nix/modules/darwin/auto-handoff/auto_handoff.py --dry-run -v`
@@ -471,9 +474,11 @@ Behaviour:
   session logs); CLI sessions are skipped.
 - Each idle stretch triggers at most once (ledger:
   `~/.handoffs/.auto-handoff-ledger.json`), and a thread whose last prompt
-  was already an `[auto-handoff]` is skipped.
+  was already `/compact` is skipped. Otherwise the compact would restart the
+  idle clock and, with its old context still logged, fire again.
 - The relay sends with `mode: "queue"`: if you come back in the same few
-  seconds, the handoff waits behind your turn instead of interrupting it.
+  seconds, the compact waits behind your turn instead of interrupting it. The
+  message must be exactly `/compact`; any other text is an ordinary prompt.
 - Mapping a session to its thread reads T3's private state DB
   (`~/.t3/userdata/statev2.sqlite`, read-only). If a T3 update changes the
   schema, runs log "no T3 thread found" and send nothing.
