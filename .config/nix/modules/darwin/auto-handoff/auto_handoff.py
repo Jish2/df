@@ -75,17 +75,19 @@ def prune(ledger: dict, now: dt.datetime) -> dict:
     return {k: v for k, v in ledger.items() if parse_ts(v["sentAt"]) > keep}
 
 
-def last_prompt_is_compact(path: Path) -> bool:
-    """A compacted session still logs its old, large context until the next real turn, and
-    the compact itself restarts the idle clock, so without this it would be compacted again
-    every idle stretch."""
-    last = ""
+def compacted_since_last_turn(path: Path) -> bool:
+    """A compacted session still logs its old, large context until the model's next reply,
+    and /compact itself restarts the idle clock, so without this it would be compacted again
+    every idle stretch (even after local commands like /context)."""
+    pending = False
     for e in handoffs.iter_entries(path):
-        text = handoffs.prompt_text(e)
-        # /compact logs its "Compacted" reply as a user entry right after the command
-        if text is not None and not text.startswith("<local-command-stdout>"):
-            last = text
-    return "<command-name>/compact</command-name>" in last
+        if e.get("type") == "assistant" and not e.get("isSidechain") and (e.get("message") or {}).get("usage"):
+            pending = False
+        elif e.get("type") == "system" and e.get("subtype") == "compact_boundary":
+            pending = True
+        elif "<command-name>/compact</command-name>" in (handoffs.prompt_text(e) or ""):
+            pending = True
+    return pending
 
 
 def post(url: str, secret: str, payload: dict) -> None:
@@ -143,7 +145,7 @@ def main() -> None:
             skip = "context below threshold"
         elif ledger.get(sid, {}).get("lastActivity") == s["lastActivity"]:
             skip = "already sent for this idle stretch"
-        elif last_prompt_is_compact(path):
+        elif compacted_since_last_turn(path):
             skip = "already compacted"
         if skip:
             if a.verbose:
