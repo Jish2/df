@@ -1,14 +1,14 @@
-# fleet.autoHandoff — have idle T3 Claude threads write a handoff while their
-# prompt cache is still warm (FLEET.md "Auto-handoff").
+# fleet.autoHandoff — compact idle T3 Claude threads while their prompt cache
+# is still warm (FLEET.md "Auto-handoff"; the name predates compacting).
 #
 # Reopening a thread after its 1-hour cache expires re-bills its whole
 # context. Every 5 minutes auto_handoff.py reads Claude Code's session logs;
 # a T3 thread that has sat idle 40–50 minutes with enough context gets a
-# signed POST to a T3 webhook task, whose Haiku agent sends the thread its
-# handoff message. The watcher itself makes no model calls.
+# signed POST to a T3 webhook task, whose Haiku agent queues `/compact` into
+# the thread. The watcher itself makes no model calls.
 #
 # LaunchAgent, not a daemon: T3's own service is a LaunchAgent (no T3 → no
-# threads to hand off), and the webhook URL + signing secret live in the
+# threads to compact), and the webhook URL + signing secret live in the
 # login Keychain, which is only unlocked inside a login session.
 #
 # Declared through Home Manager (~/Library/LaunchAgents, bootstrapped into
@@ -36,19 +36,19 @@ let
 in
 {
   options.fleet.autoHandoff = {
-    enable = lib.mkEnableOption "auto-handoff watcher for idle T3 Claude threads";
+    enable = lib.mkEnableOption "auto-compact watcher for idle T3 Claude threads";
 
     idleMin = lib.mkOption {
       type = lib.types.int;
       default = 40;
-      description = "Minutes idle before a thread is handed off.";
+      description = "Minutes idle before a thread is compacted.";
     };
 
     idleMax = lib.mkOption {
       type = lib.types.int;
       default = 50;
       description = ''
-        Latest idle minute to hand off at. The cache lasts 60, and the
+        Latest idle minute to compact at. The cache lasts 60, and the
         window must be wider than the 5-minute run interval so every idle
         stretch is caught once.
       '';
@@ -59,8 +59,7 @@ in
       default = 60000;
       description = ''
         Skip threads with less context. Every T3 Claude thread starts at
-        ~25k; a handoff pays off above ~50k if you return to half your
-        threads, ~70k if you return to a third.
+        ~25k, so compacting a small one saves little.
       '';
     };
   };
