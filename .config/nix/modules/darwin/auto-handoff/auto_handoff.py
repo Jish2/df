@@ -82,7 +82,8 @@ def last_prompt_is_compact(path: Path) -> bool:
     last = ""
     for e in handoffs.iter_entries(path):
         text = handoffs.prompt_text(e)
-        if text is not None:
+        # /compact logs its "Compacted" reply as a user entry right after the command
+        if text is not None and not text.startswith("<local-command-stdout>"):
             last = text
     return "<command-name>/compact</command-name>" in last
 
