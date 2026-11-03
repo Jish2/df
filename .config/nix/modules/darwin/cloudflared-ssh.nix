@@ -43,9 +43,10 @@ in
 
   config = lib.mkIf config.fleet.cloudflaredSsh.enable {
     launchd.daemons.cloudflared-ssh = {
+      # wait4path-wrapped, like tailscaled (see modules/darwin/tailscaled.nix)
+      command = "${startScript}";
       serviceConfig = {
         Label = "org.jgoon.cloudflared-ssh";
-        ProgramArguments = [ "${startScript}" ];
         UserName = user;
         # daemons do not inherit a user session environment
         EnvironmentVariables.HOME = home;
