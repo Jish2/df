@@ -431,60 +431,50 @@ one version, tailnet IP only) and `com.jgoon.cloudflared.t3code` (the
 `t3code.jgoon.com` tunnel). Delete that tunnel and its DNS record in
 Cloudflare once Connect works.
 
-## Auto-handoff (mini)
+## Auto-compact (mini)
 
 Reopening a T3 thread after its 1-hour prompt cache expires re-bills its
-whole context. On mini, `fleet.autoHandoff` (modules/darwin/auto-handoff)
-runs a LaunchAgent, `org.jgoon.auto-handoff`, every 5 minutes. When a T3
+whole context. On mini, `fleet.autoCompact` (modules/darwin/auto-compact)
+runs a LaunchAgent, `org.jgoon.auto-compact`, every 5 minutes. When a T3
 Claude thread has been idle 40–50 minutes with at least 60k tokens of
-context, it POSTs a signed request to a T3 webhook task. That task's Haiku
-agent queues `/compact` into the thread while its cache is still warm, so
-the next message re-bills a summary instead of the whole history. The
-watcher itself makes no model calls. (The name predates compacting: it
-used to ask the thread for a handoff doc instead. `/catch-up` in
-Jish2/skills still reads those docs and can write one from a transcript.)
+context, it sends the thread `/compact` with `t3 thread send` while its
+cache is still warm, so the next message re-bills a summary instead of the
+whole history. The watcher itself makes no model calls.
 
 It's a LaunchAgent for the same reason T3 is: both only run while jgoon is
-logged in, and the webhook URL and secret sit in the login Keychain.
+logged in.
 
-One-time setup, from a logged-in session on mini (`mini-screen`), before
-the switch that enables it:
-
-1. Check the skill is synced: `ls ~/.claude/skills/catch-up/scripts/handoffs.py`.
-2. Create the signing secret and copy it to the clipboard:
-   ```sh
-   security add-generic-password -a "$USER" -s session-handoff-webhook-secret -w "$(openssl rand -hex 32)"
-   security find-generic-password -a "$USER" -s session-handoff-webhook-secret -w | tr -d '\n' | pbcopy
-   ```
-3. In T3, start a thread on **Haiku** titled "Auto-compact relay" and send:
-   > Create a webhook scheduled task bound to this thread. Use the prompt below the line in `~/.config/nix/modules/darwin/auto-handoff/relay-prompt.md`, verbatim. Signature: header `x-auto-handoff-signature`, encoding `hex`, prefix `sha256=`; ask me for the secret with request_secret. Then give me the webhookUrl.
-
-   Paste the secret from step 2 when asked. This needs T3 Connect. The task
-   runs on the model of the thread that creates it, and a secret is only
-   usable in the project of the thread that asked for it, so create the task
-   from the thread itself, not into another project.
-4. Store the URL: `security add-generic-password -U -a "$USER" -s session-handoff-webhook-url -w '<webhookUrl>'`
-5. Switch (`make here`, per the remote protocol above).
-6. Check: `/usr/bin/python3 -I ~/.config/nix/modules/darwin/auto-handoff/auto_handoff.py --dry-run -v`
-   lists what it would do right now. The log is `~/Library/Logs/auto-handoff.log`.
+No setup beyond the switch. Check it with
+`/usr/bin/python3 -I ~/.config/nix/modules/darwin/auto-compact/auto_compact.py --dry-run -v`,
+which lists what it would do right now. The log is
+`~/Library/Logs/auto-compact.log`.
 
 Behaviour:
 
-- Only sessions T3 started count (`entrypoint: sdk-ts` in Claude Code's
-  session logs); CLI sessions are skipped.
-- Each idle stretch triggers at most once (ledger:
-  `~/.handoffs/.auto-handoff-ledger.json`), and a thread whose last prompt
-  was already `/compact` is skipped. Otherwise the compact would restart the
-  idle clock and, with its old context still logged, fire again.
-- The relay sends with `mode: "queue"`: if you come back in the same few
-  seconds, the compact waits behind your turn instead of interrupting it. The
-  message must be exactly `/compact`; any other text is an ordinary prompt.
+- Only sessions T3 started count (`entrypoint` `sdk-ts`, or `t3-code` from
+  T3 0.1.7 on, in Claude Code's session logs); CLI sessions are skipped.
+- Before sending, `t3 thread show --json` must say the thread isn't busy,
+  settled, archived or a subagent, and still runs on the provider that owns
+  the session.
+- It uses the `t3` CLI of the running server's version
+  (`~/.t3/runtime/versions/<serverVersion>/t3`, from
+  `~/.t3/userdata/server-runtime.json`), not `t3` on PATH, which can lag.
+- It waits up to 10 minutes for each compact. Each idle stretch is
+  compacted at most once (ledger: `~/.local/state/auto-compact/ledger.json`),
+  and a thread whose last prompt was already `/compact` is skipped.
+  Otherwise the compact would restart the idle clock and, with its old
+  context still logged, fire again.
 - Mapping a session to its thread reads T3's private state DB
-  (`~/.t3/userdata/statev2.sqlite`, read-only). If a T3 update changes the
-  schema, runs log "no T3 thread found" and send nothing.
+  (`~/.t3/userdata/statev2.sqlite`, read-only), because the CLI doesn't
+  show session ids. If a T3 update changes the schema, runs log "no T3
+  thread found" and send nothing.
 
-Tune with `fleet.autoHandoff.{idleMin,idleMax,minTokens}`; turn it off with
+Tune with `fleet.autoCompact.{idleMin,idleMax,minTokens}`; turn it off with
 `enable = false`.
+
+This replaced a webhook relay (a signed POST to a T3 scheduled task whose
+Haiku agent queued the `/compact`). The relay cost a model run per compact,
+kept a long-running thread in T3, and kept picking its own thread as idle.
 
 ## pc Secure Boot + TPM disk unlock
 
