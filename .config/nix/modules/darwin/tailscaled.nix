@@ -18,13 +18,13 @@
     environment.systemPackages = [ pkgs.tailscale ];
 
     launchd.daemons.tailscaled = {
+      # `command`, not ProgramArguments: nix-darwin wraps it in
+      # `/bin/wait4path /nix/store`. At boot launchd can start this before
+      # the nix volume is mounted; the exec then fails with EX_CONFIG and
+      # launchd never retries it, KeepAlive or not (mini, 2026-10-28).
+      command = "${pkgs.tailscale}/bin/tailscaled --state=/var/lib/tailscale/tailscaled.state --socket=/var/run/tailscaled.socket";
       serviceConfig = {
         Label = "org.jgoon.tailscaled";
-        ProgramArguments = [
-          "${pkgs.tailscale}/bin/tailscaled"
-          "--state=/var/lib/tailscale/tailscaled.state"
-          "--socket=/var/run/tailscaled.socket"
-        ];
         RunAtLoad = true;
         KeepAlive = true;
       };
