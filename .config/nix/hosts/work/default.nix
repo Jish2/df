@@ -63,7 +63,9 @@
 
   homebrew = {
     taps = [
+      "anomalyco/tap"
       "ankitpokhrel/jira-cli"
+      "eurfelux/tap" # lyrisland (menu-bar Spotify lyrics)
       "ariga/tap"
       "aserto-dev/tap"
       "cloudflare/cloudflare"
@@ -106,6 +108,12 @@
       "lcov"
       "macism" # Ctrl+Space EN/CN toggle — karabiner rule runs it
       "markdownlint-cli"
+      # EarPods karabiner scripts (earpods-lib.sh) hardcode both of these
+      # absolute paths — karabiner.json binds them to the USB-C center button
+      "nowplaying-cli"
+      "switchaudio-osx"
+      # pi fetch_content needs this + ffmpeg for YouTube transcripts/frames
+      "yt-dlp"
       "md-tui"
       "pandoc"
       "pipx"
@@ -153,6 +161,11 @@
       "karabiner-elements"
       "monitorcontrol"
       "itsycal"
+      # LinearMouse: per-device pointer/scroll config (~/.config/linearmouse);
+      # not running right now but config + cask are live-declared, keep it
+      "linearmouse"
+      # menu-bar lyrics for Spotify, in active use (last run 2026-10-21)
+      "eurfelux/tap/lyrisland"
       # --- k8s / cloud --------------------------------------------------------
       "docker-desktop"
       "gcloud-cli"
@@ -163,6 +176,7 @@
       "aserto-dev/tap/topaz"
       "opcr-io/tap/policy"
       # --- apps ---------------------------------------------------------------
+      "anomalyco/tap/hex" # local voice dictation, hold-Option push-to-talk
       "1password-cli"
       "t3-code@nightly"
       "aldente"
