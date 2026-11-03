@@ -67,7 +67,7 @@
             ./modules/darwin/fleet-keepawake.nix
             ./modules/darwin/cloudflared-ssh.nix
             ./modules/darwin/remote-access.nix
-            ./modules/darwin/auto-handoff
+            ./modules/darwin/auto-compact
             ./modules/darwin/fleet-t3s.nix
             ./hosts/${host}
             home-manager.darwinModules.home-manager

@@ -26,10 +26,9 @@
     daemon = true;
   };
 
-  # idle T3 Claude threads write a handoff before their prompt cache
-  # expires. needs the one-time Keychain + webhook setup in FLEET.md
-  # "Auto-handoff" first.
-  fleet.autoHandoff.enable = true;
+  # idle T3 Claude threads get /compact before their prompt cache
+  # expires (FLEET.md "Auto-compact").
+  fleet.autoCompact.enable = true;
 
   # t3s sidecar indexing (personal box, but syncing its sidecar is how the
   # other machines see mini's T3 threads; user's group map: mini = personal)
