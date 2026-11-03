@@ -1,10 +1,28 @@
 # brew (darwin; nix-darwin boxes also get brew via nix-homebrew — both live in /opt/homebrew)
 command -v /opt/homebrew/bin/brew >/dev/null 2>&1 && eval "$(/opt/homebrew/bin/brew shellenv)"
 
-# nvm
+# nvm: lazy-loaded. nvm isn't installed right now (node comes from volta /
+# vite-plus), so the old unconditional source attempt was two dead `-s` tests
+# every shell. Defining the function costs nothing at startup, and if nvm comes
+# back it wires itself up on first use. Startup cost matters: T3 Code only
+# gives login shells 5s to report PATH before falling back to a stripped one.
+# Note: with pure lazy loading, `nvm use` (not sourcing) puts node on PATH, so
+# run `nvm use default` per shell or add it where a default node is wanted.
 export NVM_DIR="$HOME/.nvm"
-[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"
-[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"
+nvm() {
+  local nvm_sh
+  for nvm_sh in "$NVM_DIR/nvm.sh" "${HOMEBREW_PREFIX:-/opt/homebrew}/opt/nvm/nvm.sh" /usr/local/opt/nvm/nvm.sh; do
+    [ -s "$nvm_sh" ] && break
+  done
+  if [ ! -s "$nvm_sh" ]; then
+    echo "nvm is not installed (brew install nvm); node comes from volta/vite-plus." >&2
+    return 127
+  fi
+  unset -f nvm
+  . "$nvm_sh"
+  [ -s "${nvm_sh%/*}/etc/bash_completion.d/nvm" ] && . "${nvm_sh%/*}/etc/bash_completion.d/nvm"
+  nvm "$@"
+}
 
 # pyenv
 export PYENV_ROOT="$HOME/.pyenv"
