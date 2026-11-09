@@ -230,6 +230,37 @@ file on mini → `make here` on mini (fleet-ssh-safety procedure) →
 `ssh pc` from work while Tailscale is still installed → only then uninstall
 Tailscale on work.
 
+## Mini MCP (cloud agents → mini)
+
+Cloud agents (Meta Muse, the xAI Grok bot) get shell and file access to
+mini through Desktop Commander, published at `mini-mcp.jgoon.com`. It has its
+own tunnel so it can never take the ssh lifeline down with it.
+
+```
+agent ──https + service token──> Access (Service Auth) ──> tunnel mini-mcp ──> proxy 127.0.0.1:7801 ──stdio──> Desktop Commander
+```
+
+| piece | where | declared? |
+|---|---|---|
+| tunnel `mini-mcp`, ingress, DNS CNAME, Access app (service tokens only), one service token per agent, outputs | `~/github/terraform` → `envs/cloudflare/mini-mcp-tunnel.tf` (CNAME in `jgoon-com.tf`) | yes |
+| Desktop Commander (npm release, nix-built) + `proxy.mjs`: re-verifies the Access JWT, exposes only an allowlist of tools (never `set_config_value`) | `modules/darwin/desktop-commander/`, `fleet.desktopCommander` in hosts/mini | yes |
+| proxy: LaunchAgent `org.jgoon.mini-mcp` (needs jgoon logged in — Messages and Reminders are per-session) | same module | yes |
+| connector: LaunchDaemon `org.jgoon.cloudflared-mcp`, as the user, nix `cloudflared` | same module | yes |
+| `make doctor` checks (daemon, token file, connector, proxy health) | `Makefile` | yes |
+
+Not declarable (one-time, by hand):
+
+- **connector token** → `~/.cloudflared/mini-mcp.token` (0600), from
+  `terraform output -raw mini_mcp_tunnel_token`.
+- **agent credentials** → `terraform output -json mini_mcp_service_tokens`,
+  pasted into each agent's secret store. Agents send
+  `CF-Access-Client-Id`/`CF-Access-Client-Secret`, or both as JSON in
+  `Authorization`. Tokens expire after a year; rotate in terraform.
+- **TCC grants** for the nix `node` the proxy runs: Reminders, Automation →
+  Messages, Full Disk Access (imsg reads `chat.db`). Granted in a GUI
+  session (Screen Sharing). A nodejs bump changes node's store path, so
+  re-grant after a flake update if remindctl/imsg start failing.
+
 ## Apply
 
 ### Hard rules (SSH-critical — breaking one on mini = physical visit)

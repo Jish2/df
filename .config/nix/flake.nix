@@ -69,6 +69,7 @@
             ./modules/darwin/remote-access.nix
             ./modules/darwin/auto-compact
             ./modules/darwin/fleet-t3s.nix
+            ./modules/darwin/desktop-commander
             ./hosts/${host}
             home-manager.darwinModules.home-manager
             nix-homebrew.darwinModules.nix-homebrew

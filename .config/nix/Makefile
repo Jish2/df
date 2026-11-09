@@ -177,6 +177,31 @@ doctor:
 	else \
 	  echo "n/a on this host: tailnet peers reach mini directly"; \
 	fi
+	@echo "== mini MCP (mini-mcp.jgoon.com — Desktop Commander for cloud agents) =="
+	@if [ "$(INFERRED)" = mini ] && grep -q 'desktopCommander' $(FLAKE)/hosts/mini/default.nix; then \
+	  if [ -f /Library/LaunchDaemons/org.jgoon.cloudflared-mcp.plist ]; then \
+	    echo "ok: connector daemon plist present (org.jgoon.cloudflared-mcp)"; \
+	  else \
+	    echo "!! /Library/LaunchDaemons/org.jgoon.cloudflared-mcp.plist missing — run make here"; \
+	  fi; \
+	  if [ -f ~/.cloudflared/mini-mcp.token ]; then \
+	    echo "ok: connector token file present"; \
+	  else \
+	    echo "!! ~/.cloudflared/mini-mcp.token missing — install it from terraform output (modules/darwin/desktop-commander)"; \
+	  fi; \
+	  if pgrep -f 'token-file .*mini-mcp.token' >/dev/null 2>&1; then \
+	    echo "ok: connector is running"; \
+	  else \
+	    echo "!! connector not running (log: ~/Library/Logs/cloudflared-mcp.err.log)"; \
+	  fi; \
+	  if curl -sf --max-time 3 http://127.0.0.1:7801/healthz >/dev/null 2>&1; then \
+	    echo "ok: proxy answering on 127.0.0.1:7801"; \
+	  else \
+	    echo "!! proxy not answering on :7801 — a LaunchAgent, so it needs jgoon logged in (log: ~/Library/Logs/mini-mcp.log)"; \
+	  fi; \
+	else \
+	  echo "n/a on this host"; \
+	fi
 	@echo "== sshd (Remote Login) =="
 	@if nc -z 127.0.0.1 22 2>/dev/null; then \
 	  echo "ok: listening on :22"; \
