@@ -34,6 +34,14 @@
   # other machines see mini's T3 threads; user's group map: mini = personal)
   fleet.t3s.enable = true;
 
+  # Desktop Commander MCP for cloud agents at mini-mcp.jgoon.com (Access
+  # service tokens per agent; see the module). The audience is the terraform
+  # output mini_mcp_access_audience — public, it's in every Access JWT.
+  fleet.desktopCommander = {
+    enable = true;
+    accessAudience = "ab7f06e2f7b5d9e5c66462e595f3f4198e6bb42e5dba72f3b2bbc1fed2dc3fee";
+  };
+
   networking.hostName = "Joshuas-Mac-mini";
   networking.localHostName = "Joshuas-Mac-mini";
   networking.computerName = "Joshua’s Mac mini"; # (curly apostrophe, as shipped)
@@ -117,6 +125,7 @@
       # --- home-infra / mini-specific ----------------------------------------
       "gcalcli"
       "steipete/tap/imsg" # pairs with the BlueBubbles install
+      "steipete/tap/remindctl" # Apple Reminders CLI, used over mini-mcp
       # --- services ----------------------------------------------------------
       {
         name = "postgresql@14";
