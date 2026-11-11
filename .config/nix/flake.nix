@@ -70,6 +70,7 @@
             ./modules/darwin/auto-compact
             ./modules/darwin/fleet-t3s.nix
             ./modules/darwin/desktop-commander
+            ./modules/darwin/hex.nix
             ./hosts/${host}
             home-manager.darwinModules.home-manager
             nix-homebrew.darwinModules.nix-homebrew

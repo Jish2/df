@@ -21,6 +21,10 @@
   # common/t3-history skill). user confirmed work machines: this laptop + devspace.
   fleet.t3s.enable = true;
 
+  # Hex voice dictation (cask above): manage ~/.config/hex/hex.config.ts.
+  # Linux hosts don't get this — Hex is a Mac app.
+  fleet.hex.enable = true;
+
   networking.hostName = "HQ-KP2HJMHQ7R";
   networking.localHostName = "HQ-KP2HJMHQ7R";
   networking.computerName = "HQ-KP2HJMHQ7R";
