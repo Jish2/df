@@ -21,3 +21,11 @@
 /.cursor/skills/*
 /.codex/skills/*
 /.claude/skills/*
+
+# Hex (voice dictation) app state is machine-local: settings.json holds the
+# vocabulary and Corrections (declared in df's fleet.hex.corrections and
+# merged at activation), local-api.json holds a live API token, history.json
+# is every dictation, and models/ is ~700 MB of GGUF weights. Nothing here
+# belongs in a git repo. The managed transformations config lives in df as
+# modules/darwin/hex.config.ts and is symlinked by home-manager.
+/Library/Application Support/hex/
