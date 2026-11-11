@@ -25,6 +25,20 @@
   # Linux hosts don't get this — Hex is a Mac app.
   fleet.hex.enable = true;
 
+  # Fixed swaps for words the transcription engine cannot recover from
+  # vocabulary alone: terms under 5 letters (yadm) and phrases whose
+  # spelling is too far from the term ("remind cuddle" -> remindctl).
+  # Merged into Hex's Global mode at activation; rules added by hand in Hex
+  # are kept. Verify with: hex settings get dictation_processing.default_mode
+  fleet.hex.corrections = [
+    { matched_phrase = "remind cuddle"; output = "remindctl"; }
+    { matched_phrase = "remind ctl"; output = "remindctl"; }
+    { matched_phrase = "remind cuttle"; output = "remindctl"; }
+    { matched_phrase = "yeah dum"; output = "yadm"; }
+    { matched_phrase = "yad m"; output = "yadm"; }
+    { matched_phrase = "yadam"; output = "yadm"; }
+  ];
+
   networking.hostName = "HQ-KP2HJMHQ7R";
   networking.localHostName = "HQ-KP2HJMHQ7R";
   networking.computerName = "HQ-KP2HJMHQ7R";
