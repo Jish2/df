@@ -410,11 +410,11 @@
   {
     "key": "ctrl+i",
     "command": "navigation.back",
-    "when": "!terminalFocus && !editableFocus"
+    "when": "!terminalFocus"
   },
   {
     "key": "ctrl+o",
     "command": "navigation.forward",
-    "when": "!terminalFocus && !editableFocus"
+    "when": "!terminalFocus"
   }
 ]
