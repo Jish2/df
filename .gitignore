@@ -8,7 +8,16 @@
 # caches, worktrees). settings.json included: T3 keeps one per server (machine
 # config, project IDs local to that box) and syncs the user-preference keys
 # between connected environments itself — a fleet-wide copy just churns.
-.t3/
+.t3/*
+!.t3/
+!.t3/userdata/
+# ...except keybindings.json. It is the only hand-authored file there, and it
+# is per-machine: keybindings are not in SHARED_SERVER_SETTING_KEYS, so nothing
+# propagates them between environments the way settings.json prefs do.
+.t3/userdata/*
+!.t3/userdata/keybindings.json
+# Backups T3 Code's config writer drops next to the real file.
+.t3/userdata/keybindings.json.bak-*
 
 # Private skill checkouts, loader state, and discovery links stay machine-local.
 # Skills are consolidated in github.com/Jish2/skills and linked by skills-sync
