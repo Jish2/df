@@ -394,7 +394,7 @@
 			<key>Text</key>
 			<string></string>
 		</dict>
-		<key>0xd-0x100000-0x24</key>
+		<key>0xd-0x100000-0x24-0x1</key>
 		<dict>
 			<key>Action</key>
 			<integer>60</integer>
@@ -428,7 +428,7 @@
 			<key>Text</key>
 			<string></string>
 		</dict>
-		<key>0xf702-0x380000-0x7b</key>
+		<key>0xf702-0x380000-0x7b-0x1</key>
 		<dict>
 			<key>Action</key>
 			<integer>2</integer>
@@ -448,7 +448,7 @@
 			<key>Text</key>
 			<string></string>
 		</dict>
-		<key>0xf703-0x380000-0x7c</key>
+		<key>0xf703-0x380000-0x7c-0x1</key>
 		<dict>
 			<key>Action</key>
 			<integer>0</integer>
