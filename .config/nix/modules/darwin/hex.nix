@@ -38,6 +38,36 @@ let
     builtins.toJSON cfg.corrections
   );
 
+  # Hex canonicalizes this path and refuses any config that resolves outside
+  # ~/.config/hex ("only files inside the config folder can be imported"),
+  # and BOTH home.file `source` and `text` deploy a symlink into /nix/store.
+  # Hex would realpath it, reject it, and silently keep its last good config.
+  # So copy a real file in at activation instead of linking one.
+  installHexConfig = pkgs.writeShellScript "fleet-hex-config" ''
+    set -eu
+    src=${cfg.configFile}
+    dest="$HOME/.config/hex/hex.config.ts"
+    mkdir -p "$HOME/.config/hex"
+    # `install -m 0644`, not `cp`: the store source is 0444, and cp would
+    # either create a read-only file (so the NEXT content change fails on
+    # cp's open-for-write) or preserve a stale mode. Set it explicitly.
+    #
+    # An earlier generation may have left a store symlink here (home.file did
+    # exactly that). Replace it with a real file unconditionally — Hex rejects
+    # the symlink even when its content is identical, and install would
+    # otherwise write through it into the read-only store and fail.
+    if [ -L "$dest" ]; then
+      rm -f "$dest"
+      ${pkgs.coreutils}/bin/install -m 0644 "$src" "$dest"
+      exit 0
+    fi
+    # A real file with unchanged content: leave it, and Hex's reload, alone.
+    if [ -f "$dest" ] && ${pkgs.diffutils}/bin/diff -q "$src" "$dest" >/dev/null 2>&1; then
+      exit 0
+    fi
+    ${pkgs.coreutils}/bin/install -m 0644 "$src" "$dest"
+  '';
+
   # Merge `corrections` into the Global mode's replacements: keep whatever is
   # already there, append only phrases not already present. Idempotent, so a
   # rebuild never duplicates a rule. No-op while Hex has no settings file.
@@ -107,9 +137,9 @@ in
         '')
       ];
 
-      # Hex watches the folder and reloads on change; a store symlink is
-      # enough — Hex only ever reads the config.
-      home.file.".config/hex/hex.config.ts".source = cfg.configFile;
+      # Hex watches the folder and reloads on change. Not home.file: see
+      # installHexConfig — Hex rejects a config symlinked out of its folder.
+      home.activation.fleetHexConfig = ''run ${installHexConfig}'';
 
       # Corrections merge into Hex's settings, not a managed file.
       # A plain string: this is a darwin module, so `lib` is nixpkgs lib and
