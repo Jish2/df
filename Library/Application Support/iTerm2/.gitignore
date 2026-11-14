@@ -1,0 +1,15 @@
+# iTerm2 mutates this directory constantly (sqlite DBs, sockets, downloaded
+# Python runtimes, saved state). Version only the hand-written auto-launch
+# scripts, like k9s/ does for its config.
+#
+# Ignore everything, then re-include the Scripts tree one level at a time —
+# git cannot re-include a file whose parent directory is excluded.
+
+*
+!.gitignore
+
+!Scripts/
+Scripts/*
+!Scripts/AutoLaunch/
+Scripts/AutoLaunch/*
+!Scripts/AutoLaunch/*.py
