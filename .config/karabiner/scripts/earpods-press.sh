@@ -1,7 +1,7 @@
 #!/bin/sh
-# EarPods KEY DOWN. Stamp the press only — do not start Handy here.
-# Karabiner decides tap vs hold; starting F18 on keydown races the hold
-# threshold and cancels dictation as "music".
+# EarPods KEY DOWN. Stamp the press only — do not start dictation here.
+# Karabiner decides tap vs hold; starting dictation on keydown races the
+# hold threshold and cancels dictation as "music".
 
 . /Users/jgoon/.config/karabiner/scripts/earpods-lib.sh
 
@@ -9,7 +9,6 @@ NOW=$(now_ms)
 BUTTON=${1:-center}
 echo "$NOW" > "$DOWN_TS"
 echo "$BUTTON" > "$BUTTON_FILE"
-/bin/rm -f "$HOLD_FLAG" "$STARTED_ON_DOWN" "$MAYBE_RECONNECT" "$GHOST_FLAG"
 mark_event
 log "PRESS $BUTTON"
 exit 0

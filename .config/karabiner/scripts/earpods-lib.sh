@@ -1,24 +1,21 @@
 #!/bin/sh
 # Shared helpers for EarPods center-button scripts.
 #
+# The USB-C center button drives push-to-talk for Hex, the dictation app.
+# Taps go through `hex dictation toggle`, not synthetic key events: Hex's
+# suppression layer drops fabricated chords, so the CLI is the reliable seam.
+#
 # Test seams (unset in production):
 #   EARPODS_STATE_DIR  put flag files here instead of /tmp
-#   EARPODS_FN_SIM     stub for handy-fn-sim.sh
 #   EARPODS_SKIP_MIC   skip SwitchAudioSource
 #   EARPODS_SKIP_MUSIC skip nowplaying-cli
 
 STATE_DIR="${EARPODS_STATE_DIR:-/tmp}"
 LOG="${EARPODS_LOG:-$STATE_DIR/handy-earpods-debug.log}"
-HOLD_FLAG="$STATE_DIR/handy-earpods-hold"
 DOWN_TS="$STATE_DIR/handy-earpods-down"
-GHOST_FLAG="$STATE_DIR/handy-earpods-ghost"
-STARTED_ON_DOWN="$STATE_DIR/handy-earpods-started-on-down"
-MAYBE_RECONNECT="$STATE_DIR/handy-earpods-maybe-reconnect"
 LAST_EVENT="$STATE_DIR/handy-earpods-last-event"
 MUSIC_LAST="$STATE_DIR/handy-earpods-music-last"
 BUTTON_FILE="$STATE_DIR/handy-earpods-button"
-FN_SIM_STATE="$STATE_DIR/handy-fn-sim-held"
-FN_SIM="${EARPODS_FN_SIM:-/Users/jgoon/.config/karabiner/scripts/handy-fn-sim.sh}"
 MIN_TAP_MS=30
 
 now_ms() {
@@ -33,15 +30,30 @@ mark_event() {
     now_ms > "$LAST_EVENT"
 }
 
-f18_is_held() {
-    [ -e "$FN_SIM_STATE" ]
+# Never launch a dictation app from here. Handy is retired, and an app we
+# start would take F18 back from Hex and leave the macro silently dead.
+dictation_app_running() {
+    /usr/bin/pgrep -x hex >/dev/null 2>&1
 }
 
-ensure_handy() {
-    /usr/bin/pgrep -x handy >/dev/null 2>&1
+# Resolve the bundled binary rather than trusting PATH: Karabiner's
+# shell_command environment is minimal.
+HEX_BIN=/Applications/Hex.app/Contents/MacOS/hex
+
+# Drive dictation through Hex's own CLI rather than posting a synthetic F18.
+# Hex's suppression layer discards fabricated key events it judges to be part
+# of a chord ("dictation press discarded as a chord", "resynchronized stale
+# input tracking"), which made taps flaky and sometimes needed two tries.
+# The CLI is idempotent ("already recording") and answers in ~50ms, and Hex
+# still binds F18 for real keyboards — the Fn key path is untouched.
+hex_dictation() {
+    if ! dictation_app_running; then
+        return 1
+    fi
+    "$HEX_BIN" dictation "$1" 2>&1 | tail -1
 }
 
-# Switch mic off the hot path so F18 is not blocked on SwitchAudioSource.
+# Switch mic off the hot path so dictation is not blocked on SwitchAudioSource.
 switch_earpods_mic_bg() {
     if [ -n "$EARPODS_SKIP_MIC" ]; then
         return 0
@@ -51,20 +63,4 @@ switch_earpods_mic_bg() {
             /opt/homebrew/bin/SwitchAudioSource -t input -s "EarPods Microphone" >/dev/null 2>&1 || true
         fi
     ) &
-}
-
-handy_f18_down() {
-    if [ -z "$EARPODS_FN_SIM" ] && ! ensure_handy; then
-        /usr/bin/open -a Handy
-        return 1
-    fi
-    "$FN_SIM" down
-}
-
-handy_f18_up() {
-    "$FN_SIM" up
-}
-
-handy_fn_release() {
-    handy_f18_up >/dev/null 2>&1 || true
 }

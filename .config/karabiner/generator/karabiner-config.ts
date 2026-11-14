@@ -322,12 +322,12 @@ const homeRowModsRule = disable(
 // ---------------------------------------------------------------------------
 // The USB-C remote is one pill with three stacked consumer keys: volume+
 // (top), play/pause (center), volume- (bottom). Device-scoped so MacBook
-// F8 / keyboard volume keys do not fire Handy. USB enumerate ghosts are
-// ignored by press duration (<30ms). Handy PTT is F18, toggled on key-up
-// of a tap (to_if_alone) so we never race the hold threshold.
-// Tap anywhere on the pill toggles dictation — missing the center by a
-// few millimeters used to be a silent no-op. Hold center ≥700ms
+// F8 / keyboard volume keys do not fire Hex. USB enumerate ghosts are
+// ignored by press duration (<30ms). A tap drives `hex dictation toggle`
+// from earpods-release.sh (to_if_alone), not a synthetic key: Hex discards
+// fabricated F18 events as suspected chords. Hold center ≥700ms
 // play/pauses music. Hold +/− still changes volume.
+// Note the F18 binding below (rule 10) is for real keyboards only.
 
 const EARPODS_HOLD_MS = 700
 const earpodsScript = (name: string, arg = '') => ({
@@ -353,7 +353,7 @@ const earpodsVolumeMap = (
     .condition(ifDevice(appleEarpods))
 
 const earpodsRule = rule(
-  `EarPods: tap center = Handy dictation; hold center ≥${EARPODS_HOLD_MS}ms = music; tap +/− = volume step; hold +/− = volume repeat`,
+  `EarPods: tap center = Hex dictation; hold center ≥${EARPODS_HOLD_MS}ms = music; tap +/− = volume step; hold +/− = volume repeat`,
 ).manipulators([
   mapConsumerKey('play_or_pause')
     .to(earpodsScript('earpods-press.sh', 'center'))
@@ -366,14 +366,14 @@ const earpodsRule = rule(
 ])
 
 // ---------------------------------------------------------------------------
-// Rule 10 — Fn hold = F18 hold (Handy PTT)
+// Rule 10 — Fn hold = F18 hold (Hex PTT)
 // ---------------------------------------------------------------------------
-// macOS drops CGEvent / virtual-HID Fn, so Handy is bound to F18 instead.
+// macOS drops CGEvent / virtual-HID Fn, so Hex is bound to F18 instead.
 // A basic remap holds F18 for as long as Fn is held — true push-to-talk.
 // notAdv360: same Mac-keyboard scope as the caps layer.
 
 const fnPassthroughRule = rule(
-  'Fn → F18 hold (Handy push-to-talk; EarPods scripts hold the same F18)',
+  'Fn → F18 hold (Hex push-to-talk; EarPods scripts hold the same F18)',
 ).manipulators(
   map('fn', 'optionalAny').to('f18').condition(notAdv360()),
 )

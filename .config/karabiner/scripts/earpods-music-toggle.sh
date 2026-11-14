@@ -1,11 +1,11 @@
 #!/bin/sh
 # EarPods HOLD → music. Dictation is not started on keydown, so this
-# does not need to cancel F18 (a tap never got that far).
+# does not need to cancel a dictation that a tap would have started.
 
 . /Users/jgoon/.config/karabiner/scripts/earpods-lib.sh
 
 NOW=$(now_ms)
-/bin/rm -f "$DOWN_TS" "$STARTED_ON_DOWN"
+/bin/rm -f "$DOWN_TS"
 
 if [ -f "$MUSIC_LAST" ]; then
     LAST=$(cat "$MUSIC_LAST" 2>/dev/null)

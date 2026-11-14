@@ -2056,7 +2056,7 @@
                         ]
                     },
                     {
-                        "description": "EarPods: tap center = Handy dictation; hold center ≥700ms = music; tap +/− = volume step; hold +/− = volume repeat",
+                        "description": "EarPods: tap center = Hex dictation; hold center ≥700ms = music; tap +/− = volume step; hold +/− = volume repeat",
                         "manipulators": [
                             {
                                 "conditions": [
@@ -2142,7 +2142,7 @@
                         ]
                     },
                     {
-                        "description": "Fn → F18 hold (Handy push-to-talk; EarPods scripts hold the same F18)",
+                        "description": "Fn → F18 hold (Hex push-to-talk; EarPods scripts hold the same F18)",
                         "manipulators": [
                             {
                                 "conditions": [

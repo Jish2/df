@@ -1,5 +1,5 @@
 #!/bin/sh
-# EarPods TAP (to_if_alone). Toggle Handy F18 hold.
+# EarPods TAP (to_if_alone). Toggle push-to-talk for Hex.
 # Karabiner does not call this if the press crossed the hold threshold.
 
 . /Users/jgoon/.config/karabiner/scripts/earpods-lib.sh
@@ -25,13 +25,10 @@ if [ "$DUR" -lt "$MIN_TAP_MS" ]; then
     exit 0
 fi
 
-if f18_is_held; then
-    RESULT=$(handy_f18_up)
-    log "TAP F18 up ${DUR}ms ($RESULT) $BUTTON"
-    exit 0
-fi
-
-RESULT=$(handy_f18_down)
+# One tap = one toggle. `hex dictation toggle` starts when idle and finishes
+# when recording, so a tap always does the visible thing — no stale flag to
+# desynchronize us from Hex's real state.
 switch_earpods_mic_bg
-log "TAP F18 down ${DUR}ms ($RESULT) $BUTTON"
+RESULT=$(hex_dictation toggle)
+log "TAP toggle ${DUR}ms $BUTTON -> ${RESULT:-hex not running}"
 exit 0
