@@ -94,6 +94,22 @@ The old `github.rbx.com/jgoon/skills` repo is superseded by `Jish2/skills`.
 
 ## Layout
 
+**Two checkouts, and only one of them is live.** During the yadm transition
+`~/` IS a yadm worktree, so `~/.config/nix` and `~/.config/karabiner` are the
+real, live files; `~/.config/nix/FLEET.md` and everything else resolve there.
+A separate clone often sits at `~/github/df` for repo work, and it drifts
+(commits ahead of, or behind, the yadm worktree).
+
+Consequences worth internalising before editing anything under `.config/`:
+
+- **Editing `~/github/df/...` does NOT change the machine.** `make here`
+  builds from `~/.config/nix`. An edit that "did nothing" is usually this.
+- **Check before committing, not after.** `stat -f %i FILE1 FILE2` on macs,
+  `stat -c %i` on linux (or `ls -i`, portable): same inode means one file,
+  different inodes mean two independent copies that both need the change.
+- `yadm status` / `yadm diff` / `yadm log` show the live checkout's state;
+  plain `git -C ~/github/df` shows the clone's.
+
 Flake lives at `.config/nix/` during the yadm transition (yadm already
 delivers it to `~/.config/nix` on every machine, linux included). Flatten to
 the repo root once yadm is retired; commands below assume that final shape.
