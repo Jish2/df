@@ -53,11 +53,11 @@
   # note: this makes the dock fully declarative — drag a new app in and the
   # next rebuild removes it again.
   system.defaults.dock.persistent-apps = [
-    "/Applications/Google Chrome.app"
     "/Applications/Satori.app"
     "/Applications/Slack.app"
+    # artifact of the t3-code@nightly cask (casks list below)
+    "/Applications/T3 Code (Nightly).app"
     "/System/Applications/System Settings.app"
-    "/Applications/RobloxStudio.app"
   ];
 
   # ported from the brew bundle go:/cargo: directives
