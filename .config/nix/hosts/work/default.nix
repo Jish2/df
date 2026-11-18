@@ -3,6 +3,11 @@
 # description for the kept/dropped triage.
 { pkgs, lib, ... }:
 {
+  # Hex voice dictation (fleet module + this box's corrections). The cask
+  # itself stays in the homebrew list below — brew lists are a single
+  # option, so they cannot be split across files.
+  imports = [ ./hex.nix ];
+
   # Corporate EDR (CrowdStrike Falcon) SIGKILLs the nix-built tailscaled's
   # ifconfig child at router.Up (argv matching) — the daemon crash-loops and
   # can never establish the tunnel. The App Store network-extension variant
@@ -21,27 +26,9 @@
   # common/t3-history skill). user confirmed work machines: this laptop + devspace.
   fleet.t3s.enable = true;
 
-  # Hex voice dictation (cask above): manage ~/.config/hex/hex.config.ts.
-  # Linux hosts don't get this — Hex is a Mac app.
-  fleet.hex.enable = true;
-
   # Karabiner-Elements config generated from karabiner-config.ts (see the
   # module: the GUI is no longer an authoring surface).
   fleet.karabiner.enable = true;
-
-  # Fixed swaps for words the transcription engine cannot recover from
-  # vocabulary alone: terms under 5 letters (yadm) and phrases whose
-  # spelling is too far from the term ("remind cuddle" -> remindctl).
-  # Merged into Hex's Global mode at activation; rules added by hand in Hex
-  # are kept. Verify with: hex settings get dictation_processing.default_mode
-  fleet.hex.corrections = [
-    { matched_phrase = "remind cuddle"; output = "remindctl"; }
-    { matched_phrase = "remind ctl"; output = "remindctl"; }
-    { matched_phrase = "remind cuttle"; output = "remindctl"; }
-    { matched_phrase = "yeah dum"; output = "yadm"; }
-    { matched_phrase = "yad m"; output = "yadm"; }
-    { matched_phrase = "yadam"; output = "yadm"; }
-  ];
 
   networking.hostName = "HQ-KP2HJMHQ7R";
   networking.localHostName = "HQ-KP2HJMHQ7R";
