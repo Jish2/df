@@ -14,11 +14,3 @@ fleet plan → [`.config/nix/FLEET.md`](.config/nix/FLEET.md)
 4. run make in nix
    `$ cd ~/.config/nix && make`
 
-### todo
-
-- [ ] add rectangle config
-```
-defaults write com.knollsoft.Rectangle almostMaximizeHeight -float .97
-defaults write com.knollsoft.Rectangle almostMaximizeWidth -float .97
-```
-
