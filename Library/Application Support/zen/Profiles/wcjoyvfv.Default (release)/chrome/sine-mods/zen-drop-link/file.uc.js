@@ -168,7 +168,14 @@ class ZenSplitViewLinkDrop {
     }
 
     const currentTab = gZenGlanceManager.getTabOrGlanceParent(gBrowser.selectedTab);
-    const newTab = this.#zenViewSplitter.openAndSwitchToTab(url, { inBackground: false });
+    // openAndSwitchToTab returns null without a triggeringPrincipal, which is
+    // why dropping here used to do nothing at all. Use the principal of the
+    // drop itself, the way the engine's own link drop does, and fall back to
+    // the system principal for synthetic drops that carry none.
+    const newTab = this.#zenViewSplitter.openAndSwitchToTab(url, {
+      inBackground: false,
+      triggeringPrincipal: this._getDropPrincipal(event),
+    });
 
     if (!newTab) {
       this._removeLinkDropZone();
@@ -180,6 +187,20 @@ class ZenSplitViewLinkDrop {
     this._dispatchSplitAction(currentTab, newTab, linkDropSide);
 
     this._removeLinkDropZone();
+  }
+
+  /**
+   * The principal behind a link drop. A real drop carries one; keep the system
+   * principal as a fallback so a synthetic drag cannot wedge the split path.
+   */
+  _getDropPrincipal(event) {
+    try {
+      const principal = Services.droppedLinkHandler.getTriggeringPrincipal(event);
+      if (principal) {
+        return principal;
+      }
+    } catch (e) {}
+    return Services.scriptSecurityManager.getSystemPrincipal();
   }
 
   _calculateDropSide(event, linkDropZone) {
