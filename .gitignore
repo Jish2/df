@@ -48,3 +48,176 @@
 # belongs in a git repo. The managed transformations config lives in df as
 # modules/darwin/hex.config.ts and is symlinked by home-manager.
 /Library/Application Support/hex/
+
+# ---------------------------------------------------------------------------
+# Live credentials. This repo is PUBLIC (github.com/Jish2/df). Nothing below
+# is a dotfile worth syncing and every one of them is a working secret: an
+# accidental `yadm add -A` would publish tokens with no way to un-publish.
+# Secrets that must reach a new box do so through the vault, or by re-running
+# the tool's own `auth login`.
+# ---------------------------------------------------------------------------
+.npmrc
+.zshrc.secrets
+.glean-token
+.vault-token
+.vault-tokens/
+.git-credentials
+.agent-keys/
+.skills-manager/
+
+# Per-harness auth + trust state. These are per-machine and refreshed by
+# their tools; committing them neither helps bootstrap nor survives reauth.
+.codex/auth.json
+.codex/.codex-global-state.json*
+.claude.json
+.claude/.credentials.json
+.cursor/mcp.json
+.pi/agent/auth.json
+.pi/agent/trust.json
+
+# CLI auth stores.
+.config/gh/hosts.yml
+.config/argocd/config
+.config/acli/global_auth_config.yaml
+.config/gws/credentials.enc
+.config/gws/token_cache.json
+.config/gws/client_secret.json
+.config/youtube-playlist-mcp/cookies.txt
+.config/youtube-playlist-mcp/typesafe-key.txt
+.docker/config.json
+.kube/config
+.ssh/id_*
+!.ssh/id_*.pub
+
+# ---------------------------------------------------------------------------
+# Runtime / agent state. Not secrets, but not config either: logs, sockets,
+# session snapshots, sqlite, caches. Ignoring the enclosing trees also keeps
+# `yadm status -uall` usable -- without these it reports ~3M untracked paths
+# from caches under ~, which is how a real change gets lost in the noise.
+# ---------------------------------------------------------------------------
+.tau/
+.tau-worktrees/
+.tau.backup-*/
+.claude/
+.pi/
+.brodex/
+.zenmod/
+.policy/
+.agents/skills-archive/
+.agents/.skill-lock.json
+
+# herdr + forks: sessions, snapshots, sockets, logs. config.toml and
+# agent-detection/ stay tracked (hand-authored); everything else is runtime.
+.config/herdr/sessions/
+.config/herdr/session-snapshots/
+.config/herdr/*.log
+.config/herdr/*.sock*
+.config/herdr/session.json
+.config/herdr/session-history.json
+.config/herdr/release-notes.json
+.config/herdr-dev/
+.config/jerdr/
+
+# Generated/installer-owned configs: each of these is rewritten by its tool.
+.config/vite-plus/env*
+.config/karabiner/karabiner.json.bak-*
+.config/karabiner/generator/node_modules/
+
+# Symlinks yadm creates from the ##o.<OS>,h.<HOST> alternates above. The
+# alternates are the tracked source; the symlink is per-machine plumbing.
+.zshrc.local
+.config/git/config.local
+
+# ---------------------------------------------------------------------------
+# Caches and app data that live under $HOME. Nothing here is config, and
+# `yadm status -uall` walks all of it otherwise (~3M paths, which is how a
+# real change disappears into the noise). Every entry below is asserted to
+# contain zero tracked files, except Library/ whose four tracked subtrees are
+# re-included at the end.
+# ---------------------------------------------------------------------------
+/.cache/
+/.npm/
+/.bun/
+/.rustup/
+/.volta/
+/.pyenv/
+/.cargo/
+/.nuget/
+/.cocoapods/
+/.gem/
+/.yarn/
+/.expo/
+/.mozbuild/
+/.nltk_data/
+/.conda/
+/.anaconda/
+/.matplotlib/
+/.terraform.d/
+/.krew/
+/.grokbot/
+/.vibe-replay/
+/.zen-devtools-mcp/
+/.zcompcache/
+/.zsh_sessions/
+/.local/share/
+/.local/state/
+/.local/lib/
+/.local/libexec/
+/.cursor/projects/
+/.vscode/extensions/
+/go/
+/Desktop/
+/Downloads/
+/Documents/
+/Pictures/
+/Music/
+/Movies/
+/.Trash/
+
+# Library: app data, overwhelmingly per-machine. Exclude all of Library/ and
+# re-include only the four tracked app dirs. Each of those then gets its own
+# runtime subdirs ignored, because git cannot re-include a path below an
+# excluded parent -- a negation only works once its parent directory is back
+# in scope, which is why the re-includes below are directory-level first.
+/Library/*
+!/Library/Application Support/
+/Library/Application Support/*
+
+# VS Code: only the two hand-authored User files are config.
+!/Library/Application Support/Code/
+/Library/Application Support/Code/*
+!/Library/Application Support/Code/User/
+/Library/Application Support/Code/User/*
+!/Library/Application Support/Code/User/settings.json
+!/Library/Application Support/Code/User/keybindings.json
+
+# iTerm2: plist + the AutoLaunch script; the rest of the tree is session state.
+!/Library/Application Support/iTerm2/
+/Library/Application Support/iTerm2/*
+!/Library/Application Support/iTerm2/.gitignore
+!/Library/Application Support/iTerm2/Scripts/
+/Library/Application Support/iTerm2/Scripts/*
+!/Library/Application Support/iTerm2/Scripts/AutoLaunch/
+
+# k9s: config, aliases, plugins, views, skins.
+!/Library/Application Support/k9s/
+/Library/Application Support/k9s/*
+!/Library/Application Support/k9s/config.yaml
+!/Library/Application Support/k9s/aliases.yaml
+!/Library/Application Support/k9s/plugins.yaml
+!/Library/Application Support/k9s/views.yaml
+!/Library/Application Support/k9s/.gitignore
+!/Library/Application Support/k9s/skins/
+
+# zen: only the primary profile's shipped config. Profile dirs other than the
+# tracked one are disposable, and inside it storage/, cache2/, sessionstore
+# and friends are browser state, not config.
+!/Library/Application Support/zen/
+/Library/Application Support/zen/*
+!/Library/Application Support/zen/Profiles/
+/Library/Application Support/zen/Profiles/*
+!/Library/Application Support/zen/Profiles/wcjoyvfv.Default (release)/
+/Library/Application Support/zen/Profiles/wcjoyvfv.Default (release)/*
+!/Library/Application Support/zen/Profiles/wcjoyvfv.Default (release)/chrome/
+!/Library/Application Support/zen/Profiles/wcjoyvfv.Default (release)/user.js
+!/Library/Application Support/zen/Profiles/wcjoyvfv.Default (release)/zen-*.json
