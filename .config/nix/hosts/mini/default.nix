@@ -34,6 +34,9 @@
   # other machines see mini's T3 threads; user's group map: mini = personal)
   fleet.t3s.enable = true;
 
+  # Karabiner-Elements config generated from karabiner-config.ts.
+  fleet.karabiner.enable = true;
+
   # Desktop Commander MCP for cloud agents at mini-mcp.jgoon.com (Access
   # service tokens per agent; see the module). The audience is the terraform
   # output mini_mcp_access_audience — public, it's in every Access JWT.

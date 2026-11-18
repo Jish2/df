@@ -1,20 +1,22 @@
-// Karabiner-Elements configuration — source of truth for the
-// "Default profile" complex_modifications rules.
+// Karabiner-Elements configuration — source of truth for the ENTIRE file.
 //
-//   npm run build     generate ~/.config/karabiner/karabiner.json
-//   npm run verify    build + format + compare against live config (byte-exact)
+// This module is built by nix (buildNpmPackage) into karabiner.json, which
+// Home Manager copies onto the machine at activation — see default.nix.
+// The JSON is a build artifact and is not tracked.
 //
-// The generator output is normalized to the Karabiner-Elements GUI's
-// canonical format (alphabetized keys) and formatted with the repo's
-// prettier-plugin-karabiner (json_writer byte format), so a clean build
-// produces zero diff against a GUI-maintained karabiner.json.
+// Generation covers every key in the document: `global`, the profile's
+// `devices` / identity, and complex_modifications. Nothing is merged from
+// the live file, so a machine that has never run the GUI still gets a
+// complete config.
+//
+// The Karabiner GUI rewrites karabiner.json (and reformats it) when you
+// toggle a rule or pair a device. That is fine: the next activation puts
+// the generated file back. Durable changes belong here.
 //
 // Ported 1:1 from the hand-maintained karabiner.json, including:
 //   - all three disabled rules (control+tab, MS RDP, home-row mods)
 //   - the previously-uncommitted Ctrl+Space input-source rule
 //     and scripts/toggle-input-source.sh (now tracked)
-//   - the two hand-written rules re-keyed to the GUI's canonical order
-//     (content unchanged), so the whole file round-trips byte-identically
 //
 // Device IDs (from Karabiner-Elements event viewer):
 //   Adv360 Pro (BLE)     vendor 7504  product 24926
@@ -43,6 +45,45 @@ const adv360Usb = { vendor_id: 10730, product_id: 866 }
 const gamingKeyboard = { vendor_id: 7847, product_id: 2311 }
 // USB-C EarPods inline remote (Karabiner Event Viewer: is_consumer).
 const appleEarpods = { vendor_id: 1452, product_id: 4363 }
+
+// ---------------------------------------------------------------------------
+// Document-level config (everything complex_modifications does not cover)
+// ---------------------------------------------------------------------------
+
+// Menu bar icon off; cgeventtap fallback off (it is a debugging escape hatch,
+// not a setting — see Karabiner's own docs).
+const global = {
+  show_in_menu_bar: false,
+  enable_cgeventtap_fallback: false,
+}
+
+// The profile's device list. Karabiner writes one entry per keyboard it has
+// seen; `ignore: false` means "let Karabiner modify this device". Only the
+// keyboards the rules actually target are declared — an unlisted device is
+// still handled, it just has no per-device override.
+const devices = [
+  {
+    identifiers: { is_keyboard: true, is_pointing_device: true, ...adv360Ble },
+    ignore: false,
+  },
+  {
+    identifiers: { is_keyboard: true, is_pointing_device: true, ...adv360Usb },
+    ignore: false,
+  },
+  {
+    identifiers: { is_consumer: true, ...appleEarpods },
+    ignore: false,
+  },
+]
+
+// US ANSI on every machine in the fleet.
+const profileIdentity = {
+  name: 'Default profile',
+  selected: true,
+  virtual_hid_keyboard: { country_code: 0, keyboard_type_v2: 'ansi' },
+}
+
+export { devices, global, profileIdentity }
 
 // Condition factories — the live config repeats these on every manipulator.
 const zenApps = () => ifApp(['app.zen-browser.zen', /^com\.jgoon\.satori$/])
@@ -416,8 +457,4 @@ const rules = [
 
 export { rules }
 
-// When run directly (npm run build / verify), write the profile.
-if (import.meta.url === `file://${process.argv[1]}`) {
-  const { writeProfile } = await import('./lib/write.ts')
-  writeProfile(rules)
-}
+// `emit.ts` renders the whole document (global + profile + rules) from these.

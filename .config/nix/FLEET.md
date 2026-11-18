@@ -95,10 +95,14 @@ The old `github.rbx.com/jgoon/skills` repo is superseded by `Jish2/skills`.
 ## Layout
 
 **Two checkouts, and only one of them is live.** During the yadm transition
-`~/` IS a yadm worktree, so `~/.config/nix` and `~/.config/karabiner` are the
-real, live files; `~/.config/nix/FLEET.md` and everything else resolve there.
+`~/` IS a yadm worktree, so `~/.config/nix` is the real, live flake;
+`~/.config/nix/FLEET.md` and everything else resolve there.
 A separate clone often sits at `~/github/df` for repo work, and it drifts
 (commits ahead of, or behind, the yadm worktree).
+
+`~/.config/karabiner` is the exception: `karabiner.json` is generated
+(`fleet.karabiner`) and gitignored, so the only tracked thing there is
+`scripts/`. Edit the generator, not the JSON.
 
 Consequences worth internalising before editing anything under `.config/`:
 
@@ -647,9 +651,11 @@ yadm stays live until the last file moves. Port in waves:
    `.zshrc` is NOT in the waves: it stays yadm-owned permanently (see
    Decisions) — `programs.zsh.enable` would take over the whole file and
    break the installer-append workflow.
-3. GUI-mutated files (`karabiner.json`, iterm2 plist, zen mods) can't be
-   read-only store symlinks — keep imperative or copy-on-activation; decide
-   per file.
+3. GUI-mutated files (iterm2 plist, zen mods) can't be read-only store
+   symlinks — keep imperative or copy-on-activation; decide per file.
+   `karabiner.json` already went this way: it is generated from
+   `modules/darwin/karabiner/karabiner-config.ts` and refreshed at activation
+   (`fleet.karabiner`), so it is no longer tracked at all.
 4. Empty yadm repo → delete it and the README's install steps.
 
 ## Open questions
