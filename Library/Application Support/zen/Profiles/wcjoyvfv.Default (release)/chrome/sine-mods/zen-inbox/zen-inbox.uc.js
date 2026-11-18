@@ -36,6 +36,21 @@
     throw lastError;
   })();
 
+  // Zen's shortcuts moved to an ES module in gh-16163, when upstream replaced
+  // the old zen-components keyboard-shortcuts module and stopped setting a
+  // window-level shortcuts manager global. The new entry point takes the
+  // window explicitly.
+  const zenShortcuts = (() => {
+    try {
+      const { ZenKeyboardShortcuts } = ChromeUtils.importESModule(
+        "resource:///modules/zen/kbs/ZenKeyboardShortcuts.sys.mjs"
+      );
+      return ZenKeyboardShortcuts;
+    } catch (error) {
+      return null;
+    }
+  })();
+
   const TAB_STATE_KEY = "zen-inbox-state";
   const INBOX_ATTRIBUTE = "zen-inbox";
   const URGENCY_ATTRIBUTE = "zen-inbox-urgency";
@@ -1238,10 +1253,10 @@
       closeWindowWithLastTab: false,
     });
 
-    const shortcut =
-      window.gZenKeyboardShortcutsManager?.getShortcutDisplayFromCommand?.(
-        "History:RestoreLastClosedTabOrWindowOrSession",
-      );
+    const shortcut = zenShortcuts?.getShortcutDisplayFromCommand?.(
+      window,
+      "History:RestoreLastClosedTabOrWindowOrSession"
+    );
     window.gZenUIManager?.showToast?.(
       "zen-workspaces-close-all-unpinned-tabs-toast",
       {

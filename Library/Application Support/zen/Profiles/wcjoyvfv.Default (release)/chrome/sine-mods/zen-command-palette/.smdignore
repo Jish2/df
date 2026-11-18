@@ -1,0 +1,6 @@
+# Contract tokens sine-mod-doctor should not look for in the engine.
+#
+# zen-cmd-settings-modal-overlay: the id this mod itself writes onto its own
+# settings overlay (see utils/settings-modal.js, ${overlayId} on the
+# .zenux-settings-overlay div). It is defined by the mod, not the platform.
+zen-cmd-settings-modal-overlay
