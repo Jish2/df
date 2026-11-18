@@ -208,10 +208,11 @@
       transition: var(--zen-tabbox-element-indent-transition);
     }
 
+    /* Zen's tab-label-container is a column: the main axis is vertical, so
+       the inherited pack="center" vertically centers the label and
+       align="start" keeps it flush left. Forcing row flips both axes. */
     & .tab-label-container {
-      align-items: center;
       flex: 1 1 auto;
-      flex-direction: row;
       min-width: 0;
     }
 
