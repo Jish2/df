@@ -25,6 +25,10 @@
   # Linux hosts don't get this — Hex is a Mac app.
   fleet.hex.enable = true;
 
+  # Karabiner-Elements config generated from karabiner-config.ts (see the
+  # module: the GUI is no longer an authoring surface).
+  fleet.karabiner.enable = true;
+
   # Fixed swaps for words the transcription engine cannot recover from
   # vocabulary alone: terms under 5 letters (yadm) and phrases whose
   # spelling is too far from the term ("remind cuddle" -> remindctl).

@@ -71,6 +71,7 @@
             ./modules/darwin/fleet-t3s.nix
             ./modules/darwin/desktop-commander
             ./modules/darwin/hex.nix
+            ./modules/darwin/karabiner
             ./hosts/${host}
             home-manager.darwinModules.home-manager
             nix-homebrew.darwinModules.nix-homebrew
