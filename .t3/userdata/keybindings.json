@@ -150,14 +150,6 @@
     "when": "!terminalFocus"
   },
   {
-    "key": "mod+shift+[",
-    "command": "thread.previous"
-  },
-  {
-    "key": "mod+shift+]",
-    "command": "thread.next"
-  },
-  {
     "key": "mod+1",
     "command": "thread.jump.1"
   },
@@ -419,12 +411,20 @@
   },
   {
     "key": "ctrl+i",
-    "command": "navigation.back",
+    "command": "navigation.forward",
     "when": "!terminalFocus"
   },
   {
     "key": "ctrl+o",
-    "command": "navigation.forward",
+    "command": "navigation.back",
     "when": "!terminalFocus"
+  },
+  {
+    "key": "mod+alt+arrowright",
+    "command": "thread.next"
+  },
+  {
+    "key": "mod+alt+arrowleft",
+    "command": "thread.previous"
   }
 ]
