@@ -1,4 +1,7 @@
-[user]
-	email = jgoon@roblox.com
-	name = Joshua Goon
-
+# Machine-specific git settings for this host. yadm symlinks this from the
+# ##o.Darwin,h.HQ-KP2HJMHQ7R alternate.
+#
+# Identity is NOT set here: personal identity is the default in config, and
+# work identity is pulled in by the includeIf blocks there, keyed on the
+# github.rbx.com remote. Setting user.email here would win over both, because
+# this file is included after them.

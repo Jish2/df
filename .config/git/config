@@ -1,5 +1,9 @@
+# Personal identity is the default: everything that is not the company GHES.
+# The noreply form rather than a real address so public history doesn't carry
+# one; the 25201575 id is assigned at signup and never changes, so a rename of
+# the Jish2 login leaves old commits correctly attributed.
 [user]
-	email = jgoon2004@gmail.com
+	email = 25201575+Jish2@users.noreply.github.com
 	name = Joshua Goon
 [core]
 	editor = vim
@@ -34,6 +38,31 @@
 # Include machine-specific config, yadm will symlink the config.local##...
 [include]
 	path = ~/.config/git/config.local
+
+# github.rbx.com is a separate GitHub Enterprise Server (3.20.8), not a host
+# alias for github.com: its own account (id 4246, login jgoon), its own
+# authenticating token, and its own noreply domain (*@users.noreply.github.rbx.com).
+# Commits there must carry the work address, and identity is chosen by remote
+# URL so no per-repo `git config user.email` is needed. Both remote syntaxes
+# are covered: https for the current 34 clones, scp-style for ssh.
+[includeIf "hasconfig:remote.*.url:https://github.rbx.com/**"]
+	path = ~/.config/git/work.inc
+[includeIf "hasconfig:remote.*.url:git@github.rbx.com:*"]
+	path = ~/.config/git/work.inc
+[includeIf "hasconfig:remote.*.url:git@github.rbx.com:**/**"]
+	path = ~/.config/git/work.inc
+
+# Roblox org repos also live on public github.com (ros, aws, gcp, ros-infra,
+# security-workflows, ...). Those are work too, even though the host is not
+# GHES. Case is matched both ways because remotes in the wild vary.
+[includeIf "hasconfig:remote.*.url:https://github.com/Roblox/**"]
+	path = ~/.config/git/work.inc
+[includeIf "hasconfig:remote.*.url:https://github.com/roblox/**"]
+	path = ~/.config/git/work.inc
+[includeIf "hasconfig:remote.*.url:git@github.com:Roblox/**"]
+	path = ~/.config/git/work.inc
+[includeIf "hasconfig:remote.*.url:git@github.com:roblox/**"]
+	path = ~/.config/git/work.inc
 [credential "https://github.com"]
 	helper = 
 	helper = !PATH="$PATH:/opt/homebrew/bin:/usr/local/bin:/etc/profiles/per-user/jgoon/bin:/run/current-system/sw/bin" gh auth git-credential
