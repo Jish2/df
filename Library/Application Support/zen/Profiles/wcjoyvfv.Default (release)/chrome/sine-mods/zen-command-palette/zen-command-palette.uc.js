@@ -378,12 +378,24 @@
   // The Library is an ES module (moz-src/zen/library/ZenLibrary.mjs) exposing a
   // static toggle(sectionId). There has never been a window-level library
   // global, so these entries used to be dead.
+  //
+  // global: "current" is required: the module calls customElements.define() at
+  // top level, and a plain importESModule evaluates it in the system global,
+  // which has no document/customElements. The engine imports it the same way.
+  let zenLibraryModule = null;
   function getZenLibrary() {
-    try {
-      return ChromeUtils.importESModule("moz-src:///zen/library/ZenLibrary.mjs").ZenLibrary;
-    } catch {
-      return null;
+    if (zenLibraryModule !== null) {
+      return zenLibraryModule;
     }
+    try {
+      zenLibraryModule = ChromeUtils.importESModule(
+        "moz-src:///zen/library/ZenLibrary.mjs",
+        { global: "current" }
+      ).ZenLibrary;
+    } catch (e) {
+      zenLibraryModule = null;
+    }
+    return zenLibraryModule;
   }
   var commands = [
     {
