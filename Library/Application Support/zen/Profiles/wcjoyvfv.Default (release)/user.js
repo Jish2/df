@@ -16,3 +16,11 @@ user_pref("zen.view.draggable-sidebar", false);
 // partial match and pressing Enter is how stray mods got installed.
 // Off removes both the install and uninstall Sine entries.
 user_pref("zen-command-palette.dynamic.sine-mods", false);
+
+// Show the extensions (puzzle) button instead of routing the extension list
+// through the site-data panel. Also hides #zen-site-data-section-addons and
+// makes nsZenSiteDataPanel use the stock #unified-extensions-panel as the
+// "original-unified-extensions-view" subview.
+// Default: true (prefs/zen/theme.yaml:42). Read once at module load in
+// ZenSiteDataPanel.sys.mjs, so changing it needs a restart, not a pref flush.
+user_pref("zen.theme.hide-unified-extensions-button", false);
