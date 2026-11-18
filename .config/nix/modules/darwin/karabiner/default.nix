@@ -15,11 +15,6 @@
 # the Karabiner GUI lasts until the next `make here`. Durable changes go in
 # karabiner-config.ts (`enabled: false` to disable a rule — the three
 # disabled rules there are intentional history, keep them).
-#
-# Dev loop without a rebuild (writes the live file immediately; Karabiner
-# hot-reloads):
-#   cd ~/.config/nix/modules/darwin/karabiner
-#   npm install && node emit.ts > ~/.config/karabiner/karabiner.json
 {
   config,
   user,
@@ -40,7 +35,6 @@ let
     src = ./.;
     nodejs = pkgs.nodejs;
     npmDepsHash = "sha256-rwyVYrBzo59qk/PdrhMdFVU5vr3wtlnZcFKyyfxnR+M=";
-    # emit.ts prints the document; nothing else is needed from node_modules.
     buildPhase = ''
       runHook preBuild
       node emit.ts > karabiner.json

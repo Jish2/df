@@ -46,10 +46,6 @@ const gamingKeyboard = { vendor_id: 7847, product_id: 2311 }
 // USB-C EarPods inline remote (Karabiner Event Viewer: is_consumer).
 const appleEarpods = { vendor_id: 1452, product_id: 4363 }
 
-// ---------------------------------------------------------------------------
-// Document-level config (everything complex_modifications does not cover)
-// ---------------------------------------------------------------------------
-
 // Menu bar icon off; cgeventtap fallback off (it is a debugging escape hatch,
 // not a setting — see Karabiner's own docs).
 const global = {
@@ -76,7 +72,6 @@ const devices = [
   },
 ]
 
-// US ANSI on every machine in the fleet.
 const profileIdentity = {
   name: 'Default profile',
   selected: true,
@@ -456,5 +451,3 @@ const rules = [
 ]
 
 export { rules }
-
-// `emit.ts` renders the whole document (global + profile + rules) from these.

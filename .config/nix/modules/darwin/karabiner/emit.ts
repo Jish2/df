@@ -5,18 +5,12 @@
 // only in the tracked JSON, which made the generator a merge into live state
 // and left those facts untracked on any machine that had never opened the
 // Karabiner GUI. They are declarations here now, so this is the only input.
-//
-// No prettier, no canonicalization: once the JSON is a build artifact rather
-// than a tracked file, matching the GUI writer's byte layout buys nothing.
-// Karabiner accepts any valid JSON, and nix's own activation guard compares
-// content, not bytes.
 
 import { complexModifications } from 'karabiner.ts'
 import { devices, global, profileIdentity } from './karabiner-config.ts'
 
 export { render }
 
-/** The complete config document, in Karabiner-Elements' schema order. */
 function render(rules: readonly unknown[]): unknown {
   // complexModifications() always injects its five default parameters. Those
   // are Karabiner's own defaults, so omitting them changes nothing, and every
@@ -37,7 +31,6 @@ function render(rules: readonly unknown[]): unknown {
   }
 }
 
-/** JSON bytes for karabiner.json (trailing newline: it is a normal file now). */
 function renderText(rules: readonly unknown[]): string {
   return `${JSON.stringify(render(rules), null, 4)}\n`
 }
