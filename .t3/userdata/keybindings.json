@@ -426,5 +426,13 @@
   {
     "key": "mod+alt+arrowleft",
     "command": "thread.previous"
+  },
+  {
+    "key": "ctrl+shift+tab",
+    "command": "workspace.focusPrevious"
+  },
+  {
+    "key": "ctrl+tab",
+    "command": "workspace.focusNext"
   }
 ]
