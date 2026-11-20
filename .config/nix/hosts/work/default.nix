@@ -121,7 +121,6 @@
       "herdr"
       "jira-cli"
       "lcov"
-      "macism" # Ctrl+Space EN/CN toggle — karabiner rule runs it
       "markdownlint-cli"
       # EarPods karabiner scripts (earpods-lib.sh) hardcode both of these
       # absolute paths — karabiner.json binds them to the USB-C center button

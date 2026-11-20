@@ -109,7 +109,6 @@
       "git-delta"
       "git-lfs"
       "just"
-      "macism" # Ctrl+Space EN/CN toggle — karabiner rule runs it
       "lazygit"
       "markdownlint-cli"
       "mas"
