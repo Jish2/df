@@ -13,10 +13,14 @@
 // toggle a rule or pair a device. That is fine: the next activation puts
 // the generated file back. Durable changes belong here.
 //
-// Ported 1:1 from the hand-maintained karabiner.json, including:
-//   - all three disabled rules (control+tab, MS RDP, home-row mods)
-//   - the previously-uncommitted Ctrl+Space input-source rule
-//     and scripts/toggle-input-source.sh (now tracked)
+// Ported 1:1 from the hand-maintained karabiner.json, including the three
+// disabled rules (control+tab, MS RDP, home-row mods).
+//
+// The Ctrl+Space input-source rule and scripts/toggle-input-source.sh are
+// gone: the EN/CN toggle is macOS's own hotkey 61 (ctrl+option+space), and
+// ctrl+space is deliberately unbound so it reaches the foreground app (it is
+// crouch+jump in Roblox). No Karabiner involvement, so nothing here has to
+// know which keyboard is in use.
 //
 // Device IDs (from Karabiner-Elements event viewer):
 //   Adv360 Pro (BLE)     vendor 7504  product 24926
@@ -42,7 +46,6 @@ import {
 
 const adv360Ble = { vendor_id: 7504, product_id: 24926 }
 const adv360Usb = { vendor_id: 10730, product_id: 866 }
-const gamingKeyboard = { vendor_id: 7847, product_id: 2311 }
 // USB-C EarPods inline remote (Karabiner Event Viewer: is_consumer).
 const appleEarpods = { vendor_id: 1452, product_id: 4363 }
 
@@ -415,21 +418,6 @@ const fnPassthroughRule = rule(
 )
 
 // ---------------------------------------------------------------------------
-// Rule 10 — Ctrl+Space input source toggle
-// ---------------------------------------------------------------------------
-
-const inputSourceRule = rule(
-  'Ctrl+Space toggles EN/Chinese via macism on all keyboards EXCEPT gaming keyboard; never in Roblox',
-).manipulators(
-  map('spacebar', 'control')
-    .to$('$HOME/.config/karabiner/scripts/toggle-input-source.sh')
-    .condition(
-      ifApp(/^com\.roblox\./).unless(),
-      ifDevice([gamingKeyboard, adv360Usb]).unless(),
-    ),
-)
-
-// ---------------------------------------------------------------------------
 // Assemble + write
 // ---------------------------------------------------------------------------
 
@@ -447,7 +435,6 @@ const rules = [
   homeRowModsRule,
   earpodsRule,
   fnPassthroughRule,
-  inputSourceRule,
 ]
 
 export { rules }
