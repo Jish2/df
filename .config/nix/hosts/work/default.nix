@@ -70,6 +70,12 @@
     export PATH="$PATH:/opt/homebrew/bin:/opt/rbx/infosec/safe-git-push"
   '';
 
+  # Must be visible to a LOGIN SHELL, not just launchd: the desktop app probes
+  # `zsh -ilc` with a fixed allowlist that includes this name. nix-darwin's
+  # environment.variables land in /etc/static/set-environment, which
+  # /etc/zshenv sources for every zsh — same path LIBSQLITE already takes.
+  environment.variables.T3CODE_TELEMETRY_ENABLED = "false";
+
   homebrew = {
     taps = [
       "anomalyco/tap"
