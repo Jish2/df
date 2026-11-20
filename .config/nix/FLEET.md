@@ -35,7 +35,8 @@ Decisions:
   plugin mechanism in `.zshrc` (NIX_PROFILES walk, guarded, in-tree) IS the
   end state for linux boxes — not a bridge to a `programs.zsh` port. See
   "Migration from yadm" for what that means for the waves.
-- The repo lives at `~/github/df` (or anywhere); nothing pre-exists at `~`.
+- The repo lives in yadm's store (`~/.local/share/yadm/repo.git`), checked
+  out over `~`. No second working copy: see "Layout" below.
 - **`pc` is folded in**: its system config now lives in the flake
   (`nixosConfigurations.pc`, hosts/pc/configuration.nix) — the out-of-band
   `/etc/nixos` era ended with the fold. HM rides along as a NixOS module,
@@ -94,11 +95,17 @@ The old `github.rbx.com/jgoon/skills` repo is superseded by `Jish2/skills`.
 
 ## Layout
 
-**Two checkouts, and only one of them is live.** During the yadm transition
-`~/` IS a yadm worktree, so `~/.config/nix` is the real, live flake;
-`~/.config/nix/FLEET.md` and everything else resolve there.
-A separate clone often sits at `~/github/df` for repo work, and it drifts
-(commits ahead of, or behind, the yadm worktree).
+**One checkout, and it is live.** `~/` IS a yadm worktree, so `~/.config/nix`
+is the real, live flake; `~/.config/nix/FLEET.md` and everything else resolve
+there.
+
+There used to be a second clone at `~/github/df` "for repo work". It was
+removed (2026-11-19): it drifted 26 commits behind while holding one unpushed
+commit, it silently accumulated a stale pre-move copy of the karabiner
+generator, and a `git fetch` there rewrote `origin/main` to a 26-commit-old
+position — which looks exactly like a force-pushed remote. There is nothing a
+second checkout can do here that `yadm` cannot. Do not recreate it; if you
+want a scratch copy, use `git clone` somewhere disposable and delete it.
 
 `~/.config/karabiner` is the exception: `karabiner.json` is generated
 (`fleet.karabiner`) and gitignored, so the only tracked thing there is
@@ -106,13 +113,13 @@ A separate clone often sits at `~/github/df` for repo work, and it drifts
 
 Consequences worth internalising before editing anything under `.config/`:
 
-- **Editing `~/github/df/...` does NOT change the machine.** `make here`
-  builds from `~/.config/nix`. An edit that "did nothing" is usually this.
+- **`make here` builds from `~/.config/nix`** — the live worktree, which is
+  the only copy. Anything you edit there is what ships.
 - **Check before committing, not after.** `stat -f %i FILE1 FILE2` on macs,
   `stat -c %i` on linux (or `ls -i`, portable): same inode means one file,
   different inodes mean two independent copies that both need the change.
-- `yadm status` / `yadm diff` / `yadm log` show the live checkout's state;
-  plain `git -C ~/github/df` shows the clone's.
+- `yadm status` / `yadm diff` / `yadm log` are the whole story; there is no
+  second tree to reconcile against.
 
 Flake lives at `.config/nix/` during the yadm transition (yadm already
 delivers it to `~/.config/nix` on every machine, linux included). Flatten to
