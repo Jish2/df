@@ -157,6 +157,23 @@
               type = "standard";
             };
           };
+          # ctrl+space ("select previous input source"). Disabled so the combo
+          # reaches the foreground app instead of switching languages: it is
+          # crouch+jump in Roblox, which the OS swallowed otherwise. Karabiner
+          # puts the toggle back everywhere except Roblox and the gaming
+          # keyboard (modules/darwin/karabiner), so disabling it globally
+          # costs nothing here.
+          "60" = {
+            enabled = false;
+            value = {
+              parameters = [
+                32
+                49
+                262144
+              ];
+              type = "standard";
+            };
+          };
           # Cmd+Shift+3 / Ctrl+Cmd+Shift+3
           "28" = {
             enabled = false;
