@@ -133,7 +133,7 @@ the repo root once yadm is retired; commands below assume that final shape.
 │   ├── darwin/common.nix        # system pkgs, defaults, activation scripts
 │   └── home/{common,darwin,linux}.nix
 ├── vscode/
-└── Makefile                     # make work | personal | mini | pc | devspace
+└── Makefile                     # make here | plan | doctor | skills-machine
 ```
 
 ## Tailnet (headscale)
