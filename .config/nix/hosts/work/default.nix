@@ -22,6 +22,14 @@
   # battery — the laptop still sleeps normally in a bag.
   fleet.keepAwake.enable = true;
 
+  # ...but `-s` alone is AC-only, and nothing else here bounded the battery
+  # timer, so it had drifted to `sleep 0` (never) with no config asserting it.
+  # Lid open + unplugged then meant 14h awake at ~15%/hr, three times to 1%
+  # (2026-11-22/23). 10 min is macOS's laptop default and restores the
+  # assumed invariant: on battery this machine sleeps when nothing is asking
+  # it not to.
+  fleet.keepAwake.batterySleepMinutes = 10;
+
   # keep this machine's t3s sidecar fresh (search surface for agents; see
   # common/t3-history skill). user confirmed work machines: this laptop + devspace.
   fleet.t3s.enable = true;

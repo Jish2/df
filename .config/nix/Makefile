@@ -243,6 +243,31 @@ doctor:
 	else \
 	  echo "ok: over 10GB free on /"; \
 	fi
+	@echo "== system sleep timer (drift check for fleet.keepAwake) =="
+	@# Declared per host via fleet.keepAwake.batterySleepMinutes (battery only).
+	@# pmset has no nix module, so the value is set by an activation script and
+	@# an imperative `pmset` afterwards sticks silently. This is the watchman.
+	@if [ "$(INFERRED)" = work ]; then \
+	  batt=$$(pmset -g custom 2>/dev/null | awk '/^Battery Power:/{f=1} /^AC Power:/{f=0} f&&/^ *sleep /{print $$2}'); \
+	  ac=$$(pmset -g custom 2>/dev/null | awk '/^AC Power:/{f=1} f&&/^ *sleep /{print $$2}'); \
+	  want=$$(grep -oE 'batterySleepMinutes *= *[0-9]+' $(FLAKE)/hosts/work/default.nix 2>/dev/null | grep -oE '[0-9]+$$'); \
+	  if [ -z "$$batt" ]; then \
+	    echo "!! could not read the battery sleep timer"; \
+	  elif [ -z "$$want" ]; then \
+	    echo "!! fleet.keepAwake.batterySleepMinutes is not declared in hosts/work — drift-settable again"; \
+	  elif [ "$$batt" = "$$want" ]; then \
+	    echo "ok: battery sleep $$batt min (declared $$want)"; \
+	  else \
+	    echo "!! battery sleep is $$batt min but $$want is declared — drifted; run make here to re-assert"; \
+	  fi; \
+	  if [ "$$ac" = "0" ]; then \
+	    echo "ok: AC sleep 0 (intentional — the docked keep-awake profile)"; \
+	  else \
+	    echo "!! AC sleep is $$ac min, expected 0 — a `pmset -a sleep N` probably overwrote the docked profile"; \
+	  fi; \
+	else \
+	  echo "n/a on this host (mini is sleep 0 by design; see hosts/mini)"; \
+	fi
 	@echo "== doctor done =="
 
 # not wired into the mac targets for now; run manually if wanted
